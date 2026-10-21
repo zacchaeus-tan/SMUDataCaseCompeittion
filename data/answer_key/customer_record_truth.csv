@@ -1,0 +1,247 @@
+record_id,true_customer_id,dup_type
+C10007,T001,original
+C10010,T001,entity_split (orders for Product B booked here)
+C10012,T001,migration (all new orders from 2026-01 booked here)
+C10015,T002,original
+C10024,T003,original
+C10026,T003,entity_split (orders for Product C booked here)
+C10029,T004,original
+C10037,T004,entity_split (orders for Product C booked here)
+C10041,T005,original
+C10048,T006,original
+C10054,T007,original
+C10056,T008,original
+C10059,T009,original
+C10065,T010,original
+C10072,T011,original
+C10074,T012,original
+C10080,T013,original
+C10081,T014,original
+C10085,T014,migration (all new orders from 2026-03 booked here)
+C10086,T015,original
+C10095,T016,original
+C10096,T017,original
+C10098,T018,original
+C10099,T019,original
+C10106,T020,original
+C10111,T021,original
+C10113,T021,migration (all new orders from 2026-04 booked here)
+C10121,T022,original
+C10127,T023,original
+C10128,T024,original
+C10136,T025,original
+C10137,T026,original
+C10139,T027,original
+C10141,T028,original
+C10142,T028,migration (all new orders from 2026-03 booked here)
+C10146,T029,original
+C10147,T030,original
+C10154,T031,original
+C10163,T032,original
+C10167,T033,original
+C10169,T034,original
+C10176,T035,original
+C10181,T035,entity_split (orders for Product B booked here)
+C10182,T036,original
+C10188,T037,original
+C10189,T038,original
+C10192,T038,entity_split (orders for Product B booked here)
+C10200,T039,original
+C10205,T039,migration (all new orders from 2026-01 booked here)
+C10206,T040,original
+C10209,T041,original
+C10215,T042,original
+C10222,T043,original
+C10225,T044,original
+C10233,T045,original
+C10235,T046,original
+C10242,T046,migration (all new orders from 2026-04 booked here)
+C10246,T047,original
+C10253,T048,original
+C10262,T049,original
+C10268,T050,original
+C10274,T051,original
+C10279,T052,original
+C10282,T053,original
+C10291,T054,original
+C10296,T054,entity_split (orders for Product C booked here)
+C10299,T055,original
+C10305,T056,original
+C10309,T057,original
+C10311,T058,original
+C10319,T059,original
+C10322,T060,original
+C10328,T060,migration (all new orders from 2025-12 booked here)
+C10335,T061,original
+C10344,T062,original
+C10347,T063,original
+C10352,T063,migration (all new orders from 2025-11 booked here)
+C10358,T064,original
+C10367,T065,original
+C10369,T065,migration (all new orders from 2026-02 booked here)
+C10376,T066,original
+C10385,T067,original
+C10387,T067,migration (all new orders from 2026-04 booked here)
+C10393,T068,original
+C10401,T069,original
+C10404,T070,original
+C10409,T071,original
+C10410,T072,original
+C10419,T073,original
+C10426,T074,original
+C10430,T075,original
+C10435,T075,entity_split (orders for Product B booked here)
+C10437,T076,original
+C10443,T077,original
+C10444,T077,migration (all new orders from 2026-05 booked here)
+C10445,T078,original
+C10447,T079,original
+C10452,T080,original
+C10459,T081,original
+C10468,T082,original
+C10474,T083,original
+C10482,T084,original
+C10490,T085,original
+C10496,T086,original
+C10505,T087,original
+C10512,T088,original
+C10517,T089,original
+C10519,T089,migration (all new orders from 2026-01 booked here)
+C10527,T090,original
+C10532,T091,original
+C10534,T092,original
+C10542,T093,original
+C10543,T094,original
+C10552,T095,original
+C10556,T096,original
+C10564,T097,original
+C10573,T098,original
+C10577,T099,original
+C10578,T100,original
+C10579,T100,migration (all new orders from 2025-10 booked here)
+C10582,T101,original
+C10584,T102,original
+C10590,T103,original
+C10592,T104,original
+C10597,T104,migration (all new orders from 2026-06 booked here)
+C10603,T105,original
+C10607,T106,original
+C10609,T106,migration (all new orders from 2025-10 booked here)
+C10617,T107,original
+C10619,T108,original
+C10624,T109,original
+C10633,T109,migration (all new orders from 2026-06 booked here)
+C10635,T110,original
+C10644,T111,original
+C10647,T112,original
+C10650,T113,original
+C10656,T113,migration (all new orders from 2026-01 booked here)
+C10657,T114,original
+C10660,T115,original
+C10663,T115,migration (all new orders from 2025-11 booked here)
+C10671,T116,original
+C10673,T117,original
+C10676,T118,original
+C10680,T119,original
+C10683,T120,original
+C10684,T121,original
+C10685,T122,original
+C10694,T122,migration (all new orders from 2026-05 booked here)
+C10699,T123,original
+C10707,T124,original
+C10714,T125,original
+C10723,T126,original
+C10724,T127,original
+C10725,T128,original
+C10734,T129,original
+C10736,T130,original
+C10738,T131,original
+C10745,T132,original
+C10747,T133,original
+C10752,T134,original
+C10754,T135,original
+C10758,T136,original
+C10763,T136,entity_split (orders for Product C booked here)
+C10771,T137,original
+C10778,T138,original
+C10780,T139,original
+C10787,T139,entity_split (orders for Product B booked here)
+C10788,T140,original
+C10791,T141,original
+C10796,T142,original
+C10799,T143,original
+C10806,T144,original
+C10811,T145,original
+C10815,T146,original
+C10819,T146,migration (all new orders from 2026-06 booked here)
+C10820,T147,original
+C10822,T148,original
+C10825,T149,original
+C10829,T150,original
+C10838,T150,migration (all new orders from 2025-11 booked here)
+C10844,T151,original
+C10848,T152,original
+C10853,T153,original
+C10855,T154,original
+C10857,T155,original
+C10862,T156,original
+C10868,T156,entity_split (orders for Product B booked here)
+C10877,T157,original
+C10886,T158,original
+C10891,T159,original
+C10894,T160,original
+C10898,T161,original
+C10905,T161,migration (all new orders from 2026-03 booked here)
+C10911,T162,original
+C10915,T162,migration (all new orders from 2026-05 booked here)
+C10923,T163,original
+C10929,T164,original
+C10935,T165,original
+C10942,T166,original
+C10946,T167,original
+C10950,T167,migration (all new orders from 2026-01 booked here)
+C10956,T168,original
+C10959,T169,original
+C10962,T170,original
+C10970,T171,original
+C10973,T171,migration (all new orders from 2026-03 booked here)
+C10974,T172,original
+C10976,T173,original
+C10977,T174,original
+C10981,T175,original
+C10989,T176,original
+C10997,T177,original
+C11005,T178,original
+C11006,T178,migration (all new orders from 2025-10 booked here)
+C11015,T179,original
+C11016,T180,original
+C11017,T181,original
+C11022,T182,original
+C11028,T183,original
+C11033,T183,migration (all new orders from 2026-04 booked here)
+C11034,T184,original
+C11040,T185,original
+C11048,T185,migration (all new orders from 2026-01 booked here)
+C11051,T186,original
+C11056,T187,original
+C11065,T188,original
+C11073,T188,migration (all new orders from 2026-06 booked here)
+C11079,T189,original
+C11087,T190,original
+C11092,T191,original
+C11093,T192,original
+C11101,T193,original
+C11107,T194,original
+C11112,T195,original
+C11118,T195,migration (all new orders from 2026-05 booked here)
+C11125,T196,original
+C11134,T197,original
+C11143,T198,original
+C11152,T198,migration (all new orders from 2026-03 booked here)
+C11158,T199,original
+C11161,T200,original
+C11165,T201,original
+C11171,T202,original
+C11178,T203,original
+C11184,T204,original
+C11192,T205,original

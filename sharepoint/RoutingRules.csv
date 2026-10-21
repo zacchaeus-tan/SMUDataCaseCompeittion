@@ -1,0 +1,14 @@
+Title,RequestType,Entity,ConditionField,ConditionValue,ApproverRole,Stage,SLADays,EscalateAfterDays,Active
+R01,Customer,Any,,,BU Head,1,2,4,Yes
+R02,Customer,Any,,,Finance,1,2,4,Yes
+R03,Customer,Any,,,Business Support,1,2,4,Yes
+R04,Item,Any,,,BU Head,1,2,4,Yes
+R05,Item,Any,IsRegulated,Yes,Quality/Regulatory,1,2,4,Yes
+R06,Item,Any,,,Business Support,1,2,4,Yes
+R07,Vendor,Any,,,BU Head,1,2,4,Yes
+R08,Vendor,Any,,,Finance,1,2,4,Yes
+R09,Vendor,Any,SuppliesRegulatedGoods,Yes,Quality/Regulatory,1,2,4,Yes
+R10,Vendor,Any,,,Business Support,1,2,4,Yes
+R11,Cost Center,Any,,,Finance,1,2,4,Yes
+R12,Cost Center,Any,,,BU Head,1,2,4,Yes
+R13,Any,Any,,,MDM Analyst,2,1,,Yes

@@ -1,0 +1,247 @@
+record_id,customer_name,country,city,address,registration_no,segment,created_by_entity,created_date,contact_email,payment_terms,credit_limit_sgd,status
+C10007,National University Hospital,SG,Kent Ridge,"5 Lower Kent Ridge Road, Kent Ridge",200288778W,Hospital,SPD,2014-02-09,procurement@nationaluniversityhospit.example,60 days,250000,Active
+C10010,National Univ. Hospital (S) Pte Ltd,SG,Kent Ridge,"5 Lower Kent Ridge Rd, Kent Ridge",200288778W,Hospital,QTS,2019-07-12,procurement@nationaluniversityhospit.example,60 days,500000,Active
+C10012,NUH,SG,Kent Ridge,"5 Lower Kent Ridge Rd, Kent Ridge",,Hospital,SPD,2025-12-29,procurement@nationaluniversityhospit.example,30 days,100000,Active
+C10015,Clementi Golden Hospital,SG,Clementi,"123 Novena Rise, Clementi",201420580K,Hospital,SPD,2026-03-11,procurement@clementigoldenhospital.example,30 days,50000,Active
+C10024,Woodlands Heart Hospital,SG,Woodlands,"204 Lorong 6 Toa Payoh, Woodlands",200656745R,Hospital,QTS,2016-06-25,procurement@woodlandshearthospital.example,45 days,50000,Active
+C10026,WOODLANDS HEART HOSP.,SG,Woodlands,204 Lorong 6 Toa Payoh Woodlands,,Hospital,QTG,2019-09-11,procurement@woodlandshearthospital.example,30 days,20000,Active
+C10029,Toa Payoh Sunrise Hospital,SG,Toa Payoh,"235 Jurong West Street 41, Toa Payoh",201585684N,Hospital,SPD,2016-10-10,procurement@toapayohsunrisehospital.example,60 days,100000,Active
+C10037,Toa Payoh Sunrise Hosp.,SG,Toa Payoh,"235 Jurong West St 41, Toa Payoh",201585684N,Hospital,QTG,2019-06-16,procurement@toapayohsunrisehospital.example,45 days,20000,Active
+C10041,Clementi Northpoint Hospital,SG,Clementi,"256 Tampines Avenue 5, Clementi",200876369W,Hospital,QTS,2014-09-27,procurement@clementinorthpointhospit.example,60 days,250000,Active
+C10048,Outram Medical Centre,SG,Outram,"266 Novena Rise, Outram",201339428M,Hospital,SPD,2023-10-19,procurement@outrammedicalcentre.example,30 days,500000,Active
+C10054,Bedok Green Valley Hospital,SG,Bedok,"73 Outram Road, Bedok",200225992Z,Hospital,SPD,2019-04-02,procurement@bedokgreenvalleyhospital.example,60 days,50000,Active
+C10056,Toa Payoh Northpoint Hospital,SG,Toa Payoh,"410 Outram Road, Toa Payoh",202062684R,Hospital,SPD,2015-11-04,procurement@toapayohnorthpointhospit.example,30 days,250000,Active
+C10059,Bukit Timah Riverside Hospital,SG,Bukit Timah,"355 Outram Road, Bukit Timah",200977012R,Hospital,SPD,2022-08-23,procurement@bukittimahriversidehospi.example,60 days,100000,Active
+C10065,Tampines Golden Hospital,SG,Tampines,"353 Lorong 6 Toa Payoh, Tampines",200933992R,Hospital,SPD,2014-02-23,procurement@tampinesgoldenhospital.example,90 days,250000,Active
+C10072,Tampines Heart Hospital,SG,Tampines,"383 Bedok North Road, Tampines",199968903K,Hospital,SPD,2016-02-28,procurement@tampineshearthospital.example,30 days,20000,Active
+C10074,Bukit Timah Eastern Hospital,SG,Bukit Timah,"62 Novena Rise, Bukit Timah",201981624N,Hospital,SPD,2016-11-04,procurement@bukittimaheasternhospita.example,90 days,500000,Active
+C10080,Community Clinical Laboratory Pte Ltd,SG,Outram,"115 Outram Road, Outram",201327198W,Laboratory,QTS,2018-05-12,procurement@communityclinicallaborat.example,60 days,20000,Active
+C10081,Jurong Medical Diagnostic Laboratory Pte Ltd,SG,Jurong,"193 Novena Rise, Jurong",199861032K,Laboratory,SPD,2023-06-16,procurement@jurongmedicaldiagnosticl.example,45 days,100000,Active
+C10085,Jurong Medical Diagnostic Laboratory,SG,Jurong,193 Novena Rise Jurong,,Laboratory,SPD,2026-02-26,procurement@jurongmedicaldiagnosticl.example,60 days,500000,Active
+C10086,Golden Pathology Laboratory Toa Payoh Pte Ltd,SG,Toa Payoh,"63 Outram Road, Toa Payoh",200984923W,Laboratory,SPD,2015-11-04,procurement@goldenpathologylaborator.example,90 days,20000,Active
+C10095,Eastern Clinical Laboratory Pte Ltd,SG,Clementi,"364 Tampines Avenue 5, Clementi",201262318K,Laboratory,SPD,2015-05-16,procurement@easternclinicallaborator.example,60 days,500000,Active
+C10096,Outram Mercy Diagnostic Laboratory Pte Ltd,SG,Outram,"248 Novena Rise, Outram",199994626W,Laboratory,SPD,2023-11-05,procurement@outrammercydiagnosticlab.example,60 days,20000,Active
+C10098,Pacific Pathology Laboratory Jurong Pte Ltd,SG,Jurong,"218 Bedok North Road, Jurong",202220309R,Laboratory,SPD,2026-01-30,procurement@pacificpathologylaborato.example,30 days,100000,Active
+C10099,Sunrise Pathology Laboratory Bedok Pte Ltd,SG,Bedok,"91 Woodlands Avenue 2, Bedok",201173183R,Laboratory,SPD,2024-04-11,procurement@sunrisepathologylaborato.example,30 days,500000,Active
+C10106,Northpoint Clinical Laboratory Pte Ltd,SG,Bedok,"94 Novena Rise, Bedok",200630546N,Laboratory,SPD,2015-10-26,procurement@northpointclinicallabora.example,60 days,50000,Active
+C10111,Lakeside Pathology Laboratory Bukit Timah Pte Ltd,SG,Bukit Timah,"289 Lorong 6 Toa Payoh, Bukit Timah",201682841M,Laboratory,SPD,2014-01-08,procurement@lakesidepathologylaborat.example,90 days,500000,Active
+C10113,Lakeside Pathology Lab Bukit Timah Pte. Ltd.,SG,Bukit Timah,289 Lorong 6 Toa Payoh Bukit Timah,201682841M,Laboratory,SPD,2026-04-20,procurement@lakesidepathologylaborat.example,60 days,50000,Active
+C10121,Women's & Children's Clinical Laboratory Pte Ltd,SG,Woodlands,"323 Tampines Avenue 5, Woodlands",201151097N,Laboratory,SPD,2018-10-16,procurement@womenschildrensclinicall.example,30 days,100000,Active
+C10127,Lotus Pathology Laboratory Novena Pte Ltd,SG,Novena,"213 Novena Rise, Novena",199622641M,Laboratory,SPD,2017-04-13,procurement@lotuspathologylaboratory.example,90 days,50000,Active
+C10128,Unity Pathology Laboratory Woodlands Pte Ltd,SG,Woodlands,"311 Novena Rise, Woodlands",200751427W,Laboratory,SPD,2024-12-02,procurement@unitypathologylaboratory.example,30 days,20000,Active
+C10136,Serangoon Hope Polyclinic Pte Ltd,SG,Serangoon,"200 Lorong 6 Toa Payoh, Serangoon",202156703K,Clinic,SPD,2014-09-28,procurement@serangoonhopepolyclinicp.example,60 days,5000,Active
+C10137,Tampines Sunrise Polyclinic Pte Ltd,SG,Tampines,"164 Novena Rise, Tampines",201254890M,Clinic,SPD,2014-08-01,procurement@tampinessunrisepolyclini.example,30 days,10000,Active
+C10139,Jurong Medical Polyclinic Pte Ltd,SG,Jurong,"306 Lorong 6 Toa Payoh, Jurong",199565675W,Clinic,SPD,2017-08-20,procurement@jurongmedicalpolyclinicp.example,30 days,5000,Active
+C10141,Women's & Children's Family Clinic Jurong Pte Ltd,SG,Jurong,"15 Bedok North Road, Jurong",200329357M,Clinic,SPD,2021-03-16,procurement@womenschildrensfamilycli.example,90 days,5000,Active
+C10142,Women's & Children's Family Clinic Juorng Pte Ltd,SG,Jurong,"15 Bedok North Road, Jurong",,Clinic,SPD,2026-03-12,procurement@womenschildrensfamilycli.example,60 days,10000,Active
+C10146,Lakeside Medical Clinic Yishun Pte Ltd,SG,Yishun,"430 Jurong West Street 41, Yishun",201214981Z,Clinic,QTS,2016-10-23,procurement@lakesidemedicalclinicyis.example,30 days,5000,Active
+C10147,Unity Medical Clinic Pasir Ris Pte Ltd,SG,Pasir Ris,"337 Novena Rise, Pasir Ris",201541825R,Clinic,SPD,2015-04-19,procurement@unitymedicalclinicpasirr.example,30 days,20000,Active
+C10154,Eastern Family Clinic Woodlands Pte Ltd,SG,Woodlands,"425 Lorong 6 Toa Payoh, Woodlands",200536342N,Clinic,SPD,2024-12-05,procurement@easternfamilyclinicwoodl.example,60 days,20000,Active
+C10163,Sunrise Medical Clinic Clementi Pte Ltd,SG,Clementi,"82 Bedok North Road, Clementi",199973551K,Clinic,QTS,2018-01-21,procurement@sunrisemedicalclinicclem.example,30 days,20000,Active
+C10167,Women's & Children's Medical Clinic Yishun Pte Ltd,SG,Yishun,"154 Woodlands Avenue 2, Yishun",201244736M,Clinic,SPD,2020-10-11,procurement@womenschildrensmedicalcl.example,90 days,5000,Active
+C10169,Pasir Ris Lakeside Polyclinic Pte Ltd,SG,Pasir Ris,"294 Novena Rise, Pasir Ris",200759883W,Clinic,QTS,2020-07-25,procurement@pasirrislakesidepolyclin.example,45 days,5000,Active
+C10176,Community Family Clinic Tampines Pte Ltd,SG,Tampines,"200 Woodlands Avenue 2, Tampines",201244267N,Clinic,SPD,2018-10-24,procurement@communityfamilyclinictam.example,60 days,20000,Active
+C10181,Community Family Clinic Tampines,SG,Tampines,"200 Woodlands Ave 2, Tampines",201244267N,Clinic,QTS,2018-08-19,procurement@communityfamilyclinictam.example,90 days,10000,Active
+C10182,Serangoon Sunrise Polyclinic Pte Ltd,SG,Serangoon,"69 Bedok North Road, Serangoon",200192551K,Clinic,SPD,2017-03-04,procurement@serangoonsunrisepolyclin.example,90 days,10000,Active
+C10188,Women's & Children's Family Clinic Serangoon Pte Ltd,SG,Serangoon,"265 Novena Rise, Serangoon",200051244W,Clinic,SPD,2016-12-27,procurement@womenschildrensfamilycli.example,90 days,10000,Active
+C10189,Harmony Medical Clinic Novena Pte Ltd,SG,Novena,"189 Lorong 6 Toa Payoh, Novena",200179747M,Clinic,SPD,2019-11-02,procurement@harmonymedicalclinicnove.example,30 days,20000,Active
+C10192,Harmony Med Clinic Novena Pte Ltd,SG,Novena,189 Lorong 6 Toa Payoh Novena,200179747M,Clinic,QTS,2022-04-11,procurement@harmonymedicalclinicnove.example,90 days,10000,Active
+C10200,Pasir Ris Specialist Polyclinic Pte Ltd,SG,Pasir Ris,"135 Lorong 6 Toa Payoh, Pasir Ris",201525407N,Clinic,SPD,2014-08-15,procurement@pasirrisspecialistpolycl.example,45 days,20000,Active
+C10205,Pasir Ris Spec. Ployclinic Pte Ltd,SG,Pasir Ris,135 Lorong 6 Toa Payoh Pasir Ris,201525407N,Clinic,SPD,2025-12-26,procurement@pasirrisspecialistpolycl.example,30 days,5000,Active
+C10206,Outram Lakeside Polyclinic Pte Ltd,SG,Outram,"43 Tampines Avenue 5, Outram",201921516R,Clinic,SPD,2017-12-09,procurement@outramlakesidepolyclinic.example,90 days,10000,Active
+C10209,Melaka Unity Hospital,MY,Melaka,"166 Jalan Wong Ah Fook, Melaka",20210164099053,Hospital,SPD,2026-03-12,procurement@melakaunityhospital.example,45 days,500000,Active
+C10215,Seremban Pacific Hospital,MY,Seremban,"109 Jalan Tun Razak, Seremban",20180186043714,Hospital,SPD,2024-01-17,procurement@serembanpacifichospital.example,90 days,500000,Active
+C10222,Shah Alam Riverside Hospital,MY,Shah Alam,"75 Persiaran Gurney, Shah Alam",20070141446260,Hospital,SPD,2014-04-28,procurement@shahalamriversidehospita.example,45 days,100000,Active
+C10225,Kota Kinabalu Pacific Hospital,MY,Kota Kinabalu,"12 Persiaran Gurney, Kota Kinabalu",20110164983661,Hospital,SPD,2019-05-14,procurement@kotakinabalupacifichospi.example,90 days,500000,Active
+C10233,Kuching Mercy Hospital,MY,Kuching,"170 Jalan Ampang, Kuching",20150133215571,Hospital,SPD,2019-12-22,procurement@kuchingmercyhospital.example,45 days,20000,Active
+C10235,Kota Kinabalu Green Valley Hospital,MY,Kota Kinabalu,"436 Jalan Gasing, Kota Kinabalu",20110111577597,Hospital,SPD,2017-01-12,procurement@kotakinabalugreenvalleyh.example,90 days,20000,Active
+C10242,KOTA KINABALU GREEN VALLEY HOSPITAL,MY,Kota Kinabalu,"436 Jalan Gasing, Kota Kinabalu",20110111577597,Hospital,SPD,2026-04-02,procurement@kotakinabalugreenvalleyh.example,60 days,20000,Active
+C10246,Petaling Jaya Heart Hospital,MY,Petaling Jaya,"405 Jalan Gasing, Petaling Jaya",20220147166155,Hospital,SPD,2021-01-08,procurement@petalingjayahearthospita.example,90 days,500000,Active
+C10253,Johor Bahru Community Hospital,MY,Johor Bahru,"169 Jalan Tun Razak, Johor Bahru",20190137698636,Hospital,SPD,2024-10-21,procurement@johorbahrucommunityhospi.example,60 days,50000,Active
+C10262,Seremban Northpoint Hospital,MY,Seremban,"69 Jalan Ampang, Seremban",19910146356183,Hospital,QTS,2022-07-10,procurement@serembannorthpointhospit.example,45 days,50000,Active
+C10268,Shah Alam Hope Hospital,MY,Shah Alam,"340 Jalan Sultan Ismail, Shah Alam",20110156628928,Hospital,SPD,2021-07-17,procurement@shahalamhopehospital.example,45 days,100000,Active
+C10274,Shah Alam Community Hospital,MY,Shah Alam,"12 Jalan Gasing, Shah Alam",20130144071544,Hospital,SPD,2016-08-11,procurement@shahalamcommunityhospita.example,90 days,20000,Active
+C10279,Ipoh Heart Hospital,MY,Ipoh,"298 Jalan Ampang, Ipoh",20160118664330,Hospital,SPD,2024-04-25,procurement@ipohhearthospital.example,90 days,20000,Active
+C10282,Shah Alam St. Mary's Hospital,MY,Shah Alam,"47 Persiaran Gurney, Shah Alam",20100175663953,Hospital,SPD,2016-04-16,procurement@shahalamstmaryshospital.example,90 days,20000,Active
+C10291,Melaka Medical Centre,MY,Melaka,"445 Jalan Gasing, Melaka",19960191786246,Hospital,QTS,2017-02-16,procurement@melakamedicalcentre.example,60 days,250000,Active
+C10296,Melaka Med. Centre,MY,Melaka,"445 Jln Gasing, Melaka",19960191786246,Hospital,QTG,2018-09-17,procurement@melakamedicalcentre.example,90 days,500000,Active
+C10299,Penang Medical Diagnostic Laboratory Sdn Bhd,MY,Penang,"406 Jalan Sultan Ismail, Penang",20210128349025,Laboratory,SPD,2019-06-21,procurement@penangmedicaldiagnosticl.example,45 days,500000,Active
+C10305,Seremban Northpoint Diagnostic Laboratory Sdn Bhd,MY,Seremban,"78 Persiaran Gurney, Seremban",19990129324407,Laboratory,SPD,2019-04-20,procurement@serembannorthpointdiagno.example,45 days,50000,Active
+C10309,Community Pathology Laboratory Kuching Sdn Bhd,MY,Kuching,"87 Jalan Tun Razak, Kuching",19930134915395,Laboratory,SPD,2016-07-20,procurement@communitypathologylabora.example,30 days,20000,Active
+C10311,Specialist Pathology Laboratory Melaka Sdn Bhd,MY,Melaka,"349 Jalan Wong Ah Fook, Melaka",20160130806154,Laboratory,QTS,2023-06-04,procurement@specialistpathologylabor.example,90 days,500000,Active
+C10319,Lakeside Clinical Laboratory Sdn Bhd,MY,Kuching,"358 Jalan Sultan Ismail, Kuching",20110113769882,Laboratory,SPD,2014-12-05,procurement@lakesideclinicallaborato.example,90 days,100000,Active
+C10322,Penang Eastern Diagnostic Laboratory Sdn Bhd,MY,Penang,"339 Jalan Gasing, Penang",20030159975934,Laboratory,SPD,2016-02-14,procurement@penangeasterndiagnosticl.example,30 days,100000,Active
+C10328,PENANG EASTERN DIAGNOSTIC LABORATORY SDN BHD,MY,Penang,"339 Jln Gasing, Penang",20030159975934,Laboratory,SPD,2025-11-18,procurement@penangeasterndiagnosticl.example,90 days,100000,Active
+C10335,Sunrise Clinical Laboratory Sdn Bhd,MY,Kuala Lumpur,"379 Jalan Gasing, Kuala Lumpur",20200122316302,Laboratory,QTS,2025-07-23,procurement@sunriseclinicallaborator.example,45 days,20000,Active
+C10344,Seremban Women's & Children's Diagnostic Laboratory Sdn Bhd,MY,Seremban,"89 Jalan Tun Razak, Seremban",20170135407316,Laboratory,QTS,2019-06-09,procurement@serembanwomenschildrensd.example,60 days,500000,Active
+C10347,Kuching Pacific Diagnostic Laboratory Sdn Bhd,MY,Ipoh,"245 Persiaran Gurney, Ipoh",20190146652985,Laboratory,SPD,2020-05-21,procurement@kuchingpacificdiagnostic.example,45 days,50000,Active
+C10352,KUCHING PACIFIC DIAGNOSTIC LAB SDN BHD,MY,Ipoh,245 Persiaran Gurney Ipoh,20190146652985,Laboratory,SPD,2025-10-21,procurement@kuchingpacificdiagnostic.example,60 days,20000,Active
+C10358,Golden Pathology Laboratory Kuching Sdn Bhd,MY,Kuching,"312 Jalan Wong Ah Fook, Kuching",19930199928734,Laboratory,SPD,2021-02-07,procurement@goldenpathologylaborator.example,45 days,100000,Active
+C10367,Medical Clinical Laboratory Sdn Bhd,MY,Melaka,"51 Jalan Sultan Ismail, Melaka",20080114996960,Laboratory,SPD,2023-04-13,procurement@medicalclinicallaborator.example,90 days,50000,Active
+C10369,Medical Clinical Laboratory,MY,Melaka,"51 Jalan Sultan Ismail, Melaka",20080114996960,Laboratory,SPD,2026-01-26,procurement@medicalclinicallaborator.example,90 days,50000,Active
+C10376,Golden Clinical Laboratory Sdn Bhd,MY,Seremban,"246 Persiaran Gurney, Seremban",19910130549175,Laboratory,QTS,2024-06-19,procurement@goldenclinicallaboratory.example,60 days,500000,Active
+C10385,Ipoh Central Diagnostic Laboratory Sdn Bhd,MY,Ipoh,"384 Jalan Ampang, Ipoh",19970154951322,Laboratory,SPD,2019-03-13,procurement@ipohcentraldiagnosticlab.example,30 days,500000,Active
+C10387,Ipoh Central Diagnostic Laboratory Sdn. Bhd.,MY,Ipoh,"384 Jln Ampang, Ipoh",19970154951322,Laboratory,SPD,2026-04-02,procurement@ipohcentraldiagnosticlab.example,90 days,20000,Active
+C10393,Kuala Lumpur Pacific Diagnostic Laboratory Sdn Bhd,MY,Kuala Lumpur,"264 Jalan Sultan Ismail, Kuala Lumpur",20160115541091,Laboratory,SPD,2015-01-01,procurement@kualalumpurpacificdiagno.example,45 days,100000,Active
+C10401,Seremban Pacific Polyclinic Sdn Bhd,MY,Seremban,"272 Jalan Ampang, Seremban",20210139335391,Clinic,SPD,2023-01-02,procurement@serembanpacificpolyclini.example,60 days,5000,Active
+C10404,Melaka Unity Polyclinic Sdn Bhd,MY,Melaka,"393 Jalan Gasing, Melaka",19910157441910,Clinic,SPD,2025-07-23,procurement@melakaunitypolyclinicsdn.example,45 days,5000,Active
+C10409,Lakeside Medical Clinic Kuala Lumpur Sdn Bhd,MY,Kuala Lumpur,"284 Jalan Tun Razak, Kuala Lumpur",20190164411918,Clinic,SPD,2024-10-06,procurement@lakesidemedicalclinickua.example,30 days,5000,Active
+C10410,Harmony Medical Clinic Ipoh Sdn Bhd,MY,Ipoh,"131 Jalan Tun Razak, Ipoh",19920139333593,Clinic,SPD,2022-01-10,procurement@harmonymedicalclinicipoh.example,60 days,10000,Active
+C10419,Harmony Family Clinic Petaling Jaya Sdn Bhd,MY,Petaling Jaya,"240 Persiaran Gurney, Petaling Jaya",19920135501820,Clinic,SPD,2018-05-10,procurement@harmonyfamilyclinicpetal.example,90 days,5000,Active
+C10426,Heart Medical Clinic Ipoh Sdn Bhd,MY,Ipoh,"147 Persiaran Gurney, Ipoh",19920173267927,Clinic,QTS,2021-02-19,procurement@heartmedicalclinicipohsd.example,60 days,10000,Active
+C10430,Lakeside Family Clinic Melaka Sdn Bhd,MY,Melaka,"122 Jalan Gasing, Melaka",19930182701840,Clinic,SPD,2021-09-25,procurement@lakesidefamilyclinicmela.example,30 days,20000,Active
+C10435,Lakseide Family Clinic Melaka Sdn. Bhd.,MY,Melaka,"122 Jln Gasing, Melaka",19930182701840,Clinic,QTS,2018-03-11,procurement@lakesidefamilyclinicmela.example,60 days,5000,Active
+C10437,Women's & Children's Medical Clinic Seremban Sdn Bhd,MY,Seremban,"122 Jalan Tun Razak, Seremban",20020177759488,Clinic,SPD,2025-08-28,procurement@womenschildrensmedicalcl.example,30 days,10000,Active
+C10443,Harmony Medical Clinic Petaling Jaya Sdn Bhd,MY,Petaling Jaya,"383 Jalan Tun Razak, Petaling Jaya",20050173667615,Clinic,QTS,2024-05-01,procurement@harmonymedicalclinicpeta.example,60 days,10000,Active
+C10444,Harmony Medical Clinic Petaling Jaya,MY,Petaling Jaya,"383 Jln Tun Razak, Petaling Jaya",20050173667615,Clinic,QTS,2026-05-11,procurement@harmonymedicalclinicpeta.example,60 days,10000,Active
+C10445,Penang Central Polyclinic Sdn Bhd,MY,Penang,"46 Jalan Wong Ah Fook, Penang",20210194458990,Clinic,SPD,2022-08-20,procurement@penangcentralpolyclinics.example,30 days,20000,Active
+C10447,Central Family Clinic Seremban Sdn Bhd,MY,Seremban,"130 Jalan Tun Razak, Seremban",19970160632340,Clinic,QTS,2015-03-11,procurement@centralfamilyclinicserem.example,60 days,10000,Active
+C10452,Petaling Jaya Central Polyclinic Sdn Bhd,MY,Petaling Jaya,"377 Jalan Tun Razak, Petaling Jaya",20190189176114,Clinic,SPD,2022-10-15,procurement@petalingjayacentralpolyc.example,90 days,10000,Active
+C10459,Community Medical Clinic Johor Bahru Sdn Bhd,MY,Johor Bahru,"314 Persiaran Gurney, Johor Bahru",20090129815022,Clinic,SPD,2014-03-26,procurement@communitymedicalclinicjo.example,90 days,5000,Active
+C10468,Golden Family Clinic Petaling Jaya Sdn Bhd,MY,Petaling Jaya,"63 Jalan Ampang, Petaling Jaya",20040153588665,Clinic,SPD,2022-12-14,procurement@goldenfamilyclinicpetali.example,60 days,5000,Active
+C10474,Ipoh Riverside Polyclinic Sdn Bhd,MY,Ipoh,"379 Persiaran Gurney, Ipoh",20160173015220,Clinic,SPD,2024-07-17,procurement@ipohriversidepolyclinics.example,90 days,20000,Active
+C10482,Sunrise Family Clinic Kuala Lumpur Sdn Bhd,MY,Kuala Lumpur,"390 Jalan Gasing, Kuala Lumpur",20040199213390,Clinic,SPD,2014-04-02,procurement@sunrisefamilyclinickuala.example,60 days,20000,Active
+C10490,Pacific Medical Clinic Melaka Sdn Bhd,MY,Melaka,"316 Persiaran Gurney, Melaka",20090182870673,Clinic,SPD,2023-10-03,procurement@pacificmedicalclinicmela.example,60 days,5000,Active
+C10496,Phuket Medical Centre,TH,Phuket,"155 Sukhumvit Road, Phuket",0105543112421,Hospital,SPD,2014-01-24,procurement@phuketmedicalcentre.example,60 days,250000,Active
+C10505,Hat Yai General Hospital,TH,Hat Yai,"410 Mittraphap Road, Hat Yai",0105564483124,Hospital,SPD,2025-08-04,procurement@hatyaigeneralhospital.example,90 days,100000,Active
+C10512,Hat Yai Hope Hospital,TH,Hat Yai,"426 Mittraphap Road, Hat Yai",0105563958829,Hospital,SPD,2022-05-22,procurement@hatyaihopehospital.example,30 days,500000,Active
+C10517,Udon Thani Pacific Hospital,TH,Udon Thani,"319 Phahonyothin Road, Udon Thani",0105546374807,Hospital,SPD,2019-08-07,procurement@udonthanipacifichospital.example,30 days,50000,Active
+C10519,UDON THANI PACIFIC HOSPITAL,TH,Udon Thani,"319 Phahonyothin Rd, Udon Thani",0105546374807,Hospital,SPD,2025-12-19,procurement@udonthanipacifichospital.example,45 days,500000,Active
+C10527,Udon Thani Green Valley Hospital,TH,Udon Thani,"417 Rama IV Road, Udon Thani",0105559222392,Hospital,SPD,2020-04-09,procurement@udonthanigreenvalleyhosp.example,90 days,500000,Active
+C10532,Nonthaburi Mercy Hospital,TH,Nonthaburi,"265 Petchkasem Road, Nonthaburi",0105536607873,Hospital,SPD,2022-07-01,procurement@nonthaburimercyhospital.example,30 days,20000,Active
+C10534,Udon Thani Family Hospital,TH,Udon Thani,"330 Sukhumvit Road, Udon Thani",0105542796162,Hospital,QTG,2018-09-14,procurement@udonthanifamilyhospital.example,45 days,100000,Active
+C10542,Nonthaburi Eastern Hospital,TH,Nonthaburi,"77 Nimmanhaemin Road, Nonthaburi",0105561290226,Hospital,QTS,2015-06-25,procurement@nonthaburieasternhospita.example,60 days,50000,Active
+C10543,Bangkok Hope Hospital,TH,Bangkok,"238 Nimmanhaemin Road, Bangkok",0105534208652,Hospital,SPD,2025-07-02,procurement@bangkokhopehospital.example,45 days,50000,Active
+C10552,Chiang Mai Riverside Hospital,TH,Chiang Mai,"365 Mittraphap Road, Chiang Mai",0105565163519,Hospital,SPD,2021-01-14,procurement@chiangmairiversidehospit.example,45 days,100000,Active
+C10556,Khon Kaen Harmony Hospital,TH,Udon Thani,"386 Sukhumvit Road, Udon Thani",0105557547615,Hospital,QTS,2015-10-02,procurement@khonkaenharmonyhospital.example,45 days,250000,Active
+C10564,Hat Yai Eastern Hospital,TH,Hat Yai,"380 Mittraphap Road, Hat Yai",0105565148386,Hospital,SPD,2015-10-05,procurement@hatyaieasternhospital.example,45 days,100000,Active
+C10573,"Lotus Clinical Laboratory Co., Ltd.",TH,Hat Yai,"437 Phahonyothin Road, Hat Yai",0105543954053,Laboratory,SPD,2017-11-06,procurement@lotusclinicallaboratoryc.example,90 days,500000,Active
+C10577,"Chiang Mai St. Mary's Diagnostic Laboratory Co., Ltd.",TH,Chiang Mai,"1 Rama IV Road, Chiang Mai",0105569925723,Laboratory,SPD,2020-08-02,procurement@chiangmaistmarysdiagnost.example,90 days,100000,Active
+C10578,"Mercy Pathology Laboratory Udon Thani Co., Ltd.",TH,Udon Thani,"314 Nimmanhaemin Road, Udon Thani",0105555255518,Laboratory,SPD,2016-12-16,procurement@mercypathologylaboratory.example,60 days,250000,Active
+C10579,"Mercy Pathoolgy Laboratory Udon Thani Co., Ltd.",TH,Udon Thani,"314 Nimmanhaemin Rd, Udon Thani",,Laboratory,SPD,2025-09-23,procurement@mercypathologylaboratory.example,90 days,50000,Active
+C10582,"Udon Thani Harmony Diagnostic Laboratory Co., Ltd.",TH,Udon Thani,"390 Phahonyothin Road, Udon Thani",0105555927177,Laboratory,SPD,2023-03-19,procurement@udonthaniharmonydiagnost.example,45 days,500000,Active
+C10584,"Bangkok St. Mary's Diagnostic Laboratory Co., Ltd.",TH,Bangkok,"443 Petchkasem Road, Bangkok",0105549727405,Laboratory,SPD,2015-02-07,procurement@bangkokstmarysdiagnostic.example,90 days,20000,Active
+C10590,"Sunrise Clinical Laboratory Co., Ltd.",TH,Udon Thani,"132 Sukhumvit Road, Udon Thani",0105543840513,Laboratory,SPD,2023-01-28,procurement@sunriseclinicallaborator.example,90 days,100000,Active
+C10592,"Hope Clinical Laboratory Co., Ltd.",TH,Chiang Mai,"275 Mittraphap Road, Chiang Mai",0105533648076,Laboratory,SPD,2024-08-28,procurement@hopeclinicallaboratoryco.example,90 days,250000,Active
+C10597,"Hope Clinical Lab Co., Ltd.",TH,Chiang Mai,"275 Mittraphap Rd, Chiang Mai",,Laboratory,SPD,2026-05-28,procurement@hopeclinicallaboratoryco.example,45 days,50000,Active
+C10603,"Udon Thani General Diagnostic Laboratory Co., Ltd.",TH,Udon Thani,"226 Mittraphap Road, Udon Thani",0105531609024,Laboratory,SPD,2014-05-01,procurement@udonthanigeneraldiagnost.example,60 days,20000,Active
+C10607,"Pattaya Heart Diagnostic Laboratory Co., Ltd.",TH,Pattaya,"213 Phahonyothin Road, Pattaya",0105540037366,Laboratory,SPD,2022-08-22,procurement@pattayaheartdiagnosticla.example,60 days,500000,Active
+C10609,Pattaya Heart Diagnostic Laboratory,TH,Pattaya,"213 Phahonyothin Road, Pattaya",0105540037366,Laboratory,SPD,2025-09-30,procurement@pattayaheartdiagnosticla.example,45 days,20000,Active
+C10617,"Golden Clinical Laboratory Co., Ltd.",TH,Chiang Mai,"212 Nimmanhaemin Road, Chiang Mai",0105559601109,Laboratory,SPD,2016-08-22,procurement@goldenclinicallaboratory.example,45 days,250000,Active
+C10619,"Phuket Lotus Diagnostic Laboratory Co., Ltd.",TH,Phuket,"139 Petchkasem Road, Phuket",0105561004048,Laboratory,SPD,2016-08-02,procurement@phuketlotusdiagnosticlab.example,30 days,250000,Active
+C10624,"Bangkok Family Diagnostic Laboratory Co., Ltd.",TH,Bangkok,"239 Nimmanhaemin Road, Bangkok",0105535171377,Laboratory,SPD,2021-12-22,procurement@bangkokfamilydiagnosticl.example,60 days,250000,Active
+C10633,Bangkok Family Diagnostic Lab. Co Ltd,TH,Bangkok,"239 Nimmanhaemin Rd, Bangkok",0105535171377,Laboratory,SPD,2026-06-04,procurement@bangkokfamilydiagnosticl.example,30 days,250000,Active
+C10635,"Khon Kaen Unity Polyclinic Co., Ltd.",TH,Khon Kaen,"48 Phahonyothin Road, Khon Kaen",0105566175618,Clinic,SPD,2017-07-06,procurement@khonkaenunitypolyclinicc.example,60 days,5000,Active
+C10644,"Women's & Children's Medical Clinic Phuket Co., Ltd.",TH,Phuket,"100 Mittraphap Road, Phuket",0105546914060,Clinic,SPD,2019-06-09,procurement@womenschildrensmedicalcl.example,90 days,5000,Active
+C10647,"Phuket Harmony Polyclinic Co., Ltd.",TH,Phuket,"34 Petchkasem Road, Phuket",0105569946047,Clinic,SPD,2022-01-21,procurement@phuketharmonypolyclinicc.example,45 days,20000,Active
+C10650,"Khon Kaen Riverside Polyclinic Co., Ltd.",TH,Khon Kaen,"326 Sukhumvit Road, Khon Kaen",0105550495155,Clinic,SPD,2024-03-07,procurement@khonkaenriversidepolycli.example,60 days,10000,Active
+C10656,"Khon Kaen Riverside Polcylinic Co., Ltd.",TH,Khon Kaen,"326 Sukhumvit Rd, Khon Kaen",0105550495155,Clinic,SPD,2026-01-12,procurement@khonkaenriversidepolycli.example,45 days,5000,Active
+C10657,"Udon Thani Specialist Polyclinic Co., Ltd.",TH,Udon Thani,"162 Phahonyothin Road, Udon Thani",0105550041518,Clinic,SPD,2025-10-29,procurement@udonthanispecialistpolyc.example,30 days,20000,Active
+C10660,"Mercy Medical Clinic Khon Kaen Co., Ltd.",TH,Khon Kaen,"277 Sukhumvit Road, Khon Kaen",0105532016753,Clinic,QTS,2018-11-04,procurement@mercymedicalclinickhonka.example,60 days,5000,Active
+C10663,"Mercy Medical Clniic Khon Kaen Co., Ltd.",TH,Khon Kaen,"277 Sukhumvit Rd, Khon Kaen",,Clinic,QTS,2025-10-29,procurement@mercymedicalclinickhonka.example,45 days,20000,Active
+C10671,"Udon Thani Hope Polyclinic Co., Ltd.",TH,Udon Thani,"277 Petchkasem Road, Udon Thani",0105544688790,Clinic,SPD,2016-09-08,procurement@udonthanihopepolyclinicc.example,90 days,10000,Active
+C10673,"General Family Clinic Udon Thani Co., Ltd.",TH,Udon Thani,"334 Phahonyothin Road, Udon Thani",0105554365826,Clinic,SPD,2022-06-02,procurement@generalfamilyclinicudont.example,45 days,5000,Active
+C10676,"Mercy Family Clinic Chiang Mai Co., Ltd.",TH,Chiang Mai,"389 Sukhumvit Road, Chiang Mai",0105559083966,Clinic,SPD,2022-03-05,procurement@mercyfamilyclinicchiangm.example,60 days,20000,Active
+C10680,"Nonthaburi Family Polyclinic Co., Ltd.",TH,Nonthaburi,"61 Rama IV Road, Nonthaburi",0105558365126,Clinic,SPD,2022-01-15,procurement@nonthaburifamilypolyclin.example,30 days,10000,Active
+C10683,"General Family Clinic Chiang Mai Co., Ltd.",TH,Chiang Mai,"271 Nimmanhaemin Road, Chiang Mai",0105553563185,Clinic,SPD,2020-11-11,procurement@generalfamilyclinicchian.example,45 days,20000,Active
+C10684,"Hat Yai Women's & Children's Polyclinic Co., Ltd.",TH,Hat Yai,"385 Nimmanhaemin Road, Hat Yai",0105549203136,Clinic,SPD,2014-04-11,procurement@hatyaiwomenschildrenspol.example,60 days,10000,Active
+C10685,"Heart Family Clinic Nonthaburi Co., Ltd.",TH,Nonthaburi,"279 Petchkasem Road, Nonthaburi",0105568443458,Clinic,SPD,2024-05-15,procurement@heartfamilyclinicnonthab.example,60 days,10000,Active
+C10694,Heart Family Clinic Nonthaburi Co Ltd,TH,Nonthaburi,"279 Petchkasem Rd, Nonthaburi",0105568443458,Clinic,SPD,2026-05-05,procurement@heartfamilyclinicnonthab.example,60 days,5000,Active
+C10699,"Northpoint Medical Clinic Nonthaburi Co., Ltd.",TH,Nonthaburi,"439 Rama IV Road, Nonthaburi",0105547984287,Clinic,SPD,2020-05-26,procurement@northpointmedicalclinicn.example,30 days,20000,Active
+C10707,"Pattaya General Polyclinic Co., Ltd.",TH,Pattaya,"438 Petchkasem Road, Pattaya",0105549473038,Clinic,SPD,2017-03-01,procurement@pattayageneralpolyclinic.example,90 days,10000,Active
+C10714,"Pacific Family Clinic Chiang Mai Co., Ltd.",TH,Chiang Mai,"262 Nimmanhaemin Road, Chiang Mai",0105551100739,Clinic,SPD,2025-09-24,procurement@pacificfamilyclinicchian.example,60 days,10000,Active
+C10723,Rumah Sakit Lakeside Makassar,ID,Makassar,"163 Jalan MH Thamrin, Makassar",34.728.789.5-113.000,Hospital,SPD,2014-05-17,procurement@rumahsakitlakesidemakass.example,90 days,20000,Active
+C10724,Rumah Sakit Medical Yogyakarta,ID,Yogyakarta,"385 Jalan Ahmad Yani, Yogyakarta",95.176.885.9-231.000,Hospital,SPD,2021-09-09,procurement@rumahsakitmedicalyogyaka.example,60 days,20000,Active
+C10725,Rumah Sakit Pacific Makassar,ID,Makassar,"387 Jalan Gatot Subroto, Makassar",89.107.856.9-100.000,Hospital,SPD,2023-05-13,procurement@rumahsakitpacificmakassa.example,90 days,100000,Active
+C10734,Rumah Sakit Central Bandung,ID,Bandung,"11 Jalan Diponegoro, Bandung",07.887.118.2-554.000,Hospital,SPD,2018-03-14,procurement@rumahsakitcentralbandung.example,30 days,250000,Active
+C10736,Rumah Sakit General Medan,ID,Medan,"192 Jalan Diponegoro, Medan",05.304.137.5-637.000,Hospital,QTS,2017-06-08,procurement@rumahsakitgeneralmedan.example,90 days,20000,Active
+C10738,Rumah Sakit Pacific Denpasar,ID,Denpasar,"438 Jalan Jenderal Sudirman, Denpasar",14.412.510.4-464.000,Hospital,SPD,2021-06-19,procurement@rumahsakitpacificdenpasa.example,30 days,100000,Active
+C10745,Rumah Sakit Sunrise Jakarta,ID,Jakarta,"3 Jalan Ahmad Yani, Jakarta",27.103.107.5-270.000,Hospital,SPD,2014-11-25,procurement@rumahsakitsunrisejakarta.example,30 days,50000,Active
+C10747,Rumah Sakit Harmony Makassar,ID,Makassar,"92 Jalan Gatot Subroto, Makassar",32.145.183.3-528.000,Hospital,SPD,2015-04-07,procurement@rumahsakitharmonymakassa.example,30 days,20000,Active
+C10752,Rumah Sakit Green Valley Yogyakarta,ID,Yogyakarta,"11 Jalan Pemuda, Yogyakarta",64.718.839.3-698.000,Hospital,SPD,2018-06-09,procurement@rumahsakitgreenvalleyyog.example,60 days,500000,Active
+C10754,Rumah Sakit Heart Medan,ID,Medan,"252 Jalan Jenderal Sudirman, Medan",17.598.800.2-624.000,Hospital,SPD,2023-11-16,procurement@rumahsakitheartmedan.example,30 days,250000,Active
+C10758,Rumah Sakit Sunrise Surabaya,ID,Surabaya,"251 Jalan Jenderal Sudirman, Surabaya",86.512.582.6-421.000,Hospital,SPD,2018-08-07,procurement@rumahsakitsunrisesurabay.example,30 days,500000,Active
+C10763,Rumah Sakit Surnise Surabaya,ID,Surabaya,"251 Jln Jenderal Sudirman, Surabaya",,Hospital,QTG,2022-05-09,procurement@rumahsakitsunrisesurabay.example,90 days,100000,Active
+C10771,Rumah Sakit Lotus Yogyakarta,ID,Yogyakarta,"403 Jalan Gatot Subroto, Yogyakarta",19.933.424.8-300.000,Hospital,SPD,2025-10-30,procurement@rumahsakitlotusyogyakart.example,30 days,100000,Active
+C10778,Rumah Sakit Lotus Medan,ID,Medan,"203 Jalan MH Thamrin, Medan",67.931.274.1-774.000,Hospital,QTG,2014-01-27,procurement@rumahsakitlotusmedan.example,45 days,20000,Active
+C10780,Rumah Sakit Sunrise Bandung,ID,Bandung,"80 Jalan Ahmad Yani, Bandung",20.127.864.5-239.000,Hospital,SPD,2015-04-19,procurement@rumahsakitsunrisebandung.example,60 days,20000,Active
+C10787,RUMAH SAKIT SUNRISE BANDUNG,ID,Bandung,"80 Jln Ahmad Yani, Bandung",,Hospital,QTS,2019-04-23,procurement@rumahsakitsunrisebandung.example,90 days,250000,Active
+C10788,PT General Clinical Laboratory,ID,Denpasar,"62 Jalan Gatot Subroto, Denpasar",67.702.786.9-560.000,Laboratory,SPD,2018-09-25,procurement@ptgeneralclinicallaborat.example,90 days,250000,Active
+C10791,PT Bandung Unity Diagnostic Laboratory,ID,Bandung,"197 Jalan Gatot Subroto, Bandung",47.862.547.4-760.000,Laboratory,SPD,2015-04-10,procurement@ptbandungunitydiagnostic.example,30 days,250000,Active
+C10796,PT Mercy Clinical Laboratory,ID,Jakarta,"69 Jalan Jenderal Sudirman, Jakarta",89.975.702.7-743.000,Laboratory,SPD,2025-06-20,procurement@ptmercyclinicallaborator.example,30 days,250000,Active
+C10799,PT Jakarta Central Diagnostic Laboratory,ID,Jakarta,"66 Jalan MH Thamrin, Jakarta",70.514.880.7-715.000,Laboratory,QTS,2019-06-16,procurement@ptjakartacentraldiagnost.example,60 days,100000,Active
+C10806,PT Makassar Unity Diagnostic Laboratory,ID,Makassar,"34 Jalan MH Thamrin, Makassar",96.470.222.1-848.000,Laboratory,SPD,2021-07-22,procurement@ptmakassarunitydiagnosti.example,90 days,250000,Active
+C10811,PT Specialist Pathology Laboratory Makassar,ID,Makassar,"174 Jalan Gatot Subroto, Makassar",47.136.708.9-771.000,Laboratory,SPD,2020-04-09,procurement@ptspecialistpathologylab.example,30 days,20000,Active
+C10815,PT Denpasar Specialist Diagnostic Laboratory,ID,Denpasar,"100 Jalan Ahmad Yani, Denpasar",04.248.281.6-101.000,Laboratory,SPD,2016-12-07,procurement@ptdenpasarspecialistdiag.example,60 days,20000,Active
+C10819,PT Denpasar Specialist Diangostic Laboratory,ID,Denpasar,"100 Jln Ahmad Yani, Denpasar",04.248.281.6-101.000,Laboratory,SPD,2026-06-10,procurement@ptdenpasarspecialistdiag.example,45 days,500000,Active
+C10820,PT Riverside Clinical Laboratory,ID,Surabaya,"71 Jalan Gatot Subroto, Surabaya",84.356.940.2-927.000,Laboratory,SPD,2018-12-08,procurement@ptriversideclinicallabor.example,45 days,20000,Active
+C10822,PT Medan Harmony Diagnostic Laboratory,ID,Medan,"375 Jalan Jenderal Sudirman, Medan",93.233.289.3-321.000,Laboratory,SPD,2018-10-10,procurement@ptmedanharmonydiagnostic.example,90 days,50000,Active
+C10825,PT Green Valley Pathology Laboratory Yogyakarta,ID,Yogyakarta,"24 Jalan Pemuda, Yogyakarta",92.112.468.5-275.000,Laboratory,SPD,2019-08-27,procurement@ptgreenvalleypathologyla.example,30 days,250000,Active
+C10829,PT Golden Pathology Laboratory Bandung,ID,Bandung,"138 Jalan Jenderal Sudirman, Bandung",82.822.260.8-417.000,Laboratory,SPD,2015-01-03,procurement@ptgoldenpathologylaborat.example,90 days,50000,Active
+C10838,PT Golden Pathology Lab Bandung,ID,Bandung,"138 Jln Jenderal Sudirman, Bandung",,Laboratory,SPD,2025-10-28,procurement@ptgoldenpathologylaborat.example,90 days,250000,Active
+C10844,PT Medan St. Mary's Diagnostic Laboratory,ID,Medan,"201 Jalan Ahmad Yani, Medan",07.777.470.6-121.000,Laboratory,SPD,2023-05-03,procurement@ptmedanstmarysdiagnostic.example,60 days,50000,Active
+C10848,PT Lotus Pathology Laboratory Makassar,ID,Makassar,"357 Jalan MH Thamrin, Makassar",30.308.621.8-906.000,Laboratory,SPD,2024-07-26,procurement@ptlotuspathologylaborato.example,60 days,100000,Active
+C10853,PT St. Mary's Clinical Laboratory,ID,Jakarta,"206 Jalan Pemuda, Jakarta",33.393.509.5-926.000,Laboratory,SPD,2023-03-14,procurement@ptstmarysclinicallaborat.example,30 days,500000,Active
+C10855,PT Medan Community Polyclinic,ID,Medan,"200 Jalan Ahmad Yani, Medan",01.588.447.7-615.000,Clinic,SPD,2022-07-06,procurement@ptmedancommunitypolyclin.example,60 days,10000,Active
+C10857,PT Northpoint Family Clinic Yogyakarta,ID,Yogyakarta,"90 Jalan Jenderal Sudirman, Yogyakarta",85.354.686.7-275.000,Clinic,SPD,2021-08-24,procurement@ptnorthpointfamilyclinic.example,45 days,20000,Active
+C10862,PT Eastern Family Clinic Makassar,ID,Makassar,"368 Jalan Gatot Subroto, Makassar",64.190.215.1-126.000,Clinic,SPD,2021-11-24,procurement@pteasternfamilyclinicmak.example,90 days,5000,Active
+C10868,Eastern Family Clinic Makassar,ID,Makassar,"368 Jln Gatot Subroto, Makassar",,Clinic,QTS,2022-10-28,procurement@pteasternfamilyclinicmak.example,30 days,5000,Active
+C10877,PT Medical Clinic Bandung,ID,Bandung,"86 Jalan Jenderal Sudirman, Bandung",64.117.189.7-731.000,Clinic,SPD,2022-09-05,procurement@ptmedicalclinicbandung.example,45 days,5000,Active
+C10886,PT General Family Clinic Bandung,ID,Bandung,"195 Jalan Ahmad Yani, Bandung",20.383.975.5-322.000,Clinic,SPD,2019-10-09,procurement@ptgeneralfamilyclinicban.example,45 days,20000,Active
+C10891,PT Heart Medical Clinic Semarang,ID,Semarang,"322 Jalan MH Thamrin, Semarang",15.542.815.8-550.000,Clinic,SPD,2026-02-25,procurement@ptheartmedicalclinicsema.example,30 days,10000,Active
+C10894,PT Medan Sunrise Polyclinic,ID,Medan,"227 Jalan Ahmad Yani, Medan",78.773.503.8-236.000,Clinic,SPD,2020-11-12,procurement@ptmedansunrisepolyclinic.example,60 days,20000,Active
+C10898,PT Heart Medical Clinic Medan,ID,Medan,"38 Jalan MH Thamrin, Medan",94.542.822.7-622.000,Clinic,SPD,2017-03-09,procurement@ptheartmedicalclinicmeda.example,90 days,5000,Active
+C10905,Heart Medical Clinic Medan,ID,Medan,"38 Jalan MH Thamrin, Medan",94.542.822.7-622.000,Clinic,SPD,2026-03-05,procurement@ptheartmedicalclinicmeda.example,60 days,5000,Active
+C10911,PT Women's & Children's Family Clinic Surabaya,ID,Surabaya,"140 Jalan Ahmad Yani, Surabaya",63.192.480.1-786.000,Clinic,SPD,2018-10-03,procurement@ptwomenschildrensfamilyc.example,30 days,20000,Active
+C10915,Women's & Children's Family Clinic Surabaya,ID,Surabaya,"140 Jalan Ahmad Yani, Surabaya",,Clinic,SPD,2026-05-01,procurement@ptwomenschildrensfamilyc.example,90 days,20000,Active
+C10923,PT Sunrise Medical Clinic Yogyakarta,ID,Yogyakarta,"173 Jalan Diponegoro, Yogyakarta",42.607.682.9-293.000,Clinic,SPD,2021-02-03,procurement@ptsunrisemedicalclinicyo.example,45 days,20000,Active
+C10929,PT Lotus Family Clinic Jakarta,ID,Jakarta,"133 Jalan Pemuda, Jakarta",01.978.172.2-399.000,Clinic,SPD,2024-05-05,procurement@ptlotusfamilyclinicjakar.example,90 days,10000,Active
+C10935,PT Unity Family Clinic Semarang,ID,Semarang,"391 Jalan Jenderal Sudirman, Semarang",04.569.746.5-829.000,Clinic,SPD,2023-04-07,procurement@ptunityfamilyclinicsemar.example,60 days,10000,Active
+C10942,PT Lotus Medical Clinic Makassar,ID,Makassar,"133 Jalan Ahmad Yani, Makassar",04.667.828.4-575.000,Clinic,SPD,2019-11-28,procurement@ptlotusmedicalclinicmaka.example,45 days,5000,Active
+C10946,PT Specialist Medical Clinic Jakarta,ID,Jakarta,"59 Jalan Gatot Subroto, Jakarta",91.951.445.5-369.000,Clinic,SPD,2021-04-28,procurement@ptspecialistmedicalclini.example,90 days,10000,Active
+C10950,Specialist Medical Clinic Jakarta,ID,Jakarta,"59 Jln Gatot Subroto, Jakarta",91.951.445.5-369.000,Clinic,SPD,2025-12-29,procurement@ptspecialistmedicalclini.example,45 days,10000,Active
+C10956,PT St. Mary's Family Clinic Medan,ID,Medan,"326 Jalan MH Thamrin, Medan",97.170.150.3-459.000,Clinic,SPD,2022-04-18,procurement@ptstmarysfamilyclinicmed.example,30 days,10000,Active
+C10959,PT Mercy Medical Clinic Bandung,ID,Bandung,"282 Jalan Ahmad Yani, Bandung",65.738.945.1-390.000,Clinic,SPD,2017-05-18,procurement@ptmercymedicalclinicband.example,90 days,10000,Active
+C10962,PT Mercy Medical Clinic Yogyakarta,ID,Yogyakarta,"111 Jalan Ahmad Yani, Yogyakarta",49.761.679.8-679.000,Clinic,SPD,2024-07-10,procurement@ptmercymedicalclinicyogy.example,60 days,5000,Active
+C10970,Da Nang Medical Centre,VN,Da Nang,"6 Nguyen Hue Boulevard, Da Nang",0725154150,Hospital,SPD,2023-09-28,procurement@danangmedicalcentre.example,45 days,50000,Active
+C10973,DA NANG MEDICAL CENTRE,VN,Da Nang,"6 Nguyen Hue Blvd, Da Nang",,Hospital,SPD,2026-03-10,procurement@danangmedicalcentre.example,45 days,500000,Active
+C10974,Nha Trang Harmony Hospital,VN,Nha Trang,"224 Ly Thuong Kiet Street, Nha Trang",0967370950,Hospital,SPD,2016-12-02,procurement@nhatrangharmonyhospital.example,45 days,500000,Active
+C10976,Ho Chi Minh City Riverside Hospital,VN,Ho Chi Minh City,"15 Ly Thuong Kiet Street, Ho Chi Minh City",0469586357,Hospital,SPD,2023-08-18,procurement@hochiminhcityriversideho.example,60 days,100000,Active
+C10977,Hue Sunrise Hospital,VN,Hue,"81 Hai Ba Trung Street, Hue",0796371786,Hospital,SPD,2021-09-12,procurement@huesunrisehospital.example,60 days,50000,Active
+C10981,Ho Chi Minh City Specialist Hospital,VN,Ho Chi Minh City,"239 Dien Bien Phu Street, Ho Chi Minh City",0187574452,Hospital,QTS,2015-01-27,procurement@hochiminhcityspecialisth.example,90 days,250000,Active
+C10989,Hai Phong Heart Hospital,VN,Hai Phong,"345 Dien Bien Phu Street, Hai Phong",0657495487,Hospital,SPD,2022-06-19,procurement@haiphonghearthospital.example,45 days,500000,Active
+C10997,Can Tho Lotus Hospital,VN,Can Tho,"424 Le Loi Street, Can Tho",0988194645,Hospital,SPD,2016-12-28,procurement@cantholotushospital.example,30 days,20000,Active
+C11005,Ho Chi Minh City Family Hospital,VN,Ho Chi Minh City,"139 Tran Hung Dao Street, Ho Chi Minh City",0980856433,Hospital,SPD,2014-11-04,procurement@hochiminhcityfamilyhospi.example,30 days,100000,Active
+C11006,HO CHI MINH CITY FAMILY HOSPITAL,VN,Ho Chi Minh City,"139 Tran Hung Dao St, Ho Chi Minh City",0980856433,Hospital,SPD,2025-09-30,procurement@hochiminhcityfamilyhospi.example,60 days,20000,Active
+C11015,Nha Trang Family Hospital,VN,Nha Trang,"262 Le Loi Street, Nha Trang",0883239637,Hospital,SPD,2024-07-03,procurement@nhatrangfamilyhospital.example,90 days,50000,Active
+C11016,Hue Pacific Hospital,VN,Ho Chi Minh City,"205 Nguyen Hue Boulevard, Ho Chi Minh City",0183424099,Hospital,SPD,2019-03-09,procurement@huepacifichospital.example,90 days,500000,Active
+C11017,"Hope Pathology Laboratory Ho Chi Minh City Co., Ltd",VN,Ho Chi Minh City,"421 Dien Bien Phu Street, Ho Chi Minh City",0123739003,Laboratory,SPD,2020-04-24,procurement@hopepathologylaboratoryh.example,45 days,250000,Active
+C11022,"Golden Clinical Laboratory Co., Ltd",VN,Hue,"33 Hai Ba Trung Street, Hue",0506718717,Laboratory,SPD,2018-12-18,procurement@goldenclinicallaboratory.example,60 days,50000,Active
+C11028,"Nha Trang Hope Diagnostic Laboratory Co., Ltd",VN,Nha Trang,"251 Dien Bien Phu Street, Nha Trang",0592197545,Laboratory,SPD,2022-02-01,procurement@nhatranghopediagnosticla.example,30 days,50000,Active
+C11033,"NHA TRANG HOPE DIAGNOSTIC LAB. CO., LTD",VN,Nha Trang,"251 Dien Bien Phu Street, Nha Trang",0592197545,Laboratory,SPD,2026-03-27,procurement@nhatranghopediagnosticla.example,45 days,50000,Active
+C11034,"Harmony Pathology Laboratory Hanoi Co., Ltd",VN,Hanoi,"391 Nguyen Hue Boulevard, Hanoi",0788427950,Laboratory,SPD,2021-10-13,procurement@harmonypathologylaborato.example,45 days,20000,Active
+C11040,"Mercy Pathology Laboratory Hue Co., Ltd",VN,Hue,"251 Le Loi Street, Hue",0680570946,Laboratory,SPD,2022-11-24,procurement@mercypathologylaboratory.example,90 days,250000,Active
+C11048,Mercy Pathology Laboratory Hue Co. Ltd,VN,Hue,"251 Le Loi Street, Hue",0680570946,Laboratory,SPD,2025-12-30,procurement@mercypathologylaboratory.example,90 days,20000,Active
+C11051,"Can Tho Golden Diagnostic Laboratory Co., Ltd",VN,Can Tho,"251 Hai Ba Trung Street, Can Tho",0379584456,Laboratory,SPD,2016-09-11,procurement@canthogoldendiagnosticla.example,60 days,20000,Active
+C11056,"Ho Chi Minh City Central Diagnostic Laboratory Co., Ltd",VN,Ho Chi Minh City,"291 Le Loi Street, Ho Chi Minh City",0575631022,Laboratory,SPD,2017-03-25,procurement@hochiminhcitycentraldiag.example,45 days,100000,Active
+C11065,"Unity Clinical Laboratory Co., Ltd",VN,Hanoi,"22 Hai Ba Trung Street, Hanoi",0975255800,Laboratory,SPD,2014-11-15,procurement@unityclinicallaboratoryc.example,45 days,100000,Active
+C11073,"Unity Cliincal Laboratory Co., Ltd",VN,Hanoi,"22 Hai Ba Trung Street, Hanoi",0975255800,Laboratory,SPD,2026-05-26,procurement@unityclinicallaboratoryc.example,45 days,100000,Active
+C11079,"Hai Phong Lakeside Diagnostic Laboratory Co., Ltd",VN,Hai Phong,"16 Le Loi Street, Hai Phong",0513560480,Laboratory,SPD,2019-05-02,procurement@haiphonglakesidediagnost.example,45 days,250000,Active
+C11087,"Can Tho Heart Diagnostic Laboratory Co., Ltd",VN,Can Tho,"229 Le Loi Street, Can Tho",0617544301,Laboratory,QTS,2025-10-06,procurement@canthoheartdiagnosticlab.example,60 days,20000,Active
+C11092,"Lakeside Medical Clinic Da Nang Co., Ltd",VN,Da Nang,"256 Ly Thuong Kiet Street, Da Nang",0652309503,Clinic,SPD,2024-01-05,procurement@lakesidemedicalclinicdan.example,30 days,20000,Active
+C11093,"Green Valley Medical Clinic Da Nang Co., Ltd",VN,Da Nang,"158 Hai Ba Trung Street, Da Nang",0309811911,Clinic,SPD,2018-11-10,procurement@greenvalleymedicalclinic.example,90 days,10000,Active
+C11101,"Nha Trang Northpoint Polyclinic Co., Ltd",VN,Nha Trang,"246 Le Loi Street, Nha Trang",0343061710,Clinic,SPD,2015-02-07,procurement@nhatrangnorthpointpolycl.example,60 days,5000,Active
+C11107,"Can Tho Women's & Children's Polyclinic Co., Ltd",VN,Can Tho,"424 Tran Hung Dao Street, Can Tho",0991214256,Clinic,SPD,2019-01-21,procurement@canthowomenschildrenspol.example,30 days,5000,Active
+C11112,"Medical Clinic Nha Trang Co., Ltd",VN,Nha Trang,"261 Le Loi Street, Nha Trang",0784443923,Clinic,SPD,2021-11-03,procurement@medicalclinicnhatrangcol.example,30 days,20000,Active
+C11118,"MDEICAL CLINIC NHA TRANG CO., LTD",VN,Nha Trang,"261 Le Loi St, Nha Trang",,Clinic,SPD,2026-04-24,procurement@medicalclinicnhatrangcol.example,60 days,5000,Active
+C11125,"Da Nang Specialist Polyclinic Co., Ltd",VN,Da Nang,"275 Hai Ba Trung Street, Da Nang",0523794890,Clinic,SPD,2024-11-25,procurement@danangspecialistpolyclin.example,60 days,5000,Active
+C11134,"Central Family Clinic Ho Chi Minh City Co., Ltd",VN,Ho Chi Minh City,"364 Nguyen Hue Boulevard, Ho Chi Minh City",0781940867,Clinic,SPD,2025-07-25,procurement@centralfamilyclinichochi.example,45 days,20000,Active
+C11143,"Pacific Medical Clinic Hue Co., Ltd",VN,Hue,"202 Dien Bien Phu Street, Hue",0464375526,Clinic,SPD,2021-01-25,procurement@pacificmedicalclinichuec.example,45 days,20000,Active
+C11152,Pacific Medical Cliinc Hue,VN,Hue,"202 Dien Bien Phu St, Hue",,Clinic,SPD,2026-03-04,procurement@pacificmedicalclinichuec.example,60 days,20000,Active
+C11158,"Specialist Medical Clinic Hai Phong Co., Ltd",VN,Hai Phong,"365 Nguyen Hue Boulevard, Hai Phong",0256984613,Clinic,SPD,2024-08-06,procurement@specialistmedicalclinich.example,60 days,10000,Active
+C11161,"Harmony Medical Clinic Da Nang Co., Ltd",VN,Da Nang,"419 Ly Thuong Kiet Street, Da Nang",0648649812,Clinic,SPD,2024-01-25,procurement@harmonymedicalclinicdana.example,90 days,10000,Active
+C11165,"Da Nang Unity Polyclinic Co., Ltd",VN,Da Nang,"393 Tran Hung Dao Street, Da Nang",0853776438,Clinic,SPD,2025-11-21,procurement@danangunitypolycliniccol.example,45 days,10000,Active
+C11171,"Women's & Children's Medical Clinic Nha Trang Co., Ltd",VN,Nha Trang,"205 Ly Thuong Kiet Street, Nha Trang",0468296098,Clinic,SPD,2019-11-04,procurement@womenschildrensmedicalcl.example,60 days,10000,Active
+C11178,"Riverside Medical Clinic Can Tho Co., Ltd",VN,Can Tho,"1 Nguyen Hue Boulevard, Can Tho",0969954489,Clinic,SPD,2020-01-09,procurement@riversidemedicalclinicca.example,60 days,5000,Active
+C11184,"Ho Chi Minh City Golden Polyclinic Co., Ltd",VN,Ho Chi Minh City,"167 Tran Hung Dao Street, Ho Chi Minh City",0453766299,Clinic,SPD,2024-08-15,procurement@hochiminhcitygoldenpolyc.example,30 days,10000,Active
+C11192,"Harmony Medical Clinic Hue Co., Ltd",VN,Hue,"308 Dien Bien Phu Street, Hue",0443107345,Clinic,QTS,2015-10-21,procurement@harmonymedicalclinichuec.example,60 days,10000,Active

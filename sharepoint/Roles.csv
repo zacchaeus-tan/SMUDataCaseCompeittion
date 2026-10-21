@@ -1,0 +1,9 @@
+Title,Role,Entity,PersonName,PersonEmail,EscalateTo,TimeZone
+Requestor - Any,Requestor,Any,Amy (requestor persona),<teammate-1 SMU email>,,Asia/Singapore
+BU Head - SPD,BU Head,SPD,SPD BU Head,<teammate-2 SMU email>,<teammate-4 SMU email>,Asia/Singapore
+BU Head - QTS,BU Head,QTS,QTS BU Head,<teammate-2 SMU email>,<teammate-4 SMU email>,Asia/Kuala_Lumpur
+BU Head - QTG,BU Head,QTG,QTG BU Head,<teammate-2 SMU email>,<teammate-4 SMU email>,Asia/Bangkok
+Finance - Any,Finance,Any,Wei Jie (Finance Manager),<teammate-3 SMU email>,<teammate-4 SMU email>,Asia/Singapore
+Quality/Regulatory - Any,Quality/Regulatory,Any,QA/RA Lead,<teammate-2 SMU email>,<teammate-4 SMU email>,Asia/Jakarta
+Business Support - Any,Business Support,Any,Business Support,<teammate-3 SMU email>,<teammate-4 SMU email>,Asia/Ho_Chi_Minh
+MDM Analyst - Any,MDM Analyst,Any,Priya (MDM Analyst),<teammate-4 SMU email>,,Asia/Singapore

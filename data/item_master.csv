@@ -1,0 +1,16 @@
+item_code,description,product,product_name,owning_entity,uom,list_price_sgd,regulated,created_date
+A-1001,Dengue NS1 Rapid Test Kit (25 tests),A,IVD reagents & rapid tests,SPD,Kit,95,Yes,2021-03-01
+A-1002,HbA1c Reagent Cartridge (10 tests),A,IVD reagents & rapid tests,SPD,Box,120,Yes,2019-04-01
+A-1003,Troponin I Rapid Test (20 tests),A,IVD reagents & rapid tests,SPD,Kit,160,Yes,2021-12-01
+A-1004,CRP Reagent Kit (100 tests),A,IVD reagents & rapid tests,SPD,Kit,85,Yes,2021-08-01
+A-1005,Malaria Ag Rapid Test (25 tests),A,IVD reagents & rapid tests,SPD,Kit,70,Yes,2019-06-01
+B-2001,Microcentrifuge Tubes 1.5 ml (500/pack),B,Laboratory consumables,QTS,Pack,18,No,2018-08-01
+B-2002,Filter Pipette Tips 200 ul (960/box),B,Laboratory consumables,QTS,Box,42,No,2015-11-01
+B-2003,Nitrile Examination Gloves M (100/box),B,Laboratory consumables,QTS,Box,9,Yes,2021-08-01
+B-2004,EDTA Blood Collection Tubes (100/pack),B,Laboratory consumables,QTS,Pack,26,Yes,2017-09-01
+B-2005,Specimen Containers 60 ml (100/pack),B,Laboratory consumables,QTS,Pack,15,No,2017-01-01
+C-3001,Benchtop Centrifuge 24-place,C,Medical & laboratory equipment,QTG,Unit,4800,Yes,2019-08-01
+C-3002,Point-of-Care Chemistry Analyser,C,Medical & laboratory equipment,QTG,Unit,14500,Yes,2017-09-01
+C-3003,Analyser Preventive Maintenance Kit,C,Medical & laboratory equipment,QTG,Kit,950,No,2016-08-01
+C-3004,Biosafety Cabinet HEPA Filter Set,C,Medical & laboratory equipment,QTG,Set,1800,No,2022-07-01
+A-1009,Dengue NS1 Ag Rapid Test 25T,A,IVD reagents & rapid tests,QTS,Kit,95,Yes,2025-11-22

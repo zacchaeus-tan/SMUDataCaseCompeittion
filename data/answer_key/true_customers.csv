@@ -1,0 +1,206 @@
+true_customer_id,canonical_name,country,segment,products_bought,pattern,cross_sell_gap
+T001,National University Hospital,SG,Hospital,A+B+C,,
+T002,Clementi Golden Hospital,SG,Hospital,A+B+C,new customer from 2026-03,
+T003,Woodlands Heart Hospital,SG,Hospital,B+C,,B not A
+T004,Toa Payoh Sunrise Hospital,SG,Hospital,A+C,,A not B
+T005,Clementi Northpoint Hospital,SG,Hospital,B,,B not A
+T006,Outram Medical Centre,SG,Hospital,A,,A not B
+T007,Bedok Green Valley Hospital,SG,Hospital,A,,A not B
+T008,Toa Payoh Northpoint Hospital,SG,Hospital,A+C,,A not B
+T009,Bukit Timah Riverside Hospital,SG,Hospital,A+B,,
+T010,Tampines Golden Hospital,SG,Hospital,A+B+C,,
+T011,Tampines Heart Hospital,SG,Hospital,A+B,,
+T012,Bukit Timah Eastern Hospital,SG,Hospital,A+C,true drop-off from 2026-04 to 30% of normal,A not B
+T013,Community Clinical Laboratory Pte Ltd,SG,Laboratory,B+C,,B not A
+T014,Jurong Medical Diagnostic Laboratory Pte Ltd,SG,Laboratory,A+B,,
+T015,Golden Pathology Laboratory Toa Payoh Pte Ltd,SG,Laboratory,A+B,,
+T016,Eastern Clinical Laboratory Pte Ltd,SG,Laboratory,A+C,true drop-off from 2026-03 to 0% of normal,A not B
+T017,Outram Mercy Diagnostic Laboratory Pte Ltd,SG,Laboratory,A,,A not B
+T018,Pacific Pathology Laboratory Jurong Pte Ltd,SG,Laboratory,A+B+C,new customer from 2026-02,
+T019,Sunrise Pathology Laboratory Bedok Pte Ltd,SG,Laboratory,A,,A not B
+T020,Northpoint Clinical Laboratory Pte Ltd,SG,Laboratory,A+B,,
+T021,Lakeside Pathology Laboratory Bukit Timah Pte Ltd,SG,Laboratory,A+B,,
+T022,Women's & Children's Clinical Laboratory Pte Ltd,SG,Laboratory,A+B,,
+T023,Lotus Pathology Laboratory Novena Pte Ltd,SG,Laboratory,A+B,,
+T024,Unity Pathology Laboratory Woodlands Pte Ltd,SG,Laboratory,A+B,,
+T025,Serangoon Hope Polyclinic Pte Ltd,SG,Clinic,A+B+C,,
+T026,Tampines Sunrise Polyclinic Pte Ltd,SG,Clinic,A,,A not B
+T027,Jurong Medical Polyclinic Pte Ltd,SG,Clinic,A+B,true drop-off from 2026-04 to 40% of normal,
+T028,Women's & Children's Family Clinic Jurong Pte Ltd,SG,Clinic,A+B,,
+T029,Lakeside Medical Clinic Yishun Pte Ltd,SG,Clinic,B,,B not A
+T030,Unity Medical Clinic Pasir Ris Pte Ltd,SG,Clinic,A+B,,
+T031,Eastern Family Clinic Woodlands Pte Ltd,SG,Clinic,A,,A not B
+T032,Sunrise Medical Clinic Clementi Pte Ltd,SG,Clinic,B,,B not A
+T033,Women's & Children's Medical Clinic Yishun Pte Ltd,SG,Clinic,A+B,,
+T034,Pasir Ris Lakeside Polyclinic Pte Ltd,SG,Clinic,B,,B not A
+T035,Community Family Clinic Tampines Pte Ltd,SG,Clinic,A+B,,
+T036,Serangoon Sunrise Polyclinic Pte Ltd,SG,Clinic,A,,A not B
+T037,Women's & Children's Family Clinic Serangoon Pte Ltd,SG,Clinic,A+B,,
+T038,Harmony Medical Clinic Novena Pte Ltd,SG,Clinic,A+B,,
+T039,Pasir Ris Specialist Polyclinic Pte Ltd,SG,Clinic,A+B,,
+T040,Outram Lakeside Polyclinic Pte Ltd,SG,Clinic,A+B,,
+T041,Melaka Unity Hospital,MY,Hospital,A+B+C,new customer from 2026-03,
+T042,Seremban Pacific Hospital,MY,Hospital,A+B+C,,
+T043,Shah Alam Riverside Hospital,MY,Hospital,A+B,,
+T044,Kota Kinabalu Pacific Hospital,MY,Hospital,A,,A not B
+T045,Kuching Mercy Hospital,MY,Hospital,A+B+C,,
+T046,Kota Kinabalu Green Valley Hospital,MY,Hospital,A+B+C,,
+T047,Petaling Jaya Heart Hospital,MY,Hospital,A+B,,
+T048,Johor Bahru Community Hospital,MY,Hospital,A+B+C,,
+T049,Seremban Northpoint Hospital,MY,Hospital,B,,B not A
+T050,Shah Alam Hope Hospital,MY,Hospital,A+B+C,,
+T051,Shah Alam Community Hospital,MY,Hospital,A+B+C,,
+T052,Ipoh Heart Hospital,MY,Hospital,A,,A not B
+T053,Shah Alam St. Mary's Hospital,MY,Hospital,A+B+C,,
+T054,Melaka Medical Centre,MY,Hospital,B+C,,B not A
+T055,Penang Medical Diagnostic Laboratory Sdn Bhd,MY,Laboratory,A+C,true drop-off from 2026-05 to 0% of normal,A not B
+T056,Seremban Northpoint Diagnostic Laboratory Sdn Bhd,MY,Laboratory,A,,A not B
+T057,Community Pathology Laboratory Kuching Sdn Bhd,MY,Laboratory,A+B,,
+T058,Specialist Pathology Laboratory Melaka Sdn Bhd,MY,Laboratory,B,,B not A
+T059,Lakeside Clinical Laboratory Sdn Bhd,MY,Laboratory,A+B,,
+T060,Penang Eastern Diagnostic Laboratory Sdn Bhd,MY,Laboratory,A,,A not B
+T061,Sunrise Clinical Laboratory Sdn Bhd,MY,Laboratory,B+C,new customer from 2025-08,B not A
+T062,Seremban Women's & Children's Diagnostic Laboratory Sdn Bhd,MY,Laboratory,B,,B not A
+T063,Kuching Pacific Diagnostic Laboratory Sdn Bhd,MY,Laboratory,A+B+C,,
+T064,Golden Pathology Laboratory Kuching Sdn Bhd,MY,Laboratory,A,,A not B
+T065,Medical Clinical Laboratory Sdn Bhd,MY,Laboratory,A+B,,
+T066,Golden Clinical Laboratory Sdn Bhd,MY,Laboratory,B+C,,B not A
+T067,Ipoh Central Diagnostic Laboratory Sdn Bhd,MY,Laboratory,A+B,,
+T068,Kuala Lumpur Pacific Diagnostic Laboratory Sdn Bhd,MY,Laboratory,A+B,,
+T069,Seremban Pacific Polyclinic Sdn Bhd,MY,Clinic,A+B,,
+T070,Melaka Unity Polyclinic Sdn Bhd,MY,Clinic,A+B,new customer from 2025-08,
+T071,Lakeside Medical Clinic Kuala Lumpur Sdn Bhd,MY,Clinic,A,,A not B
+T072,Harmony Medical Clinic Ipoh Sdn Bhd,MY,Clinic,A,,A not B
+T073,Harmony Family Clinic Petaling Jaya Sdn Bhd,MY,Clinic,A+C,,A not B
+T074,Heart Medical Clinic Ipoh Sdn Bhd,MY,Clinic,B,,B not A
+T075,Lakeside Family Clinic Melaka Sdn Bhd,MY,Clinic,A+B,,
+T076,Women's & Children's Medical Clinic Seremban Sdn Bhd,MY,Clinic,A+B,new customer from 2025-09,
+T077,Harmony Medical Clinic Petaling Jaya Sdn Bhd,MY,Clinic,B,,B not A
+T078,Penang Central Polyclinic Sdn Bhd,MY,Clinic,A+B,,
+T079,Central Family Clinic Seremban Sdn Bhd,MY,Clinic,B,,B not A
+T080,Petaling Jaya Central Polyclinic Sdn Bhd,MY,Clinic,A,,A not B
+T081,Community Medical Clinic Johor Bahru Sdn Bhd,MY,Clinic,A+B,true drop-off from 2026-02 to 20% of normal,
+T082,Golden Family Clinic Petaling Jaya Sdn Bhd,MY,Clinic,A+B,,
+T083,Ipoh Riverside Polyclinic Sdn Bhd,MY,Clinic,A+B,,
+T084,Sunrise Family Clinic Kuala Lumpur Sdn Bhd,MY,Clinic,A,,A not B
+T085,Pacific Medical Clinic Melaka Sdn Bhd,MY,Clinic,A+B,,
+T086,Phuket Medical Centre,TH,Hospital,A,,A not B
+T087,Hat Yai General Hospital,TH,Hospital,A+B+C,new customer from 2025-08,
+T088,Hat Yai Hope Hospital,TH,Hospital,A,,A not B
+T089,Udon Thani Pacific Hospital,TH,Hospital,A+B,,
+T090,Udon Thani Green Valley Hospital,TH,Hospital,A+B,,
+T091,Nonthaburi Mercy Hospital,TH,Hospital,A+B,,
+T092,Udon Thani Family Hospital,TH,Hospital,C,,
+T093,Nonthaburi Eastern Hospital,TH,Hospital,B,true drop-off from 2026-01 to 30% of normal,B not A
+T094,Bangkok Hope Hospital,TH,Hospital,A+B+C,new customer from 2025-07,
+T095,Chiang Mai Riverside Hospital,TH,Hospital,A+B,,
+T096,Khon Kaen Harmony Hospital,TH,Hospital,B,,B not A
+T097,Hat Yai Eastern Hospital,TH,Hospital,A+B+C,,
+T098,"Lotus Clinical Laboratory Co., Ltd.",TH,Laboratory,A,,A not B
+T099,"Chiang Mai St. Mary's Diagnostic Laboratory Co., Ltd.",TH,Laboratory,A+B,true drop-off from 2026-02 to 30% of normal,
+T100,"Mercy Pathology Laboratory Udon Thani Co., Ltd.",TH,Laboratory,A,,A not B
+T101,"Udon Thani Harmony Diagnostic Laboratory Co., Ltd.",TH,Laboratory,A,,A not B
+T102,"Bangkok St. Mary's Diagnostic Laboratory Co., Ltd.",TH,Laboratory,A+B+C,true drop-off from 2026-03 to 10% of normal,
+T103,"Sunrise Clinical Laboratory Co., Ltd.",TH,Laboratory,A+B+C,,
+T104,"Hope Clinical Laboratory Co., Ltd.",TH,Laboratory,A+B,,
+T105,"Udon Thani General Diagnostic Laboratory Co., Ltd.",TH,Laboratory,A,,A not B
+T106,"Pattaya Heart Diagnostic Laboratory Co., Ltd.",TH,Laboratory,A,,A not B
+T107,"Golden Clinical Laboratory Co., Ltd.",TH,Laboratory,A+B+C,,
+T108,"Phuket Lotus Diagnostic Laboratory Co., Ltd.",TH,Laboratory,A+B+C,,
+T109,"Bangkok Family Diagnostic Laboratory Co., Ltd.",TH,Laboratory,A,,A not B
+T110,"Khon Kaen Unity Polyclinic Co., Ltd.",TH,Clinic,A+C,true drop-off from 2026-04 to 20% of normal,A not B
+T111,"Women's & Children's Medical Clinic Phuket Co., Ltd.",TH,Clinic,A+B,,
+T112,"Phuket Harmony Polyclinic Co., Ltd.",TH,Clinic,A,true drop-off from 2026-03 to 20% of normal,A not B
+T113,"Khon Kaen Riverside Polyclinic Co., Ltd.",TH,Clinic,A+B,,
+T114,"Udon Thani Specialist Polyclinic Co., Ltd.",TH,Clinic,A,new customer from 2025-11,A not B
+T115,"Mercy Medical Clinic Khon Kaen Co., Ltd.",TH,Clinic,B,,B not A
+T116,"Udon Thani Hope Polyclinic Co., Ltd.",TH,Clinic,A,,A not B
+T117,"General Family Clinic Udon Thani Co., Ltd.",TH,Clinic,A,,A not B
+T118,"Mercy Family Clinic Chiang Mai Co., Ltd.",TH,Clinic,A,,A not B
+T119,"Nonthaburi Family Polyclinic Co., Ltd.",TH,Clinic,A+B,,
+T120,"General Family Clinic Chiang Mai Co., Ltd.",TH,Clinic,A,,A not B
+T121,"Hat Yai Women's & Children's Polyclinic Co., Ltd.",TH,Clinic,A+B,,
+T122,"Heart Family Clinic Nonthaburi Co., Ltd.",TH,Clinic,A,,A not B
+T123,"Northpoint Medical Clinic Nonthaburi Co., Ltd.",TH,Clinic,A+B,,
+T124,"Pattaya General Polyclinic Co., Ltd.",TH,Clinic,A,,A not B
+T125,"Pacific Family Clinic Chiang Mai Co., Ltd.",TH,Clinic,A+B,new customer from 2025-10,
+T126,Rumah Sakit Lakeside Makassar,ID,Hospital,A,,A not B
+T127,Rumah Sakit Medical Yogyakarta,ID,Hospital,A+B+C,true drop-off from 2026-01 to 0% of normal,
+T128,Rumah Sakit Pacific Makassar,ID,Hospital,A,,A not B
+T129,Rumah Sakit Central Bandung,ID,Hospital,A+B,,
+T130,Rumah Sakit General Medan,ID,Hospital,B,,B not A
+T131,Rumah Sakit Pacific Denpasar,ID,Hospital,A+B+C,,
+T132,Rumah Sakit Sunrise Jakarta,ID,Hospital,A,,A not B
+T133,Rumah Sakit Harmony Makassar,ID,Hospital,A+B+C,true drop-off from 2026-03 to 20% of normal,
+T134,Rumah Sakit Green Valley Yogyakarta,ID,Hospital,A+B,,
+T135,Rumah Sakit Heart Medan,ID,Hospital,A+B,,
+T136,Rumah Sakit Sunrise Surabaya,ID,Hospital,A+C,,A not B
+T137,Rumah Sakit Lotus Yogyakarta,ID,Hospital,A+C,new customer from 2025-11,A not B
+T138,Rumah Sakit Lotus Medan,ID,Hospital,C,,
+T139,Rumah Sakit Sunrise Bandung,ID,Hospital,A+B,,
+T140,PT General Clinical Laboratory,ID,Laboratory,A+B+C,,
+T141,PT Bandung Unity Diagnostic Laboratory,ID,Laboratory,A,,A not B
+T142,PT Mercy Clinical Laboratory,ID,Laboratory,A+B,new customer from 2025-07,
+T143,PT Jakarta Central Diagnostic Laboratory,ID,Laboratory,B+C,,B not A
+T144,PT Makassar Unity Diagnostic Laboratory,ID,Laboratory,A,,A not B
+T145,PT Specialist Pathology Laboratory Makassar,ID,Laboratory,A+B,true drop-off from 2026-04 to 40% of normal,
+T146,PT Denpasar Specialist Diagnostic Laboratory,ID,Laboratory,A+B+C,,
+T147,PT Riverside Clinical Laboratory,ID,Laboratory,A+B+C,,
+T148,PT Medan Harmony Diagnostic Laboratory,ID,Laboratory,A,,A not B
+T149,PT Green Valley Pathology Laboratory Yogyakarta,ID,Laboratory,A+B,true drop-off from 2026-04 to 0% of normal,
+T150,PT Golden Pathology Laboratory Bandung,ID,Laboratory,A,,A not B
+T151,PT Medan St. Mary's Diagnostic Laboratory,ID,Laboratory,A+B,,
+T152,PT Lotus Pathology Laboratory Makassar,ID,Laboratory,A,,A not B
+T153,PT St. Mary's Clinical Laboratory,ID,Laboratory,A,,A not B
+T154,PT Medan Community Polyclinic,ID,Clinic,A+B+C,,
+T155,PT Northpoint Family Clinic Yogyakarta,ID,Clinic,A+B,,
+T156,PT Eastern Family Clinic Makassar,ID,Clinic,A+B,,
+T157,PT Medical Clinic Bandung,ID,Clinic,A,,A not B
+T158,PT General Family Clinic Bandung,ID,Clinic,A+B,,
+T159,PT Heart Medical Clinic Semarang,ID,Clinic,A+B,new customer from 2026-03,
+T160,PT Medan Sunrise Polyclinic,ID,Clinic,A+C,,A not B
+T161,PT Heart Medical Clinic Medan,ID,Clinic,A+B,,
+T162,PT Women's & Children's Family Clinic Surabaya,ID,Clinic,A,,A not B
+T163,PT Sunrise Medical Clinic Yogyakarta,ID,Clinic,A+B,,
+T164,PT Lotus Family Clinic Jakarta,ID,Clinic,A,,A not B
+T165,PT Unity Family Clinic Semarang,ID,Clinic,A+B,,
+T166,PT Lotus Medical Clinic Makassar,ID,Clinic,A,,A not B
+T167,PT Specialist Medical Clinic Jakarta,ID,Clinic,A+B,,
+T168,PT St. Mary's Family Clinic Medan,ID,Clinic,A+C,,A not B
+T169,PT Mercy Medical Clinic Bandung,ID,Clinic,A+B,,
+T170,PT Mercy Medical Clinic Yogyakarta,ID,Clinic,A,,A not B
+T171,Da Nang Medical Centre,VN,Hospital,A+C,,A not B
+T172,Nha Trang Harmony Hospital,VN,Hospital,A+C,,A not B
+T173,Ho Chi Minh City Riverside Hospital,VN,Hospital,A+B+C,,
+T174,Hue Sunrise Hospital,VN,Hospital,A,,A not B
+T175,Ho Chi Minh City Specialist Hospital,VN,Hospital,B+C,,B not A
+T176,Hai Phong Heart Hospital,VN,Hospital,A+C,,A not B
+T177,Can Tho Lotus Hospital,VN,Hospital,A+C,,A not B
+T178,Ho Chi Minh City Family Hospital,VN,Hospital,A+C,,A not B
+T179,Nha Trang Family Hospital,VN,Hospital,A+C,,A not B
+T180,Hue Pacific Hospital,VN,Hospital,A+B,true drop-off from 2026-02 to 0% of normal,
+T181,"Hope Pathology Laboratory Ho Chi Minh City Co., Ltd",VN,Laboratory,A,true drop-off from 2026-02 to 30% of normal,A not B
+T182,"Golden Clinical Laboratory Co., Ltd",VN,Laboratory,A+B+C,true drop-off from 2026-03 to 30% of normal,
+T183,"Nha Trang Hope Diagnostic Laboratory Co., Ltd",VN,Laboratory,A+C,,A not B
+T184,"Harmony Pathology Laboratory Hanoi Co., Ltd",VN,Laboratory,A,,A not B
+T185,"Mercy Pathology Laboratory Hue Co., Ltd",VN,Laboratory,A+B+C,,
+T186,"Can Tho Golden Diagnostic Laboratory Co., Ltd",VN,Laboratory,A,,A not B
+T187,"Ho Chi Minh City Central Diagnostic Laboratory Co., Ltd",VN,Laboratory,A+B+C,true drop-off from 2026-04 to 10% of normal,
+T188,"Unity Clinical Laboratory Co., Ltd",VN,Laboratory,A+B,,
+T189,"Hai Phong Lakeside Diagnostic Laboratory Co., Ltd",VN,Laboratory,A+B,,
+T190,"Can Tho Heart Diagnostic Laboratory Co., Ltd",VN,Laboratory,B,new customer from 2025-10,B not A
+T191,"Lakeside Medical Clinic Da Nang Co., Ltd",VN,Clinic,A+B,,
+T192,"Green Valley Medical Clinic Da Nang Co., Ltd",VN,Clinic,A+B,,
+T193,"Nha Trang Northpoint Polyclinic Co., Ltd",VN,Clinic,A+B,true drop-off from 2026-02 to 0% of normal,
+T194,"Can Tho Women's & Children's Polyclinic Co., Ltd",VN,Clinic,A+B,,
+T195,"Medical Clinic Nha Trang Co., Ltd",VN,Clinic,A,,A not B
+T196,"Da Nang Specialist Polyclinic Co., Ltd",VN,Clinic,A+C,,A not B
+T197,"Central Family Clinic Ho Chi Minh City Co., Ltd",VN,Clinic,A+B+C,new customer from 2025-08,
+T198,"Pacific Medical Clinic Hue Co., Ltd",VN,Clinic,A+B,,
+T199,"Specialist Medical Clinic Hai Phong Co., Ltd",VN,Clinic,A,,A not B
+T200,"Harmony Medical Clinic Da Nang Co., Ltd",VN,Clinic,A+B,,
+T201,"Da Nang Unity Polyclinic Co., Ltd",VN,Clinic,A,new customer from 2025-12,A not B
+T202,"Women's & Children's Medical Clinic Nha Trang Co., Ltd",VN,Clinic,A,,A not B
+T203,"Riverside Medical Clinic Can Tho Co., Ltd",VN,Clinic,A,,A not B
+T204,"Ho Chi Minh City Golden Polyclinic Co., Ltd",VN,Clinic,A,,A not B
+T205,"Harmony Medical Clinic Hue Co., Ltd",VN,Clinic,B,,B not A
