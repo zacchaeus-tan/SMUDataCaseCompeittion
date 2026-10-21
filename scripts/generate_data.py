@@ -873,7 +873,7 @@ FIELDS = [
     ("Item", "RegulatoryLicenceNo", "Regulatory licence no.", "Text", "Conditional", "IsRegulated", "Yes", "No", "All", "HSA / MDA / Thai FDA / BPOM / DAV"),
     ("Item", "ShelfLifeMonths", "Shelf life (months)", "Number", "Conditional", "ProductFamily", "A", "No", "All", "Reagents only"),
     ("Vendor", "VendorName", "Vendor legal name", "Text", "Always", "", "", "No", "All", ""),
-    ("Vendor", "Country", "Country", "Text", "Always", "", "", "No", "All", ""),
+    ("Vendor", "Country", "Vendor country", "Text", "Always", "", "", "No", "All", ""),
     ("Vendor", "TaxID", "Tax ID", "Text", "Always", "", "", "No", "All", ""),
     ("Vendor", "SuppliesRegulatedGoods", "Supplies regulated goods?", "Yes/No", "Always", "", "", "No", "All", "Adds Quality/Regulatory approval if Yes"),
     ("Vendor", "ISO13485CertNo", "ISO 13485 certificate no.", "Text", "Conditional", "SuppliesRegulatedGoods", "Yes", "No", "All", ""),

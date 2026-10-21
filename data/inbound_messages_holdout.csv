@@ -1,0 +1,26 @@
+message_id,subject,body,attachment_name,from_address
+HOLD-01,Same as last month pls,"Hi Jason, pls send the same qty as last month for the dengue kits. Thx",,store@lakesidelab.example
+HOLD-02,urgent!!,"need 5 boxes troponin tmrw latest, can?",,ward7@northpointhospital.example
+HOLD-03,FW: PR approved,Our PR has been approved internally. Official PO will follow next week.,,procurement@harmonyclinic.example
+HOLD-04,Order,"Dear team, kindly refer to the attached for this month's requirement.",Requirement_Sept.xlsx,purchasing@pacificlab.example
+HOLD-05,Re: Re: Re: tips,"ok noted, then go ahead with the 200ul ones. 20 boxes",,lab@unitydiagnostic.example
+HOLD-06,Tender 2026/27,We are inviting suppliers to submit bids for our 2026/27 consumables tender. Closing date 30 Nov.,Tender_Docs.pdf,tender@centralhospital.example
+HOLD-07,CRP kits,Do you still carry the 100T CRP kit or was it discontinued?,,pathology@goldenlab.example
+HOLD-08,Short shipment,We only received 8 of the 10 kits on our last order. Please advise.,,store@riversidehospital.example
+HOLD-09,Credit note?,When will the credit note for the damaged gloves be issued?,,accounts@familyclinic.example
+HOLD-10,Cancel order,"Please cancel PO 41233, we ordered the wrong size.",,purchasing@mercyhospital.example
+HOLD-11,Hello,Please call me back regarding our account.,,director@eastclinic.example
+HOLD-12,New branch,We are opening a new branch in Johor Bahru next month. Please create an account for the new branch so we can order.,,admin@heartcentre.example
+HOLD-13,Change of PIC,Please note our new purchasing contact is Ms Lim from 1 Oct.,,hr@sunrisehospital.example
+HOLD-14,Bank details changed,Kindly update our bank account for payments as per attached letter.,Bank_Letter.pdf,finance@helixdiag.example
+HOLD-15,Pesanan bulan ini,Mohon kirim 30 kotak sarung tangan ukuran M.,,gudang@rsharmony.example
+HOLD-16,Hỏi giá,Cho tôi hỏi giá máy ly tâm 24 vị trí?,,phongxetnghiem@benhvienlotus.example
+HOLD-17,สั่งซื้อ,ต้องการสั่งชุดตรวจไข้เลือดออก 40 กล่อง,,lab@chiangmaihospital.example
+HOLD-18,Demo request,Could your specialist come by to demo the POC analyser next week?,,lab@greenvalley.example
+HOLD-19,Re: PO 41877,"Thanks, received in good order.",,store@stmaryshospital.example
+HOLD-20,Reorder,"- 12 x HbA1c Reagent Cartridge (10 tests)
+- 6 x CRP Reagent Kit (100 tests)",,lab@hopeclinic.example
+HOLD-21,Price increase?,We heard prices will go up in January. Can we lock in our order for Q1 at current prices?,,procurement@pacifichospital.example
+HOLD-22,Expiry,"The kits we received expire in 2 months, is that normal?",,lab@communitylab.example
+HOLD-23,Item code request,"Hi MDM, pls create code for the new 50T dengue kit, launching next month.",,amy.tan@livesgroup.example
+HOLD-24,Quotation accepted,We accept your quotation Q-25881. Please proceed.,,purchasing@lotushospital.example
