@@ -59,6 +59,8 @@ def growth():
             "customers_now": st.column_config.NumberColumn("Customers"),
         })
 
+    _growth_map(g)
+
     st.markdown("##### Monthly units")
     prod = st.radio("Product", list(PRODUCTS), horizontal=True, format_func=lambda p: c.PRODUCT_LABEL[p])
     mm = c.regional()["monthly"].query("product == @prod")
@@ -79,6 +81,44 @@ def growth():
         f"It is a **retention** problem, not a demand problem → see *Sales actions*.\n"
         f"- **Singapore is mature** (single-digit growth, equipment declining) — growth there comes from cross-selling "
         f"into existing accounts rather than new ones.")
+
+
+ISO3 = {"SG": "SGP", "MY": "MYS", "TH": "THA", "ID": "IDN", "VN": "VNM"}
+CAPITAL = {"SG": (1.35, 103.82), "MY": (3.14, 101.69), "TH": (13.76, 100.50), "ID": (-6.21, 106.85),
+           "VN": (21.03, 105.85)}
+LABEL_POS = {"SG": "middle right", "MY": "middle left", "TH": "middle left", "ID": "bottom center",
+             "VN": "middle right"}  # KL and Singapore sit close together: push their labels apart
+
+
+def _growth_map(g):
+    st.markdown("##### Regional map")
+    pick = st.radio("Show", ["All products", *PRODUCTS], horizontal=True, key="map_product",
+                    format_func=lambda p: p if p == "All products" else c.PRODUCT_LABEL[p])
+    d = g if pick == "All products" else g[g["product"] == pick]
+    m = d.groupby("country")[["units_now", "units_prev", "value_now"]].sum().reindex(c.COUNTRY_ORDER).reset_index()
+    m["growth"] = m.units_now / m.units_prev - 1
+    m["iso"], m["name"] = m.country.map(ISO3), m.country.map(COUNTRIES)
+    m["lat"], m["lon"] = zip(*m.country.map(CAPITAL))
+    m["label"] = m.country + " " + m.growth.map(lambda x: f"{x:+.0%}")
+    hover = "<b>%{customdata[0]}</b><br>Units Apr–Sep 2026: %{customdata[1]:,.0f}<br>YoY: %{customdata[2]:+.1%}" \
+            "<br>Value: S$%{customdata[3]:,.0f}<extra></extra>"
+    custom = m[["name", "units_now", "growth", "value_now"]].values
+    fig = go.Figure()
+    fig.add_choropleth(locations=m.iso, z=m.growth, colorscale="RdYlGn", zmin=-0.3, zmax=0.3, customdata=custom,
+                       hovertemplate=hover, marker_line_color="white", colorbar=dict(title="YoY", tickformat="+.0%"))
+    # bubbles sized by volume; they also keep Singapore visible, which is too small to see as a filled shape
+    fig.add_scattergeo(lat=m.lat, lon=m.lon, text=m.label, mode="markers+text",
+                       textposition=list(m.country.map(LABEL_POS)),
+                       marker=dict(size=10 + 30 * m.units_now / m.units_now.max(), color="rgba(40,40,40,0.35)",
+                                   line=dict(color="white", width=1)),
+                       textfont=dict(size=13, color="#222"), customdata=custom, hovertemplate=hover,
+                       showlegend=False)
+    fig.update_geos(projection_type="mercator", lataxis_range=[-11, 24], lonaxis_range=[92, 128],
+                    showcountries=True, countrycolor="#bbb", showland=True, landcolor="#f2f2f2",
+                    showocean=True, oceancolor="#e8f0f8", showframe=False)
+    fig.update_layout(height=430, margin=dict(l=0, r=0, t=10, b=0))
+    st.plotly_chart(fig, width="stretch")
+    st.caption("Colour = year-on-year unit growth (same six months). Bubble size = units ordered Apr–Sep 2026.")
 
 
 # --------------------------------------------------------------------------- forecasting
@@ -404,3 +444,71 @@ def business_case():
     c.assumption("sales-driven lines are counted at gross margin, not order value; rates, hours, margin and "
                  "conversion are placeholders to agree with Lives Group. Staff time alone does NOT pay back the build — "
                  "the case rests on accounts going live faster and on sales acting on the signals clean data unlocks.")
+    _roadmap(dev_weeks, da_weeks)
+
+
+ROADMAP = [
+    ("Phase 1 · Fix the front door", "Weeks 1–10",
+     ["Power Apps form with required fields and live duplicate check",
+      "Parallel approvals in Teams, reminders, escalation, live status",
+      "Restricted list for bank details and credit terms; audit log",
+      "Rule lists the MDM team edits (business units, fields, approvers)",
+      "SAP B1 import file, so Priya stops retyping",
+      "One-off clean-up: merge the 41 duplicate customers, review queue for look-alikes",
+      "4-week pilot with SPD, then QTS and QTG"],
+     "Power Platform contractor ({dev} wks) · MDM team sets up rules and runs the pilot · IT: one-off site, "
+     "permissions and Teams setup",
+     "Median request → SAP ≤ 5 days in the pilot · ≥ 90% of requests via the form"),
+    ("Phase 2 · Use the clean data", "Months 3–6",
+     ["Regional view in Power BI inside Teams",
+      "Monthly forecast and stock plan replace the 6-month average spreadsheet",
+      "Drop-off and cross-sell lists to account managers each month",
+      "Email sorting: rules, then an AI prompt, then a person",
+      "Monthly AI action brief posted to the sales channel"],
+     "Data analyst ({da} wks) · IT enables AI Builder once · Sales ops owns the monthly review",
+     "Forecast beats the 6-month average 3 months running · top-10 drop-offs contacted within 2 weeks"),
+    ("Phase 3 · Connect and scale", "After month 6, only if Phase 1–2 targets are met",
+     ["Direct SAP B1 connection (Service Layer) replaces the import file",
+      "Form calls the full matching engine (typo-tolerant) through one Premium connector",
+      "Same duplicate clean-up for items and vendors",
+      "New data domains added as rule rows, e.g. price lists"],
+     "SAP B1 partner (outside help) · Premium licence for the connector",
+     "Request volume and error rate justify the integration cost"),
+]
+
+NOT_IN_V1 = [
+    ("Direct write into SAP B1", "The import file removes the retyping at almost no risk. A live integration needs an "
+                                 "SAP partner and testing, so it waits for Phase 3."),
+    ("Automatic merging of duplicates", "Merging touches open orders and invoices. The matcher proposes and a person "
+                                        "confirms, until it has a track record on real data."),
+    ("Custom-trained AI models", "12–18 months of history is too short to train well, and someone would have to "
+                                 "retrain them. Rules, a calendar-based forecast and an off-the-shelf AI prompt need "
+                                 "no upkeep."),
+    ("A custom web app or portal", "Power Apps, Power Automate and SharePoint are already licensed and the MDM team can "
+                                   "change them. A custom app needs developers Lives Group doesn't have."),
+    ("Premium connectors or Dataverse", "Standard licences keep cost and IT approval small. The one Premium connector "
+                                        "comes in Phase 3, if it is worth it."),
+    ("A full security redesign", "Bank details and credit terms move to a locked-down list with an audit trail. "
+                                 "Field-level encryption and role redesign can follow if audit asks."),
+    ("Monthly forecasts for Product C", "Equipment sells 30–50 units per country per half-year, too lumpy to forecast. "
+                                        "It is planned from the sales pipeline instead."),
+]
+
+
+def _roadmap(dev_weeks, da_weeks):
+    st.markdown("##### Roadmap · who builds what")
+    st.caption("Sized for a lean team: one contractor and one analyst, with the MDM team owning the rules. Each phase "
+               "starts only when the previous one hits its targets. The year-1 cost above covers Phases 1 and 2; "
+               "Phase 3 is priced with an SAP partner once Phase 1–2 results are in.")
+    for col, (title, when, items, who, gate) in zip(st.columns(3), ROADMAP):
+        with col.container(border=True):
+            st.markdown(f"**{title}**  \n*{when}*")
+            st.markdown("\n".join(f"- {i}" for i in items))
+            st.markdown(f"**Who:** {who.format(dev=dev_weeks, da=da_weeks)}")
+            st.markdown(f"**Move on when:** {gate}")
+    st.markdown("**Getting people off email (Phase 1):** the MDM mailbox auto-replies with a link to the form. After "
+                "a cut-over date, requests sent by email are not processed. The form sits as a tab in each team's "
+                "Teams channel. Each month, the share of requests that came through the form is reported to BU heads.")
+
+    st.markdown("##### Deliberately not in version 1")
+    st.table(pd.DataFrame(NOT_IN_V1, columns=["Not building", "Why not (yet)"]).set_index("Not building"))
