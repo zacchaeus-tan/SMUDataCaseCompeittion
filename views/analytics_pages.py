@@ -1,10 +1,12 @@
 """Regional business view: growth, forecasting, sales actions, inbound triage, data quality, business case."""
+import json
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from onerecord import classify, process
+from onerecord import advisor, classify, process
 from onerecord.config import COUNTRIES, CURRENT, PRIOR_YEAR, PRODUCTS
 
 from . import common as c
@@ -120,6 +122,10 @@ def forecasting():
                     line=dict(color="#aaa", dash="dot"))
     fig.add_scatter(x=one.month, y=one.calendar_model, name="Calendar model (back-test)", mode="lines+markers",
                     line=dict(color=COLORS[prod]))
+    fig.add_scatter(x=ahead.month, y=ahead.high, mode="lines", line=dict(width=0), showlegend=False,
+                    hoverinfo="skip")
+    fig.add_scatter(x=ahead.month, y=ahead.low, name="Likely range (8 in 10 months)", mode="lines",
+                    line=dict(width=0), fill="tonexty", fillcolor="rgba(120,120,120,0.18)")
     fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average · next 3 months", mode="lines",
                     line=dict(color="#aaa", dash="dash"))
     fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model · next 3 months", mode="lines+markers",
@@ -141,6 +147,60 @@ def forecasting():
         "next step: a country-specific effect once more history exists). Vietnam B is poor for both: lost "
         "accounts are a customer problem, handled by the drop-off alerts, not by a calendar. Product C is too "
         "lumpy to forecast monthly — plan it from the sales pipeline instead.")
+
+    st.markdown("##### Next quarter · what to stock")
+    plan = f["plan"]
+    st.caption("Forecast for Oct–Dec 2026 vs the last three months. The range comes from how far actual orders "
+               "landed from the model in the back-test (8 in 10 months fell inside it). Series the model "
+               "forecast poorly are flagged rather than acted on.")
+    st.dataframe(plan, hide_index=True, width="stretch", column_config={
+        "last_3_months": st.column_config.NumberColumn("Last 3 mo", format="%d"),
+        "next_3_months": st.column_config.NumberColumn("Forecast", format="%d"),
+        "low": st.column_config.NumberColumn("Low", format="%d"),
+        "high": st.column_config.NumberColumn("High", format="%d"),
+        "change": st.column_config.NumberColumn("Change", format="percent"),
+        "backtest_error": st.column_config.NumberColumn("Back-test error", format="percent"),
+        "drivers": st.column_config.TextColumn("Calendar drivers"),
+        "action": st.column_config.TextColumn("Recommended action", width="large")})
+    _ai_brief(plan)
+
+
+def _ai_brief(plan):
+    st.markdown("##### 🤖 AI action brief · Phase 2")
+    st.caption("**Planned for Phase 2, once the workflow is live.** A monthly Power Automate flow sends the summary "
+               "numbers on these pages (growth, the stock plan above, drop-offs, cross-sell) to an AI prompt "
+               "(AI Builder) and posts the five actions worth doing first, with the numbers behind them, to the "
+               "regional sales channel in Teams. No API key to manage and no model to train: IT enables AI Builder "
+               "once, and the MDM team edits the prompt text. This prototype runs the same prompt to preview the output.")
+    reg = c.regional()
+    data = advisor.facts(reg["growth"], plan, reg["compare"]["clean_drop"], reg["compare"]["clean_xsell"])
+    focus = st.text_input("Focus (optional)", placeholder="e.g. Vietnam, or year-end budget flush",
+                          key="ai_focus")
+    if not classify.ai_available():
+        st.info("Preview not configured on this machine (set ANTHROPIC_API_KEY to run it). The rule-based stock "
+                "plan above works without it.")
+    elif st.button("Preview the AI action brief", type="primary"):
+        st.session_state["ai_brief"] = c.ai_brief(json.dumps(data), focus)
+    res = st.session_state.get("ai_brief")
+    if res:
+        brief, err = res
+        if err:
+            c.ai_brief.clear()  # don't keep a failed call cached; the button retries
+            st.warning(f"{err}. Showing the rule-based plan only.")
+        else:
+            st.success(f"**{brief['headline']}**")
+            for i, a in enumerate(brief["actions"], 1):
+                with st.container(border=True):
+                    st.markdown(f"**{i}. {a['title']}**  \n"
+                                f"`{a['country']}` · Product `{a['product']}` · Owner: **{a['owner']}** · "
+                                f"Confidence: {a['confidence']}")
+                    st.markdown(f"**First step:** {a['first_step']}  \n**Evidence:** {a['evidence']}  \n"
+                                f"**Expected impact:** {a['expected_impact']}")
+            c.assumption("AI suggestions are a starting point for the monthly sales meeting, not decisions. "
+                         "Every figure it cites is in the data below, so it can be checked. Preview generated "
+                         "with Claude; production runs the same prompt in Power Automate.")
+    with st.expander("Exactly what the AI sees (no customer master data, no raw orders)"):
+        st.json(data, expanded=False)
 
 
 # --------------------------------------------------------------------------- actions

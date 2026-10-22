@@ -120,5 +120,56 @@ def forecast_ahead(Y: pd.DataFrame, n=3) -> pd.DataFrame:
         ma6 = moving_average(Y.iloc[si].values)
         for k in range(1, n + 1):
             ym = add_months(last, k)
-            rows.append(dict(country=cc, product=p, month=ym, baseline_ma6=ma6, calendar_model=predict(si, ym)))
+            rows.append(dict(country=cc, product=p, month=ym, horizon=k, baseline_ma6=ma6,
+                             calendar_model=predict(si, ym)))
     return pd.DataFrame(rows), effects
+
+
+# --------------------------------------------------------------------------- range + stock plan
+def error_bands(bt: pd.DataFrame, lo=0.1, hi=0.9) -> pd.DataFrame:
+    """How far actuals landed from the model in the back-test, per product x horizon (actual / forecast).
+    Applying these ratios to a new forecast gives an honest low / high range: 8 in 10 months fell inside."""
+    r = bt.assign(ratio=bt.actual / bt.calendar_model)
+    return r.groupby(["product", "horizon"]).ratio.quantile([lo, hi]).unstack().set_axis(["low", "high"], axis=1)
+
+
+def with_range(ahead: pd.DataFrame, bands: pd.DataFrame) -> pd.DataFrame:
+    out = ahead.join(bands, on=["product", "horizon"])
+    out["low"], out["high"] = out.calendar_model * out.low, out.calendar_model * out.high
+    return out
+
+
+def drivers(cc, product, months) -> list:
+    """Calendar events active in the forecast window, in plain words."""
+    hit = set()
+    for ym in months:
+        hit |= {n for n, on in zip(EVENT_NAMES, _events(cc, product, ym)) if on}
+    return [n for n in EVENT_NAMES if n in hit]
+
+
+def stock_plan(Y: pd.DataFrame, ahead: pd.DataFrame, acc: pd.DataFrame, change_band=0.10,
+               max_error=0.15) -> pd.DataFrame:
+    """Next quarter vs the last quarter, per country x product, turned into a stocking action.
+    A series the model forecast poorly in the back-test is flagged instead of acted on."""
+    last3 = Y.iloc[:, -3:].sum(axis=1)
+    err = acc.set_index(["country", "product"])["Model error"]
+    rows = []
+    for (cc, p), g in ahead.groupby(["country", "product"]):
+        fc, hi = g.calendar_model.sum(), g.high.sum()
+        change = fc / last3[(cc, p)] - 1 if last3[(cc, p)] else 0.0
+        why = drivers(cc, p, g.month)
+        if p == "C":
+            action = "Too lumpy to stock by forecast: plan equipment from the sales pipeline"
+        elif err[(cc, p)] > max_error:
+            action = (f"Low confidence (back-test error {err[(cc, p)]:.0%}): confirm with account managers "
+                      f"before stocking; check the drop-off list")
+        elif change >= change_band:
+            action = f"Build stock: cover the high case ({hi:,.0f} units) before {g.month.min()}"
+        elif change <= -change_band:
+            action = "Trim replenishment to the forecast; avoid expiry on short-life reagents"
+        else:
+            action = "Hold the current run-rate"
+        rows.append(dict(country=cc, product=p, last_3_months=int(last3[(cc, p)]), next_3_months=round(fc),
+                         low=round(g.low.sum()), high=round(hi), change=change, backtest_error=err[(cc, p)],
+                         drivers=", ".join(why) or "none", action=action))
+    return pd.DataFrame(rows)

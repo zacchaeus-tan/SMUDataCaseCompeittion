@@ -41,10 +41,12 @@ def render():
     st.markdown("##### Prototype ↔ Microsoft 365")
     st.table({
         "This prototype": ["New request form", "Approvals (cards)", "Reminders / escalation", "Rules, roles, log",
-                           "SAP import file", "Regional business view", "Email triage AI step"],
+                           "SAP import file", "Regional business view", "Email triage AI step",
+                           "AI action brief (Phase 2)"],
         "Production build": ["Power Apps canvas app in a Teams tab", "Power Automate approvals in Teams/Outlook",
                              "Scheduled Power Automate flow", "SharePoint lists (standard licence)",
                              "Power Automate 'Create CSV table' → SAP DTW", "Power BI in a Teams tab",
-                             "Power Automate AI prompt (AI Builder)"],
+                             "Power Automate AI prompt (AI Builder)",
+                             "Monthly Power Automate flow + AI prompt → Teams sales channel"],
     })
     st.caption("All data is synthetic (no client data was provided). See data/README.md for what was planted and why.")

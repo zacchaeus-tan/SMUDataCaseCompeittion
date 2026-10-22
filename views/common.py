@@ -2,7 +2,7 @@
 import pandas as pd
 import streamlit as st
 
-from onerecord import classify, dedup, forecast, insights, process, workflow
+from onerecord import advisor, classify, dedup, forecast, insights, process, workflow
 from onerecord.config import COUNTRIES, DATA, KEY, PRODUCTS
 
 COUNTRY_ORDER = list(COUNTRIES)
@@ -44,8 +44,18 @@ def regional():
 def forecasts():
     Y = forecast.series(regional()["clean"])
     bt = forecast.backtest(Y)
+    acc = forecast.accuracy_table(bt)
     ahead, effects = forecast.forecast_ahead(Y)
-    return dict(Y=Y, backtest=bt, accuracy=forecast.accuracy_table(bt), ahead=ahead, effects=effects)
+    ahead = forecast.with_range(ahead, forecast.error_bands(bt))
+    return dict(Y=Y, backtest=bt, accuracy=acc, ahead=ahead, effects=effects,
+                plan=forecast.stock_plan(Y, ahead, acc))
+
+
+@st.cache_data(show_spinner="Claude is reading the regional numbers…")
+def ai_brief(facts_json: str, focus: str):
+    """Cached on the exact facts + focus, so reruns of the page don't call the API again."""
+    import json
+    return advisor.recommend(json.loads(facts_json), focus)
 
 
 @st.cache_data(show_spinner="Sorting inbound emails…")
