@@ -2,66 +2,19 @@
 "OneRecord - Route and approve" flow described in sharepoint/LISTS.md.
 
 Usage: python3 powerautomate/build_route_approve.py   ->  powerautomate/OneRecord-RouteAndApprove.zip
+Each approval also writes an "Assigned" row to ApprovalLog, which build_reminders.py relies on.
 """
-import json
-import uuid
-import zipfile
 from pathlib import Path
+
+from pkg import LISTS, LOG, REQ, ROLE, RULE, SENS, SITE, after, definition, log_row, sp, teams_chat, write_package
 
 OUT = Path(__file__).with_name("OneRecord-RouteAndApprove.zip")
 NAME = "OneRecord - Route and approve"
-SITE = "https://smu.sharepoint.com/teams/DataCaseCompetition2026"
-LISTS = {  # list GUIDs on the team site
-    "Requests": "016ebf84-d2d7-4fdc-a51a-8f43c1235b93",
-    "SensitiveDetails": "a11b50e7-c929-4440-a0cf-95c32238d6bd",
-    "RoutingRules": "b547dfe1-fea2-4297-b06b-87fdcd985c53",
-    "Roles": "ddcffdf3-071e-4c53-a7a1-602cbe86ad9e",
-    "ApprovalLog": "0420543c-3d28-47c5-9218-2e31486b0932",
-}
-# SharePoint internal column names (lists were created from CSV, so columns are field_1..n in CSV order)
-REQ = {"RequestType": "field_1", "Entity": "field_2", "Country": "field_3", "Requestor": "field_4",
-       "Status": "field_5", "CurrentStage": "field_6", "CompletedAt": "field_8", "CustomerName": "field_9",
-       "RegistrationNo": "field_10", "BillingAddress": "field_11", "ContactEmail": "ContactEmail",
-       "Segment": "field_13", "ItemDescription": "field_14", "ProductFamily": "field_15",
-       "UnitOfMeasure": "field_16", "HSCode": "field_17", "IsRegulated": "field_18",
-       "RegulatoryLicenceNo": "field_19", "ShelfLifeMonths": "field_20", "VendorName": "field_21",
-       "TaxID": "field_22", "SuppliesRegulatedGoods": "field_23", "ISO13485CertNo": "field_24",
-       "CostCenterName": "field_25", "Department": "field_26", "Owner": "field_27", "BudgetYear": "field_28",
-       "DuplicateCheck": "field_29", "PossibleMatchID": "field_30", "SAPCode": "field_31"}
-RULE = {"RequestType": "field_1", "Entity": "field_2", "ConditionField": "field_3", "ConditionValue": "field_4",
-        "ApproverRole": "field_5", "Stage": "field_6", "Active": "field_9"}
-ROLE = {"Role": "field_1", "Entity": "field_2", "PersonName": "field_3", "PersonEmail": "field_4"}
-LOG = {"RequestID": "field_1", "Timestamp": "field_2", "Actor": "field_3", "ActorRole": "field_4",
-       "Action": "field_5", "Detail": "field_6"}
-SENS = {"RequestID": "field_1", "PaymentTerms": "field_2", "CreditLimit": "field_3"}
-
-APIS = {
-    "shared_sharepointonline": "SharePoint",
-    "shared_approvals": "Approvals",
-    "shared_teams": "Microsoft Teams",
-}
 
 
 def t(col):
     """Trigger (new Requests item) column."""
     return f"triggerBody()?['{REQ[col]}']"
-
-
-def sp(op, table=None, **params):
-    p = {"dataset": SITE}
-    if table:
-        p["table"] = LISTS[table]
-    p.update(params)
-    return {"type": "OpenApiConnection", "runAfter": {},
-            "inputs": {"parameters": p,
-                       "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                                "connectionName": "shared_sharepointonline", "operationId": op},
-                       "authentication": "@parameters('$authentication')"}}
-
-
-def after(action, *prev):
-    action["runAfter"] = {p: ["Succeeded"] for p in prev}
-    return action
 
 
 def update_request(prev, **cols):
@@ -71,13 +24,7 @@ def update_request(prev, **cols):
 
 
 def teams_to_requestor(message, *prev):
-    return after({"type": "OpenApiConnection", "inputs": {
-        "parameters": {"poster": "Flow bot", "location": "Chat with Flow bot",
-                       "body/recipient": "@{triggerBody()?['Author']?['Email']};",
-                       "body/messageBody": f"<p>{message}</p>"},
-        "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
-                 "connectionName": "shared_teams", "operationId": "PostMessageToConversation"},
-        "authentication": "@parameters('$authentication')"}}, *prev)
+    return after(teams_chat("@{triggerBody()?['Author']?['Email']}", message), *prev)
 
 
 NAME_EXPR = f"coalesce({t('CustomerName')}, {t('ItemDescription')}, {t('VendorName')}, {t('CostCenterName')})"
@@ -99,18 +46,21 @@ def stage_loop(stage):
     )
     role = f"items('{loop}')?['{RULE['ApproverRole']}']"
     first_resp = f"first(outputs('{approval}')?['body/responses'])"
+    approver_email = f"@{{first(body('Find_stage_{stage}_approver'))?['{ROLE['PersonEmail']}']}}"
     inner = {
         f"Find_stage_{stage}_approver": {"type": "Query", "runAfter": {}, "inputs": {
             "from": "@outputs('Get_roles')?['body/value']",
             "where": f"@and(equals(item()?['{ROLE['Role']}'], {role}), "
                      f"or(equals(item()?['{ROLE['Entity']}'], 'Any'), equals(item()?['{ROLE['Entity']}'], {t('Entity')})))"}},
+        f"Log_stage_{stage}_assigned": after(log_row(
+            "@triggerBody()?['Title']", approver_email, f"@{{{role}}}", "Assigned", f"Stage {stage}"),
+            f"Find_stage_{stage}_approver"),
         approval: after({"type": "OpenApiConnectionWebhook", "inputs": {
             "parameters": {
                 "approvalType": "Basic",
                 "WebhookApprovalCreationInput/title":
                     f"@{{triggerBody()?['Title']}}: @{{{t('RequestType')}}} request for @{{{t('Entity')}}} (@{{{role}}} check)",
-                "WebhookApprovalCreationInput/assignedTo":
-                    f"@{{first(body('Find_stage_{stage}_approver'))?['{ROLE['PersonEmail']}']}}",
+                "WebhookApprovalCreationInput/assignedTo": approver_email,
                 "WebhookApprovalCreationInput/details": (
                     f"**Requested by:** @{{{t('Requestor')}}}\n\n"
                     f"**Name:** @{{{NAME_EXPR}}}\n\n"
@@ -124,7 +74,7 @@ def stage_loop(stage):
             },
             "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
                      "connectionName": "shared_approvals", "operationId": "StartAndWaitForAnApproval"},
-            "authentication": "@parameters('$authentication')"}}, f"Find_stage_{stage}_approver"),
+            "authentication": "@parameters('$authentication')"}}, f"Log_stage_{stage}_assigned"),
         f"Log_stage_{stage}_decision": after(sp("PostItem", "ApprovalLog", **{
             "item/Title": "@triggerBody()?['Title']",
             f"item/{LOG['RequestID']}": "@triggerBody()?['Title']",
@@ -219,75 +169,15 @@ actions["Tell_requestor_approved"] = teams_to_requestor(
     "Good news: your request @{triggerBody()?['Title']} was approved by every approver and the SAP import file has been created.",
     "Log_SAP_file")
 
-definition = {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {"$connections": {"defaultValue": {}, "type": "Object"},
-                   "$authentication": {"defaultValue": {}, "type": "SecureObject"}},
-    "triggers": {"When_a_request_is_submitted": {
-        "type": "OpenApiConnection", "recurrence": {"interval": 1, "frequency": "Minute"},
-        "splitOn": "@triggerOutputs()?['body/value']",
-        "inputs": {"parameters": {"dataset": SITE, "table": LISTS["Requests"]},
-                   "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
-                            "connectionName": "shared_sharepointonline", "operationId": "GetOnNewItems"},
-                   "authentication": "@parameters('$authentication')"}}},
-    "actions": actions,
-}
+flow = definition({"When_a_request_is_submitted": {
+    "type": "OpenApiConnection", "recurrence": {"interval": 1, "frequency": "Minute"},
+    "splitOn": "@triggerOutputs()?['body/value']",
+    "inputs": {"parameters": {"dataset": SITE, "table": LISTS["Requests"]},
+               "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                        "connectionName": "shared_sharepointonline", "operationId": "GetOnNewItems"},
+               "authentication": "@parameters('$authentication')"}}}, actions)
 
-# ---------------------------------------------------------------------------- package files
-# Layout mirrors a real "Export > Package (.zip)" from this tenant: the flow's resource id in manifest.json is
-# also its folder name and its entry in Microsoft.Flow/flows/manifest.json.
-ICONS = {
-    "shared_sharepointonline": "https://static.powerapps.com/resource/ppcr/releases/v1.0.1827/1.0.1827.4913/sharepointonline/icon.png",
-    "shared_approvals": "https://static.powerapps.com/resource/ppcr/releases/v1.0.1826/1.0.1826.4893/approvals/icon.png",
-    "shared_teams": "https://static.powerapps.com/resource/ppcr/releases/v1.0.1834/1.0.1834.5088/teams/icon.png",
-}
-new_id = lambda: str(uuid.uuid4())
-flow_name = new_id()   # the flow's own name inside definition.json
-flow_res = new_id()    # package resource id = folder name
-api_res = {k: new_id() for k in APIS}
-conn_res = {k: new_id() for k in APIS}
-
-resources = {flow_res: {
-    "type": "Microsoft.Flow/flows", "suggestedCreationType": "New", "creationType": "Existing, New, Update",
-    "details": {"displayName": NAME}, "configurableBy": "User", "hierarchy": "Root",
-    "dependsOn": [r for k in APIS for r in (api_res[k], conn_res[k])]}}
-for k, display in APIS.items():
-    resources[api_res[k]] = {
-        "id": f"/providers/Microsoft.PowerApps/apis/{k}", "name": k, "type": "Microsoft.PowerApps/apis",
-        "suggestedCreationType": "Existing", "details": {"displayName": display, "iconUri": ICONS[k]},
-        "configurableBy": "System", "hierarchy": "Child", "dependsOn": []}
-    resources[conn_res[k]] = {
-        "type": "Microsoft.PowerApps/apis/connections", "suggestedCreationType": "Existing",
-        "creationType": "Existing", "details": {"displayName": display, "iconUri": ICONS[k]},
-        "configurableBy": "User", "hierarchy": "Child", "dependsOn": [api_res[k]]}
-manifest = {"schema": "1.0",
-            "details": {"displayName": NAME, "description": "Parallel approvals for OneRecord master data requests",
-                        "createdTime": "2026-10-22T10:30:00.0000000Z", "packageTelemetryId": new_id(),
-                        "creator": "N/A", "sourceEnvironment": ""},
-            "resources": resources}
-
-definition["outputs"] = {}
-flow_def = {
-    "name": flow_name, "id": f"/providers/Microsoft.Flow/flows/{flow_name}", "type": "Microsoft.Flow/flows",
-    "properties": {
-        "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows", "displayName": NAME,
-        "definition": definition,
-        "connectionReferences": {k: {"connectionName": uuid.uuid4().hex, "source": "Embedded",
-                                     "id": f"/providers/Microsoft.PowerApps/apis/{k}", "tier": "NotSpecified",
-                                     "apiName": k.replace("shared_", ""),
-                                     "isProcessSimpleApiReferenceConversionAlreadyDone": False}
-                                 for k in APIS},
-        "flowFailureAlertSubscribed": False, "isManaged": False},
-}
-
-base = f"Microsoft.Flow/flows/{flow_res}"
-with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
-    z.writestr("manifest.json", json.dumps(manifest))
-    z.writestr("Microsoft.Flow/flows/manifest.json",
-               json.dumps({"packageSchemaVersion": "1.0", "flowAssets": {"assetPaths": [flow_res]}}))
-    z.writestr(f"{base}/definition.json", json.dumps(flow_def))
-    z.writestr(f"{base}/apisMap.json", json.dumps({k: api_res[k] for k in APIS}))
-    # keyed by connection reference name (as used in the definition's connectionReferences)
-    z.writestr(f"{base}/connectionsMap.json", json.dumps({k: conn_res[k] for k in APIS}))
-print(OUT, "actions:", len(actions))
+if __name__ == "__main__":
+    write_package(OUT, NAME, "Parallel approvals for OneRecord master data requests", flow,
+                  ["shared_sharepointonline", "shared_approvals", "shared_teams"])
+    print(OUT, "actions:", len(actions))
