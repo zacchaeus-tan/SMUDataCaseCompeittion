@@ -1,0 +1,34 @@
+Title,VendorName,Country,ProductSupplied,CreatedByEntity,CreatedDate,TaxID
+V2001,"Westbrook BioSystems Co., Ltd.",Japan,C,QTG,2015-10-01,TX60604147
+V2002,Halden Diagnostics Pte Ltd,Singapore,C,QTG,2016-11-01,TX33737085
+V2003,Corvid Diagnostics Inc.,USA,B,QTS,2024-11-01,TX40404038
+V2004,"Orion Labware Co., Ltd.",Japan,C,QTG,2023-02-01,TX62361634
+V2005,Westbrook Labware Pte Ltd,Singapore,C,QTG,2022-12-01,TX92410197
+V2006,"Kestrel Life Sciences Co., Ltd.",Korea,B,QTS,2024-05-01,TX83701737
+V2007,Corvid Labware AG,Switzerland,C,QTG,2014-01-01,TX69221566
+V2008,"Orion Medical Devices Co., Ltd.",Korea,A,SPD,2025-10-01,TX49865021
+V2009,Sentinel Diagnostics GmbH,Germany,B,QTS,2023-05-01,TX41725973
+V2010,Sentinel Labware Inc.,USA,C,QTG,2016-01-01,TX65186553
+V2011,"Helix Labware Co., Ltd.",China,B,QTS,2018-08-01,TX42290585
+V2012,"Meridian Medical Devices Co., Ltd.",Japan,A,SPD,2016-04-01,TX19783229
+V2013,Helix Diagnostics AG,Switzerland,B,QTS,2020-03-01,TX13318817
+V2014,Corvid Medical Devices Inc.,USA,A,SPD,2017-09-01,TX39912597
+V2015,"Helix Life Sciences Co., Ltd.",China,B,QTS,2016-09-01,TX99594683
+V2016,Brightwater Life Sciences GmbH,Germany,A,SPD,2025-02-01,TX99613717
+V2017,Corvid BioSystems Ltd,UK,A,SPD,2022-03-01,TX31955225
+V2018,Helix Medical Devices Ltd,UK,B,QTS,2017-11-01,TX37424102
+V2019,Norland Scientific GmbH,Germany,C,QTG,2021-05-01,TX96488837
+V2020,"Castell Scientific Co., Ltd.",China,C,QTG,2016-12-01,TX86624684
+V2021,Helix Scientific Inc.,USA,C,QTG,2020-05-01,TX15611578
+V2022,Kestrel Labware Ltd,UK,B,QTS,2016-05-01,TX19937732
+V2023,"Helix BioSystems Co., Ltd.",Japan,B,QTS,2015-03-01,TX16740456
+V2024,Castell Labware Inc.,USA,B,QTS,2022-04-01,TX53045801
+V2025,"Norland Life Sciences Co., Ltd.",Japan,C,QTG,2018-12-01,TX25838333
+V2026,"Vireo Scientific Co., Ltd.",Japan,C,QTG,2022-03-01,TX92261330
+V2027,Halden Labware Pte Ltd,Singapore,A,SPD,2021-11-01,TX31112106
+V2028,"Kestrel BioSystems Co., Ltd.",Japan,B,QTS,2025-01-01,TX42590952
+V2029,Aurora Medical Devices Pte Ltd,Singapore,B,QTS,2025-02-01,TX75889533
+V2030,"Aurora Life Sciences Co., Ltd.",Japan,B,QTS,2019-05-01,TX65170549
+V2101,Corvid Diagonstics Inc.,USA,B,QTG,2025-08-01,TX40404038
+V2102,Halden Labware Pte. Ltd.,Singapore,A,QTS,2025-11-01,TX31112106
+V2103,"HELIX BIOSYSTEMS CO., LTD.",Japan,B,QTG,2025-06-01,TX16740456

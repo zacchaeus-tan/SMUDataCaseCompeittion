@@ -138,7 +138,7 @@ Screens:
                         DisabledBorderColor: =RGBA(0, 0, 0, 0)
                         FalseFill: =RGBA(96, 94, 92, 1)
                         FalseHoverFill: =RGBA(50, 49, 48, 1)
-                        FalseText: ="This is a different customer"
+                        FalseText: ="This is a different " & Lower(SelectedType)
                         FillPortions: =0
                         FocusedBorderThickness: =4
                         Font: =Font.'Segoe UI'
@@ -151,7 +151,7 @@ Screens:
                         TrueFill: =RGBA(0, 120, 212, 1)
                         TrueHoverFill: =RGBA(16, 110, 190, 1)
                         TrueText: |-
-                          ="Confirmed: this is a different customer"
+                          ="Confirmed: this is a different " & Lower(SelectedType)
                         Visible: =DupStatus = "Possible match"
                         Width: =420
             - MainContainer1:
@@ -1110,6 +1110,86 @@ Screens:
                               PaddingLeft: =0
                               Size: =10
                               Text: =LookUp(VisibleFields, FieldName = "ItemDescription").HelpText
+                  - blkManufacturerPartNo:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Item" && "ManufacturerPartNo" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblManufacturerPartNo:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "ManufacturerPartNo")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtManufacturerPartNo:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpManufacturerPartNo:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "ManufacturerPartNo").HelpText
                   - blkProductFamily:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2665,6 +2745,7 @@ Screens:
                           Reset(ddCustomerPaymentTerms);
                           Reset(txtCreditLimit);
                           Reset(txtItemDescription);
+                          Reset(txtManufacturerPartNo);
                           Reset(ddProductFamily);
                           Reset(ddUnitOfMeasure);
                           Reset(txtHSCode);
@@ -2733,6 +2814,7 @@ Screens:
                                       ItemDescription: If(SelectedType = "Item", txtItemDescription.Text),
                                       ProductFamily: If(SelectedType = "Item", ddProductFamily.Selected.Value),
                                       UnitOfMeasure: If(SelectedType = "Item", ddUnitOfMeasure.Selected.Value),
+                                      ManufacturerPartNo: If(SelectedType = "Item", txtManufacturerPartNo.Text),
                                       HSCode: If(SelectedType = "Item", txtHSCode.Text),
                                       IsRegulated: If(SelectedType = "Item", tglIsRegulated.Value),
                                       RegulatoryLicenceNo: If(SelectedType = "Item" && tglIsRegulated.Value, txtRegulatoryLicenceNo.Text),
@@ -2771,6 +2853,7 @@ Screens:
                                   Reset(ddCustomerPaymentTerms);
                                   Reset(txtCreditLimit);
                                   Reset(txtItemDescription);
+                                  Reset(txtManufacturerPartNo);
                                   Reset(ddProductFamily);
                                   Reset(ddUnitOfMeasure);
                                   Reset(txtHSCode);

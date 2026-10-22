@@ -14,6 +14,7 @@ Item.HSCode,Item,HSCode,HS code,Text,Always,,,No,All,Needed for import
 Item.IsRegulated,Item,IsRegulated,Is this a regulated medical device / IVD?,Yes/No,Always,,,No,All,Adds Quality/Regulatory approval if Yes
 Item.RegulatoryLicenceNo,Item,RegulatoryLicenceNo,Regulatory licence no.,Text,Conditional,IsRegulated,Yes,No,All,HSA / MDA / Thai FDA / BPOM / DAV
 Item.ShelfLifeMonths,Item,ShelfLifeMonths,Shelf life (months),Number,Conditional,ProductFamily,A,No,All,Reagents only
+Item.ManufacturerPartNo,Item,ManufacturerPartNo,Manufacturer part no.,Text,Always,,,No,All,From the supplier's catalogue or label; used to catch duplicate items
 Vendor.VendorName,Vendor,VendorName,Vendor legal name,Text,Always,,,No,All,
 Vendor.Country,Vendor,Country,Vendor country,Text,Always,,,No,All,
 Vendor.TaxID,Vendor,TaxID,Tax ID,Text,Always,,,No,All,

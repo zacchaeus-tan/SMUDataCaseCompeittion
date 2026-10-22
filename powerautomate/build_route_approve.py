@@ -6,7 +6,8 @@ Each approval also writes an "Assigned" row to ApprovalLog, which build_reminder
 """
 from pathlib import Path
 
-from pkg import LISTS, LOG, REQ, ROLE, RULE, SENS, SITE, after, definition, log_row, sp, teams_chat, write_package
+from pkg import (LISTS, LOG, REQ, ROLE, RULE, SENS, SITE, after, condition, definition, log_row, sp, teams_chat,
+                 write_package)
 
 OUT = Path(__file__).with_name("OneRecord-RouteAndApprove.zip")
 NAME = "OneRecord - Route and approve"
@@ -46,15 +47,42 @@ def stage_loop(stage):
     )
     role = f"items('{loop}')?['{RULE['ApproverRole']}']"
     first_resp = f"first(outputs('{approval}')?['body/responses'])"
-    approver_email = f"@{{first(body('Find_stage_{stage}_approver'))?['{ROLE['PersonEmail']}']}}"
+    # Routing gap: no Roles row, a blank email or a placeholder (no "@") -> the MDM Analyst approves on the
+    # missing role's behalf, gets a Teams nudge to fix Roles, and the gap is logged and shown on the request.
+    routing = f"Stage_{stage}_routing"
+    found = f"first(body('Find_stage_{stage}_approver'))?['{ROLE['PersonEmail']}']"
+    mdm = f"first(body('Find_MDM_analyst'))?['{ROLE['PersonEmail']}']"
+    valid = f"contains(coalesce({found}, ''), '@')"
+    approver_email = f"@{{outputs('{routing}')?['email']}}"
+    gap = f"outputs('{routing}')?['gap']"
+    entity = t('Entity')
     inner = {
         f"Find_stage_{stage}_approver": {"type": "Query", "runAfter": {}, "inputs": {
             "from": "@outputs('Get_roles')?['body/value']",
             "where": f"@and(equals(item()?['{ROLE['Role']}'], {role}), "
-                     f"or(equals(item()?['{ROLE['Entity']}'], 'Any'), equals(item()?['{ROLE['Entity']}'], {t('Entity')})))"}},
+                     f"or(equals(item()?['{ROLE['Entity']}'], 'Any'), equals(item()?['{ROLE['Entity']}'], {entity})))"}},
+        routing: after({"type": "Compose", "inputs": {
+            "found": f"@{{{found}}}",
+            "gap": f"@not({valid})",
+            "email": f"@if({valid}, {found}, {mdm})",
+        }}, f"Find_stage_{stage}_approver"),
+        f"If_stage_{stage}_routing_gap": after(condition(gap, {
+            f"Tell_MDM_routing_gap_{stage}": teams_chat(
+                f"@{{{mdm}}}",
+                f"Routing gap: no valid @{{{role}}} is set up for @{{{entity}}} in the Roles list, so "
+                f"@{{triggerBody()?['Title']}} was sent to you instead. Please add or fix a Roles row "
+                f"(Role = @{{{role}}}, Entity = @{{{entity}}} or Any)."),
+            f"Log_routing_gap_{stage}": after(log_row(
+                "@triggerBody()?['Title']", "OneRecord", "System", "Routing gap",
+                f"No valid @{{{role}}} for @{{{entity}}} (found: '@{{outputs('{routing}')?['found']}}'); "
+                f"sent to MDM @{{{mdm}}}"), f"Tell_MDM_routing_gap_{stage}"),
+            f"Show_routing_gap_{stage}": update_request(
+                [f"Log_routing_gap_{stage}"],
+                CurrentStage=f"@{{{role}}} missing for @{{{entity}}} in Roles; sent to MDM"),
+        }), routing),
         f"Log_stage_{stage}_assigned": after(log_row(
             "@triggerBody()?['Title']", approver_email, f"@{{{role}}}", "Assigned", f"Stage {stage}"),
-            f"Find_stage_{stage}_approver"),
+            f"If_stage_{stage}_routing_gap"),
         approval: after({"type": "OpenApiConnectionWebhook", "inputs": {
             "parameters": {
                 "approvalType": "Basic",
@@ -66,7 +94,9 @@ def stage_loop(stage):
                     f"**Name:** @{{{NAME_EXPR}}}\n\n"
                     f"**Country:** @{{{t('Country')}}}\n\n"
                     f"**Duplicate check:** @{{{t('DuplicateCheck')}}} @{{{t('PossibleMatchID')}}}\n\n"
-                    f"**Your check:** @{{{role}}} (stage {stage})"),
+                    f"**Your check:** @{{{role}}} (stage {stage})\n\n"
+                    f"@{{if({gap}, concat('**Note:** No ', {role}, ' is set up for ', {entity}, "
+                    f"' in Roles, so this came to MDM. Your decision counts for the ', {role}, ' step.'), '')}}"),
                 "WebhookApprovalCreationInput/itemLink": "@{triggerBody()?['{Link}']}",
                 "WebhookApprovalCreationInput/itemLinkDescription": "Open the request in SharePoint",
                 "WebhookApprovalCreationInput/enableNotifications": True,
@@ -124,7 +154,10 @@ actions["Get_routing_rules"] = sp("GetItems", "RoutingRules")
 actions["Get_roles"] = after(sp("GetItems", "Roles"), "Get_routing_rules")
 
 s1 = stage_loop(1)
-actions["Filter_stage_1_rules"] = after(s1["Filter_stage_1_rules"], "Get_roles")
+actions["Find_MDM_analyst"] = after({"type": "Query", "inputs": {
+    "from": "@outputs('Get_roles')?['body/value']",
+    "where": f"@equals(item()?['{ROLE['Role']}'], 'MDM Analyst')"}}, "Get_roles")
+actions["Filter_stage_1_rules"] = after(s1["Filter_stage_1_rules"], "Find_MDM_analyst")
 actions["Mark_stage_1"] = update_request(
     ["Filter_stage_1_rules"], Status="Pending approval",
     CurrentStage="Stage 1: waiting for @{length(body('Filter_stage_1_rules'))} approvers in parallel")

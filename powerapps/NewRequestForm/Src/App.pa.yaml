@@ -31,6 +31,7 @@ App:
           {F: "PaymentTerms", V: Switch(SelectedType, "Customer", ddCustomerPaymentTerms.Selected.Value, "Vendor", ddVendorPaymentTerms.Selected.Value)},
           {F: "CreditLimit", V: txtCreditLimit.Text},
           {F: "ItemDescription", V: txtItemDescription.Text},
+          {F: "ManufacturerPartNo", V: txtManufacturerPartNo.Text},
           {F: "ProductFamily", V: ddProductFamily.Selected.Value},
           {F: "UnitOfMeasure", V: ddUnitOfMeasure.Selected.Value},
           {F: "HSCode", V: txtHSCode.Text},
@@ -57,7 +58,7 @@ App:
       MissingFields = Filter(VisibleFields, IsBlank(Trim(LookUp(FieldValues, F = FieldName).V)));
       EmailInvalid = SelectedType = "Customer" && !IsBlank(txtContactEmail.Text) && !IsMatch(txtContactEmail.Text, Match.Email);
       
-      // ---- Live duplicate check (customers only), same clean-up as sharepoint/LISTS.md
+      // ---- Live duplicate checks. Customers use the same clean-up as sharepoint/LISTS.md
       LegalWords = ["pte", "ltd", "sdn", "bhd", "co", "jsc", "pt", "inc", "gmbh", "ag", "sa", "the"];
       NameBasic = Concat(
           Filter(Split(Trim(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Lower(txtCustomerName.Text), ".", " "), ",", " "), "(", " "), ")", " "), "-", " "), "/", " "), "'", " "), """", " "), "&", " "), ":", " "), ";", " "), "#", " "), "+", " ")), " ") As w,
@@ -85,21 +86,70 @@ App:
                        c.Country = ddCustomerCountry.Selected.Value &&
                        CountRows(Filter(KeyWords As k, !(k.Value in c.Norm))) = 0))
       );
-      DupStatus = If(
-          SelectedType <> "Customer", "Clear",
-          !IsBlank(RegMatch), "Blocked",
-          !IsBlank(AliasMatch), "Blocked",
-          !IsBlank(NameMatch), "Possible match",
+      // Items: same manufacturer part no. blocks; all main words of the description in any entity's item warns
+      ItemKeyWords = Filter(Split(Trim(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Lower(txtItemDescription.Text), ".", " "), ",", " "), "(", " "), ")", " "), "-", " "), "/", " "), "'", " "), """", " "), "&", " "), ":", " "), ";", " "), "#", " "), "+", " ")), " ") As w, Len(w.Value) >= 4);
+      ItemRows = ForAll(
+          ItemMaster,
+          {RecordID: Title, Name: Description, Norm: NormalizedName, PartNo: ManufacturerPartNo}
+      );
+      PartMatch = If(
+          !IsBlank(Trim(txtManufacturerPartNo.Text)),
+          LookUp(ItemRows, Upper(PartNo) = Upper(Trim(txtManufacturerPartNo.Text)))
+      );
+      ItemNameMatch = If(
+          CountRows(ItemKeyWords) > 0,
+          First(Filter(ItemRows As c, CountRows(Filter(ItemKeyWords As k, !(k.Value in c.Norm))) = 0))
+      );
+      // Vendors: same tax ID blocks
+      VendorRows = ForAll(VendorMaster, {RecordID: Title, Name: VendorName, TaxID: TaxID});
+      VendorTaxMatch = If(
+          !IsBlank(Trim(txtTaxID.Text)),
+          LookUp(VendorRows, Upper(TaxID) = Upper(Trim(txtTaxID.Text)))
+      );
+      // Cost centres: one per entity and department, so a second one blocks
+      CostCentreMatch = If(
+          !IsBlank(SelectedEntity) && !IsBlank(ddDepartment.Selected.Value),
+          LookUp(CostCentres, Entity = SelectedEntity && Department = ddDepartment.Selected.Value)
+      );
+      
+      DupStatus = Switch(
+          SelectedType,
+          "Customer", If(!IsBlank(RegMatch) || !IsBlank(AliasMatch), "Blocked", !IsBlank(NameMatch), "Possible match", "Clear"),
+          "Item", If(!IsBlank(PartMatch), "Blocked", !IsBlank(ItemNameMatch), "Possible match", "Clear"),
+          "Vendor", If(!IsBlank(VendorTaxMatch), "Blocked", "Clear"),
+          "Cost Center", If(!IsBlank(CostCentreMatch), "Blocked", "Clear"),
           "Clear"
       );
-      DupRecordID = If(DupStatus = "Clear", Blank(), Coalesce(RegMatch.RecordID, AliasMatch.RecordID, NameMatch.RecordID));
-      DupMessage = If(
-          !IsBlank(RegMatch),
-              "This customer already exists: " & RegMatch.Name & " (" & RegMatch.RecordID & ") has registration no. " & RegMatch.RegNo & ".",
-          !IsBlank(AliasMatch),
-              "This customer already exists: " & Char(34) & txtCustomerName.Text & Char(34) & " is a known name for " &AliasMatch.CanonicalName & " (" & AliasMatch.RecordID & ").",
-          !IsBlank(NameMatch),
-              "Possible match: " & NameMatch.Name & " (" & NameMatch.RecordID & ", " & NameMatch.Country & "). If this is a different customer, confirm it with the switch.",
+      DupRecordID = If(
+          DupStatus = "Clear", Blank(),
+          Switch(
+              SelectedType,
+              "Customer", Coalesce(RegMatch.RecordID, AliasMatch.RecordID, NameMatch.RecordID),
+              "Item", Coalesce(PartMatch.RecordID, ItemNameMatch.RecordID),
+              "Vendor", VendorTaxMatch.RecordID,
+              "Cost Center", CostCentreMatch.Title
+          )
+      );
+      DupMessage = Switch(
+          SelectedType,
+          "Customer", If(
+              !IsBlank(RegMatch),
+                  "This customer already exists: " & RegMatch.Name & " (" & RegMatch.RecordID & ") has registration no. " & RegMatch.RegNo & ".",
+              !IsBlank(AliasMatch),
+                  "This customer already exists: " & Char(34) & txtCustomerName.Text & Char(34) & " is a known name for " & AliasMatch.CanonicalName & " (" & AliasMatch.RecordID & ").",
+              !IsBlank(NameMatch),
+                  "Possible match: " & NameMatch.Name & " (" & NameMatch.RecordID & ", " & NameMatch.Country & "). If this is a different customer, confirm it with the switch.",
+              ""),
+          "Item", If(
+              !IsBlank(PartMatch),
+                  "This item already exists: part no. " & PartMatch.PartNo & " is " & PartMatch.Name & " (" & PartMatch.RecordID & ").",
+              !IsBlank(ItemNameMatch),
+                  "Possible match: " & ItemNameMatch.Name & " (" & ItemNameMatch.RecordID & "). If this is a different item, confirm it with the switch.",
+              ""),
+          "Vendor", If(!IsBlank(VendorTaxMatch),
+              "This vendor already exists: tax ID " & VendorTaxMatch.TaxID & " belongs to " & VendorTaxMatch.Name & " (" & VendorTaxMatch.RecordID & ").", ""),
+          "Cost Center", If(!IsBlank(CostCentreMatch),
+              "A cost centre already exists for " & SelectedEntity & " " & ddDepartment.Selected.Value & ": " & CostCentreMatch.CostCentreName & " (" & CostCentreMatch.Title & ").", ""),
           ""
       );
       
@@ -112,7 +162,7 @@ App:
               If(CountRows(MissingFields) > 0, "Still needed: " & Concat(MissingFields, DisplayLabel, ", ") & ". ", "") &
               If(EmailInvalid, "Check the contact email. ", "") &
               Switch(DupStatus,
-                  "Blocked", "This customer already exists, so it can't be submitted again. ",
+                  "Blocked", "This " & Lower(SelectedType) & " already exists, so it can't be submitted again. ",
                   "Possible match", If(tglNotDuplicate.Value, "", "Confirm the possible match above. "),
                   "")
           )
