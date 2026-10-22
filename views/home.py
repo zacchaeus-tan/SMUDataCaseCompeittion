@@ -35,7 +35,9 @@ def render():
             "2. Persona **Wei Jie / QA / BU Head** → *Approvals* → approve in parallel\n"
             "3. Sidebar **+3 days** on a stalled request → reminder & escalation fire\n"
             "4. Persona **Priya** → *MDM check* → approve → download the SAP file\n"
-            "5. *Five-country growth* → *Forecasting* → *Sales actions*")
+            "5. Persona **Priya** → *Rules* → onboard Marcus's new BU → persona **Marcus** → *New request* "
+            "picks it up and routes to its own BU Head, no IT\n"
+            "6. *Five-country growth* → *Forecasting* → *Sales actions*")
     st.markdown("##### Prototype ↔ Microsoft 365")
     st.table({
         "This prototype": ["New request form", "Approvals (cards)", "Reminders / escalation", "Rules, roles, log",

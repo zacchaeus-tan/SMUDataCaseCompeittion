@@ -826,6 +826,12 @@ write_csv(KEY / "mdm_requests_flags.csv",
 
 
 # --------------------------------------------------------------------------- 9. SharePoint list templates
+write_csv(SP / "BusinessUnits.csv",
+          [dict(Title="SPD", BusinessUnitName="SPD (IVD reagents & rapid tests)", Products="A", Active="Yes"),
+           dict(Title="QTS", BusinessUnitName="QTS (lab consumables)", Products="B", Active="Yes"),
+           dict(Title="QTG", BusinessUnitName="QTG (medical & lab equipment)", Products="C", Active="Yes")],
+          ["Title", "BusinessUnitName", "Products", "Active"])
+
 ROLES = [  # role, entity, persona, email, escalate-to, time zone (IANA) of where the person sits
     ("Requestor", "Any", "Amy (requestor persona)", "<teammate-1 SMU email>", "", "Asia/Singapore"),
     ("BU Head", "SPD", "SPD BU Head", "<teammate-2 SMU email>", "<teammate-4 SMU email>", "Asia/Singapore"),

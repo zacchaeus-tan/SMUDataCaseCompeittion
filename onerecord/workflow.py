@@ -21,7 +21,7 @@ from .config import SHAREPOINT, STATE
 from .normalise import name_key
 
 DB = STATE / "workflow.sqlite"
-RULE_TABLES = ["RoutingRules", "RequiredFields", "Roles", "Aliases"]
+RULE_TABLES = ["BusinessUnits", "RoutingRules", "RequiredFields", "Roles", "Aliases"]
 SENSITIVE_ROLES = {"Finance", "MDM Analyst"}
 
 PERSONAS = {  # display persona -> role (mirrors sharepoint/Roles.csv)
@@ -71,7 +71,15 @@ def reset(seed_demo=True):
 
 
 def ensure():
-    return connect() if DB.exists() else reset()
+    if not DB.exists():
+        return reset()
+    con = connect()
+    have = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    for t in RULE_TABLES:  # demo state from an older version: add any rule table it lacks
+        if t not in have:
+            pd.read_csv(SHAREPOINT / f"{t}.csv", dtype=str).fillna("").to_sql(t, con, index=False)
+    con.commit()
+    return con
 
 
 def now(con) -> datetime:
@@ -115,6 +123,55 @@ def _log(con, rid, actor, role, action, detail="", field="", old="", new="", ts=
 
 
 # --------------------------------------------------------------------------- form rules
+def business_units(con) -> pd.DataFrame:
+    """Active business units: the form's 'Business entity' dropdown. A new BU = one row here."""
+    return pd.read_sql("SELECT * FROM BusinessUnits WHERE Active='Yes'", con)
+
+
+def request_types(con) -> list:
+    """Request types = every type that has fields in RequiredFields. A new data domain = new field rows."""
+    types = pd.read_sql("SELECT DISTINCT RequestType FROM RequiredFields", con).RequestType
+    order = ["Customer", "Item", "Vendor", "Cost Center"]
+    return sorted([t for t in types if t and t != "Any"], key=lambda t: (order.index(t) if t in order else 99, t))
+
+
+def routing_gaps(con) -> list:
+    """Rules health check: approver roles a request would be routed to with nobody set up in Roles."""
+    rules = pd.read_sql("SELECT * FROM RoutingRules WHERE Active='Yes'", con)
+    roles = pd.read_sql("SELECT * FROM Roles", con)
+    gaps = []
+    for bu in business_units(con).Title:
+        for role in sorted(set(rules[rules.Entity.isin([bu, "Any"])].ApproverRole)):
+            if not len(roles[(roles.Role == role) & roles.Entity.isin([bu, "Any"])]):
+                gaps.append(f"{bu}: no one set up as {role} in Roles")
+    return gaps
+
+
+def add_business_unit(con, code, name, products, head, email, tz, qa_all_items=False,
+                      actor="Priya - MDM Analyst"):
+    """Onboard a business unit by adding rows to three rule lists - what the MDM team does in SharePoint."""
+    if code in set(pd.read_sql("SELECT Title FROM BusinessUnits", con).Title):
+        return
+    _append(con, "BusinessUnits", dict(Title=code, BusinessUnitName=name, Products=products, Active="Yes"))
+    _append(con, "Roles", dict(Title=f"BU Head - {code}", Role="BU Head", Entity=code, PersonName=head,
+                               PersonEmail=email, EscalateTo="", TimeZone=tz))
+    added = [f"BusinessUnits: {code}", f"Roles: BU Head - {code} ({head}, {tz})"]
+    if qa_all_items:
+        n = con.execute("SELECT COUNT(*) FROM RoutingRules").fetchone()[0] + 1
+        _append(con, "RoutingRules", dict(Title=f"R{n:02d}", RequestType="Item", Entity=code, ConditionField="",
+                                          ConditionValue="", ApproverRole="Quality/Regulatory", Stage="1",
+                                          SLADays="2", EscalateAfterDays="4", Active="Yes"))
+        added.append(f"RoutingRules: every {code} item also needs Quality/Regulatory")
+    _log(con, "", actor, "MDM Analyst", "Business unit added", " | ".join(added))
+    con.commit()
+
+
+def _append(con, name, row: dict):
+    df = pd.read_sql(f"SELECT * FROM {name}", con)
+    pd.concat([df, pd.DataFrame([row])], ignore_index=True).fillna("").astype(str).to_sql(
+        name, con, index=False, if_exists="replace")
+
+
 def form_fields(con, request_type) -> pd.DataFrame:
     return pd.read_sql("SELECT * FROM RequiredFields WHERE RequestType=?", con, params=(request_type,))
 
@@ -180,6 +237,11 @@ def _people(con, role, entity):
     return r.iloc[0] if len(r) else None
 
 
+def person_for(con, role, entity) -> str:
+    p = _people(con, role, entity)
+    return p.PersonName if p is not None else ""
+
+
 def submit(con, request_type, entity, country, requestor, values: dict, dup: tuple, ts=None):
     """Power Apps submit: sensitive fields go to their own locked-down list; then the routing flow runs."""
     t = ts or now(con)
@@ -207,6 +269,8 @@ def route(con, rid, request_type, entity, values, t):
     stage1 = []
     for _, r in rules[rules.Stage == "1"].iterrows():
         if r.ConditionField and str(values.get(r.ConditionField, "")) != r.ConditionValue:
+            continue
+        if r.ApproverRole in (role for role, _ in stage1):  # a BU-specific rule may repeat a general one
             continue
         p = _people(con, r.ApproverRole, entity)
         stage1.append((r.ApproverRole, p.PersonName if p is not None else r.ApproverRole))

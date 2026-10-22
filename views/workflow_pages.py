@@ -42,8 +42,13 @@ def new_request():
     d = c.raw()
 
     top = st.columns(3)
-    rtype = top[0].selectbox("What do you need?", ["Customer", "Item", "Vendor", "Cost Center"], key="req_type")
-    entity = top[1].selectbox("Business entity", ["SPD", "QTS", "QTG"], key="req_entity")
+    bus = wf.business_units(con)
+    bu_name = dict(zip(bus.Title, bus.BusinessUnitName))
+    rtype = top[0].selectbox("What do you need?", wf.request_types(con), key="req_type",
+                             help="From the RequiredFields list: a new data domain appears here once its fields exist")
+    entity = top[1].selectbox("Business entity", list(bus.Title), key="req_entity",
+                              format_func=lambda k: bu_name.get(k, k),
+                              help="From the BusinessUnits list: the MDM team adds a new BU there, no IT change")
     country = top[2].selectbox("Country", list(COUNTRIES), format_func=lambda k: f"{k} · {COUNTRIES[k]}",
                                key="req_country")
 
@@ -93,10 +98,13 @@ def new_request():
         confirm = st.checkbox(f"I checked {dup[1]} — this really is a different record", key="dup_ok")
 
     rules = pd.read_sql("SELECT * FROM RoutingRules WHERE Active='Yes'", con)
-    rules = rules[rules.RequestType.isin([rtype, "Any"])]
-    who = [r.ApproverRole for _, r in rules[rules.Stage == "1"].iterrows()
-           if not r.ConditionField or str(values.get(r.ConditionField, "")) == r.ConditionValue]
-    st.info(f"**Will be routed in parallel to:** {', '.join(who)} → then MDM final check")
+    rules = rules[rules.RequestType.isin([rtype, "Any"]) & rules.Entity.isin([entity, "Any"])]
+    who = []
+    for _, r in rules[rules.Stage == "1"].iterrows():
+        if not r.ConditionField or str(values.get(r.ConditionField, "")) == r.ConditionValue:
+            p = wf.person_for(con, r.ApproverRole, entity)
+            who.append(f"{r.ApproverRole} ({p})" if p else f"{r.ApproverRole} (⚠️ nobody set up)")
+    st.info(f"**Will be routed in parallel to:** {', '.join(dict.fromkeys(who))} → then MDM final check")
 
     can_submit = not missing and dup[0] != "Blocked" and confirm and c.role() == "Requestor"
     if c.role() != "Requestor":
@@ -253,6 +261,44 @@ def rules():
     con = c.con()
     st.markdown("Adding a business unit, a required field or an approval step = **editing a row here**. "
                 "Example: add a row to *RoutingRules* for a new regulatory check, or set a field to *Conditional*.")
+    is_mdm = c.role() == "MDM Analyst"
+
+    with st.container(border=True):
+        st.markdown("##### ➕ Onboard a new business unit · Marcus's team")
+        st.caption("Marcus's new BU joined and its first requests went to the wrong people for two weeks. Here Priya "
+                   "sets it up in a minute: one row each in BusinessUnits and Roles (plus an optional extra approval "
+                   "rule). The form dropdown and the routing pick it up on the next request.")
+        f = st.columns([1, 2, 2])
+        code = f[0].text_input("BU code", "LGD", max_chars=6).strip().upper()
+        name = f[1].text_input("Business unit name", "LGD (molecular & genomics, new BU)")
+        products = f[2].text_input("Products", "A")
+        g = st.columns([2, 2, 2])
+        head = g[0].text_input("BU Head (approver)", "LGD BU Head")
+        email = g[1].text_input("BU Head email", "<teammate-2 SMU email>")
+        tz = g[2].selectbox("BU Head time zone", ["Asia/Singapore", "Asia/Kuala_Lumpur", "Asia/Bangkok",
+                                                  "Asia/Jakarta", "Asia/Ho_Chi_Minh"], index=4)
+        qa = st.checkbox("Every item from this BU also needs Quality/Regulatory sign-off (new regulatory requirement)",
+                         value=True)
+        exists = code in set(wf.business_units(con).Title)
+        if st.button("Add business unit", type="primary", disabled=not is_mdm or not code or exists):
+            wf.add_business_unit(con, code, name, products, head, email, tz, qa)
+            st.session_state["bu_added"] = (
+                f"**{code}** is live. Switch to **Marcus** → *New request* → pick {code} as the entity: the BU Head "
+                f"card goes to {head}" + (", and every item adds a Quality/Regulatory check." if qa else "."))
+            st.rerun()  # refresh the button state and the rule tables below
+        if msg := st.session_state.pop("bu_added", None):
+            st.success(msg)
+        elif exists:
+            st.caption(f"{code} already exists. Reset demo data in the sidebar to run this again.")
+        elif not is_mdm:
+            st.caption("Only the MDM team can add a business unit (switch persona to Priya).")
+
+    gaps = wf.routing_gaps(con)
+    if gaps:
+        st.warning("**Rules health check:** " + " · ".join(gaps) + ". Requests would wait on nobody; fix in *Roles*.")
+    else:
+        st.success("**Rules health check:** every active business unit has someone for every approval step.")
+
     tabs = st.tabs(wf.RULE_TABLES)
     for tab, name in zip(tabs, wf.RULE_TABLES):
         with tab:
