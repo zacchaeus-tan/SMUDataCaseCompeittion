@@ -1,0 +1,2804 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+#
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+#
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  Screen1:
+    Properties:
+      Fill: =RGBA(245, 245, 245, 1)
+      LoadingSpinnerColor: =RGBA(0, 120, 212, 1)
+    Children:
+      - ScreenContainer1:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(245, 245, 245, 1)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =16
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            Width: =Parent.Width
+          Children:
+            - HeaderContainer1:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  Height: =75
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =16
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingBottom: =8
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                Children:
+                  - lblAppTitle:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =1
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =40
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Size: =18
+                        Text: ="OneRecord - New master data request"
+                  - lblRequestor:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Right
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(96, 94, 92, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =40
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Size: =11
+                        Text: |-
+                          ="Requestor: " & User().FullName
+                        Width: =320
+            - DupBanner:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =If(DupStatus = "Blocked", RGBA(253, 231, 233, 1), RGBA(255, 244, 206, 1))
+                  FillPortions: =0
+                  Height: =96
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingBottom: =8
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  Visible: =DupStatus <> "Clear"
+                Children:
+                  - lblDupMessage:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =40
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Size: =12
+                        Text: =DupMessage
+                        Wrap: =true
+                  - tglNotDuplicate:
+                      Control: Classic/Toggle@2.1.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Start
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        Color: =RGBA(50, 49, 48, 1)
+                        Default: =false
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        FalseFill: =RGBA(96, 94, 92, 1)
+                        FalseHoverFill: =RGBA(50, 49, 48, 1)
+                        FalseText: ="This is a different customer"
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =36
+                        HoverBorderColor: =RGBA(0, 0, 0, 0)
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PressedBorderColor: =RGBA(0, 0, 0, 0)
+                        Size: =12
+                        TrueFill: =RGBA(0, 120, 212, 1)
+                        TrueHoverFill: =RGBA(16, 110, 190, 1)
+                        TrueText: |-
+                          ="Confirmed: this is a different customer"
+                        Visible: =DupStatus = "Possible match"
+                        Width: =420
+            - MainContainer1:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =16
+                  LayoutJustifyContent: =LayoutJustifyContent.Start
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                Children:
+                  - blkRequestType:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =true
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblRequestType:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: ="Request type *"
+                        - ddRequestType:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: ="Customer"
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =RequestTypes
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =12
+                        - hlpRequestType:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: ="What are you asking MDM to create?"
+                  - blkEntity:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =true
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblEntity:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: ="Business entity *"
+                        - ddEntity:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: |-
+                                =ForAll(Filter(BusinessUnits, Active = true), {Value: BusinessUnitName, Code: Title})
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =12
+                        - hlpEntity:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: ="Which Lives Group business this is for"
+                  - blkCustomerName:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Customer" && "CustomerName" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblCustomerName:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "CustomerName")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtCustomerName:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpCustomerName:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "CustomerName").HelpText
+                  - blkCustomerCountry:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Customer" && "Country" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblCustomerCountry:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "Country")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - ddCustomerCountry:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =["SG", "MY", "TH", "ID", "VN"]
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =12
+                        - hlpCustomerCountry:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "Country").HelpText
+                  - blkRegistrationNo:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Customer" && "RegistrationNo" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblRegistrationNo:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "RegistrationNo")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtRegistrationNo:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpRegistrationNo:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "RegistrationNo").HelpText
+                  - blkBillingAddress:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Customer" && "BillingAddress" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblBillingAddress:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "BillingAddress")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtBillingAddress:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpBillingAddress:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "BillingAddress").HelpText
+                  - blkContactEmail:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Customer" && "ContactEmail" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblContactEmail:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "ContactEmail")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtContactEmail:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =If(EmailInvalid, RGBA(209, 52, 56, 1), RGBA(200, 198, 196, 1))
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HintText: ="name@company.com"
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpContactEmail:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "ContactEmail").HelpText
+                  - blkSegment:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Customer" && "Segment" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblSegment:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "Segment")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - ddSegment:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =["Hospital", "Laboratory", "Clinic"]
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =12
+                        - hlpSegment:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "Segment").HelpText
+                  - blkCustomerPaymentTerms:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Customer" && "PaymentTerms" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblCustomerPaymentTerms:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "PaymentTerms")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - ddCustomerPaymentTerms:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =["30 days", "45 days", "60 days", "90 days", "Advance"]
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =12
+                        - hlpCustomerPaymentTerms:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "PaymentTerms").HelpText
+                  - blkCreditLimit:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Customer" && "CreditLimit" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblCreditLimit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "CreditLimit")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtCreditLimit:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Format: =TextFormat.Number
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpCreditLimit:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "CreditLimit").HelpText
+                  - blkItemDescription:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Item" && "ItemDescription" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblItemDescription:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "ItemDescription")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtItemDescription:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpItemDescription:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "ItemDescription").HelpText
+                  - blkProductFamily:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Item" && "ProductFamily" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblProductFamily:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "ProductFamily")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - ddProductFamily:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =["A", "B", "C"]
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =12
+                        - hlpProductFamily:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "ProductFamily").HelpText
+                  - blkUnitOfMeasure:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Item" && "UnitOfMeasure" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblUnitOfMeasure:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "UnitOfMeasure")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - ddUnitOfMeasure:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =["Kit", "Box", "Pack", "Unit", "Set"]
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =12
+                        - hlpUnitOfMeasure:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "UnitOfMeasure").HelpText
+                  - blkHSCode:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Item" && "HSCode" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblHSCode:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "HSCode")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtHSCode:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpHSCode:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "HSCode").HelpText
+                  - blkIsRegulated:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Item" && "IsRegulated" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblIsRegulated:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "IsRegulated")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - tglIsRegulated:
+                            Control: Classic/Toggle@2.1.0
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =false
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              FalseFill: =RGBA(96, 94, 92, 1)
+                              FalseHoverFill: =RGBA(50, 49, 48, 1)
+                              FalseText: ="No"
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              Size: =12
+                              TrueFill: =RGBA(0, 120, 212, 1)
+                              TrueHoverFill: =RGBA(16, 110, 190, 1)
+                              TrueText: ="Yes"
+                              Width: =160
+                        - hlpIsRegulated:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "IsRegulated").HelpText
+                  - blkRegulatoryLicenceNo:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Item" && "RegulatoryLicenceNo" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblRegulatoryLicenceNo:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "RegulatoryLicenceNo")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtRegulatoryLicenceNo:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpRegulatoryLicenceNo:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "RegulatoryLicenceNo").HelpText
+                  - blkShelfLifeMonths:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Item" && "ShelfLifeMonths" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblShelfLifeMonths:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "ShelfLifeMonths")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtShelfLifeMonths:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Format: =TextFormat.Number
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpShelfLifeMonths:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "ShelfLifeMonths").HelpText
+                  - blkVendorName:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Vendor" && "VendorName" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblVendorName:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "VendorName")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtVendorName:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpVendorName:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "VendorName").HelpText
+                  - blkVendorCountry:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Vendor" && "Country" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblVendorCountry:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "Country")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtVendorCountry:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpVendorCountry:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "Country").HelpText
+                  - blkTaxID:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Vendor" && "TaxID" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblTaxID:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "TaxID")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtTaxID:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpTaxID:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "TaxID").HelpText
+                  - blkSuppliesRegulatedGoods:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Vendor" && "SuppliesRegulatedGoods" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblSuppliesRegulatedGoods:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "SuppliesRegulatedGoods")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - tglSuppliesRegulatedGoods:
+                            Control: Classic/Toggle@2.1.0
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =false
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              FalseFill: =RGBA(96, 94, 92, 1)
+                              FalseHoverFill: =RGBA(50, 49, 48, 1)
+                              FalseText: ="No"
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              Size: =12
+                              TrueFill: =RGBA(0, 120, 212, 1)
+                              TrueHoverFill: =RGBA(16, 110, 190, 1)
+                              TrueText: ="Yes"
+                              Width: =160
+                        - hlpSuppliesRegulatedGoods:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "SuppliesRegulatedGoods").HelpText
+                  - blkISO13485CertNo:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Vendor" && "ISO13485CertNo" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblISO13485CertNo:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "ISO13485CertNo")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtISO13485CertNo:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpISO13485CertNo:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "ISO13485CertNo").HelpText
+                  - blkBankName:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Vendor" && "BankName" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblBankName:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "BankName")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtBankName:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpBankName:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "BankName").HelpText
+                  - blkBankAccount:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Vendor" && "BankAccount" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblBankAccount:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "BankAccount")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtBankAccount:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpBankAccount:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "BankAccount").HelpText
+                  - blkVendorPaymentTerms:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Vendor" && "PaymentTerms" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblVendorPaymentTerms:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "PaymentTerms")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - ddVendorPaymentTerms:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =["30 days", "45 days", "60 days", "90 days", "Advance"]
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =12
+                        - hlpVendorPaymentTerms:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "PaymentTerms").HelpText
+                  - blkCostCenterName:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Cost Center" && "CostCenterName" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblCostCenterName:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "CostCenterName")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtCostCenterName:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpCostCenterName:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "CostCenterName").HelpText
+                  - blkDepartment:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Cost Center" && "Department" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblDepartment:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "Department")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - ddDepartment:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =["Sales", "Marketing", "Regulatory Affairs", "Service", "Finance", "Warehouse"]
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =12
+                        - hlpDepartment:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "Department").HelpText
+                  - blkOwner:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Cost Center" && "Owner" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblOwner:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "Owner")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtOwner:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpOwner:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "Owner").HelpText
+                  - blkBudgetYear:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =92
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Visible: =SelectedType = "Cost Center" && "BudgetYear" in VisibleFields.FieldName
+                        Width: =Min(Parent.Width - 48, 720)
+                      Children:
+                        - lblBudgetYear:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =22
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: |-
+                                =With({r: LookUp(VisibleFields, FieldName = "BudgetYear")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
+                        - txtBudgetYear:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =""
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Format: =TextFormat.Number
+                              Height: =38
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 120, 212, 1)
+                              PressedColor: =RGBA(50, 49, 48, 1)
+                              PressedFill: =RGBA(255, 255, 255, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                        - hlpBudgetYear:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =20
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: =LookUp(VisibleFields, FieldName = "BudgetYear").HelpText
+            - FooterContainer1:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  Height: =75
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =12
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingBottom: =8
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                Children:
+                  - lblStatus:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =If(CanSubmit, RGBA(16, 124, 16, 1), RGBA(96, 94, 92, 1))
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =1
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =56
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Size: =11
+                        Text: |-
+                          =If(IsBlank(gLastRequestID), "", "Last submitted: " & gLastRequestID & ".  ") & StatusText
+                        Wrap: =true
+                  - btnClear:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(0, 120, 212, 1)
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =1
+                        Color: =RGBA(0, 120, 212, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        DisabledFill: =RGBA(237, 235, 233, 1)
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Font: =Font.'Segoe UI'
+                        Height: =40
+                        HoverBorderColor: =RGBA(0, 0, 0, 0)
+                        HoverColor: =RGBA(0, 120, 212, 1)
+                        HoverFill: =RGBA(243, 242, 241, 1)
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        OnSelect: |-
+                          =Reset(ddEntity);
+                          Reset(tglNotDuplicate);
+                          Reset(txtCustomerName);
+                          Reset(ddCustomerCountry);
+                          Reset(txtRegistrationNo);
+                          Reset(txtBillingAddress);
+                          Reset(txtContactEmail);
+                          Reset(ddSegment);
+                          Reset(ddCustomerPaymentTerms);
+                          Reset(txtCreditLimit);
+                          Reset(txtItemDescription);
+                          Reset(ddProductFamily);
+                          Reset(ddUnitOfMeasure);
+                          Reset(txtHSCode);
+                          Reset(tglIsRegulated);
+                          Reset(txtRegulatoryLicenceNo);
+                          Reset(txtShelfLifeMonths);
+                          Reset(txtVendorName);
+                          Reset(txtVendorCountry);
+                          Reset(txtTaxID);
+                          Reset(tglSuppliesRegulatedGoods);
+                          Reset(txtISO13485CertNo);
+                          Reset(txtBankName);
+                          Reset(txtBankAccount);
+                          Reset(ddVendorPaymentTerms);
+                          Reset(txtCostCenterName);
+                          Reset(ddDepartment);
+                          Reset(txtOwner);
+                          Reset(txtBudgetYear)
+                        PressedBorderColor: =RGBA(0, 69, 120, 1)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(16, 110, 190, 1)
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Size: =12
+                        Text: ="Clear"
+                        Width: =110
+                  - btnSubmit:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        DisabledFill: =RGBA(237, 235, 233, 1)
+                        DisplayMode: =If(CanSubmit, DisplayMode.Edit, DisplayMode.Disabled)
+                        Fill: =RGBA(0, 120, 212, 1)
+                        FillPortions: =0
+                        Font: =Font.'Segoe UI'
+                        Height: =40
+                        HoverBorderColor: =RGBA(0, 0, 0, 0)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(16, 110, 190, 1)
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        OnSelect: |-
+                          =With(
+                              {rid: "REQ-" & Text(Coalesce(First(Sort(Requests, ID, SortOrder.Descending)).ID, 0) + 1, "0000")},
+                              IfError(
+                                  Patch(Requests, Defaults(Requests), {
+                                      Title: rid,
+                                      RequestType: SelectedType,
+                                      Entity: SelectedEntity,
+                                      Country: Switch(SelectedType, "Customer", ddCustomerCountry.Selected.Value, "Vendor", txtVendorCountry.Text),
+                                      Requestor: User().FullName,
+                                      Status: "Pending approval",
+                                      CurrentStage: "Submitted, waiting for approvers",
+                                      SubmittedAt: Now(),
+                                      CustomerName: If(SelectedType = "Customer", txtCustomerName.Text),
+                                      RegistrationNo: If(SelectedType = "Customer", txtRegistrationNo.Text),
+                                      BillingAddress: If(SelectedType = "Customer", txtBillingAddress.Text),
+                                      ContactEmail: If(SelectedType = "Customer", txtContactEmail.Text),
+                                      Segment: If(SelectedType = "Customer", ddSegment.Selected.Value),
+                                      ItemDescription: If(SelectedType = "Item", txtItemDescription.Text),
+                                      ProductFamily: If(SelectedType = "Item", ddProductFamily.Selected.Value),
+                                      UnitOfMeasure: If(SelectedType = "Item", ddUnitOfMeasure.Selected.Value),
+                                      HSCode: If(SelectedType = "Item", txtHSCode.Text),
+                                      IsRegulated: If(SelectedType = "Item", tglIsRegulated.Value),
+                                      RegulatoryLicenceNo: If(SelectedType = "Item" && tglIsRegulated.Value, txtRegulatoryLicenceNo.Text),
+                                      ShelfLifeMonths: If(SelectedType = "Item" && "ShelfLifeMonths" in VisibleFields.FieldName, Value(txtShelfLifeMonths.Text)),
+                                      VendorName: If(SelectedType = "Vendor", txtVendorName.Text),
+                                      TaxID: If(SelectedType = "Vendor", txtTaxID.Text),
+                                      SuppliesRegulatedGoods: If(SelectedType = "Vendor", tglSuppliesRegulatedGoods.Value),
+                                      ISO13485CertNo: If(SelectedType = "Vendor" && tglSuppliesRegulatedGoods.Value, txtISO13485CertNo.Text),
+                                      CostCenterName: If(SelectedType = "Cost Center", txtCostCenterName.Text),
+                                      Department: If(SelectedType = "Cost Center", ddDepartment.Selected.Value),
+                                      Owner: If(SelectedType = "Cost Center", txtOwner.Text),
+                                      BudgetYear: If(SelectedType = "Cost Center", Value(txtBudgetYear.Text)),
+                                      DuplicateCheck: DupStatus,
+                                      PossibleMatchID: DupRecordID
+                                  });
+                                  If(SelectedType in ["Customer", "Vendor"],
+                                      Patch(SensitiveDetails, Defaults(SensitiveDetails), {
+                                          Title: rid,
+                                          RequestID: rid,
+                                          PaymentTerms: If(SelectedType = "Customer", ddCustomerPaymentTerms.Selected.Value, ddVendorPaymentTerms.Selected.Value),
+                                          CreditLimit: If(SelectedType = "Customer", Value(txtCreditLimit.Text)),
+                                          BankName: If(SelectedType = "Vendor", txtBankName.Text),
+                                          BankAccount: If(SelectedType = "Vendor", txtBankAccount.Text)
+                                      })
+                                  );
+                                  Set(gLastRequestID, rid);
+                                  Notify(rid & " submitted. It's now with the approvers.", NotificationType.Success);
+                                  Reset(ddEntity);
+                                  Reset(tglNotDuplicate);
+                                  Reset(txtCustomerName);
+                                  Reset(ddCustomerCountry);
+                                  Reset(txtRegistrationNo);
+                                  Reset(txtBillingAddress);
+                                  Reset(txtContactEmail);
+                                  Reset(ddSegment);
+                                  Reset(ddCustomerPaymentTerms);
+                                  Reset(txtCreditLimit);
+                                  Reset(txtItemDescription);
+                                  Reset(ddProductFamily);
+                                  Reset(ddUnitOfMeasure);
+                                  Reset(txtHSCode);
+                                  Reset(tglIsRegulated);
+                                  Reset(txtRegulatoryLicenceNo);
+                                  Reset(txtShelfLifeMonths);
+                                  Reset(txtVendorName);
+                                  Reset(txtVendorCountry);
+                                  Reset(txtTaxID);
+                                  Reset(tglSuppliesRegulatedGoods);
+                                  Reset(txtISO13485CertNo);
+                                  Reset(txtBankName);
+                                  Reset(txtBankAccount);
+                                  Reset(ddVendorPaymentTerms);
+                                  Reset(txtCostCenterName);
+                                  Reset(ddDepartment);
+                                  Reset(txtOwner);
+                                  Reset(txtBudgetYear),
+                                  Notify("Couldn't submit: " & FirstError.Message, NotificationType.Error)
+                              )
+                          )
+                        PressedBorderColor: =RGBA(0, 69, 120, 1)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(16, 110, 190, 1)
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Size: =12
+                        Text: ="Submit request"
+                        Width: =180

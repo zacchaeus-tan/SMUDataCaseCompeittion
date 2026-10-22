@@ -1,0 +1,120 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+#
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+#
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+App:
+  Properties:
+    Formulas: |-
+      =RequestTypes = ["Customer", "Item", "Vendor", "Cost Center"];
+      SelectedType = ddRequestType.Selected.Value;
+      SelectedEntity = ddEntity.Selected.Code;
+      
+      // Field rules for the chosen request type, copied locally so the conditional checks below run in the app.
+      TypeRules = ForAll(
+          Filter(RequiredFields, RequestType = SelectedType),
+          {FieldName: FieldName, DisplayLabel: DisplayLabel, Required: Required, ConditionField: ConditionField,
+            ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText}
+      );
+      
+      // What the requestor has entered so far, keyed by the FieldName used in the RequiredFields list.
+      FieldValues = Table(
+          {F: "CustomerName", V: txtCustomerName.Text},
+          {F: "Country", V: Switch(SelectedType, "Customer", ddCustomerCountry.Selected.Value, "Vendor", txtVendorCountry.Text)},
+          {F: "RegistrationNo", V: txtRegistrationNo.Text},
+          {F: "BillingAddress", V: txtBillingAddress.Text},
+          {F: "ContactEmail", V: txtContactEmail.Text},
+          {F: "Segment", V: ddSegment.Selected.Value},
+          {F: "PaymentTerms", V: Switch(SelectedType, "Customer", ddCustomerPaymentTerms.Selected.Value, "Vendor", ddVendorPaymentTerms.Selected.Value)},
+          {F: "CreditLimit", V: txtCreditLimit.Text},
+          {F: "ItemDescription", V: txtItemDescription.Text},
+          {F: "ProductFamily", V: ddProductFamily.Selected.Value},
+          {F: "UnitOfMeasure", V: ddUnitOfMeasure.Selected.Value},
+          {F: "HSCode", V: txtHSCode.Text},
+          {F: "IsRegulated", V: If(tglIsRegulated.Value, "Yes", "No")},
+          {F: "RegulatoryLicenceNo", V: txtRegulatoryLicenceNo.Text},
+          {F: "ShelfLifeMonths", V: txtShelfLifeMonths.Text},
+          {F: "VendorName", V: txtVendorName.Text},
+          {F: "TaxID", V: txtTaxID.Text},
+          {F: "SuppliesRegulatedGoods", V: If(tglSuppliesRegulatedGoods.Value, "Yes", "No")},
+          {F: "ISO13485CertNo", V: txtISO13485CertNo.Text},
+          {F: "BankName", V: txtBankName.Text},
+          {F: "BankAccount", V: txtBankAccount.Text},
+          {F: "CostCenterName", V: txtCostCenterName.Text},
+          {F: "Department", V: ddDepartment.Selected.Value},
+          {F: "Owner", V: txtOwner.Text},
+          {F: "BudgetYear", V: txtBudgetYear.Text}
+      );
+      
+      // A field shows (and is required) when its rule is "Always", or when its condition is met.
+      VisibleFields = Filter(
+          TypeRules,
+          Required <> "Conditional" || LookUp(FieldValues, F = ConditionField).V = ConditionValue
+      );
+      MissingFields = Filter(VisibleFields, IsBlank(Trim(LookUp(FieldValues, F = FieldName).V)));
+      EmailInvalid = SelectedType = "Customer" && !IsBlank(txtContactEmail.Text) && !IsMatch(txtContactEmail.Text, Match.Email);
+      
+      // ---- Live duplicate check (customers only), same clean-up as sharepoint/LISTS.md
+      LegalWords = ["pte", "ltd", "sdn", "bhd", "co", "jsc", "pt", "inc", "gmbh", "ag", "sa", "the"];
+      NameBasic = Concat(
+          Filter(Split(Trim(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Lower(txtCustomerName.Text), ".", " "), ",", " "), "(", " "), ")", " "), "-", " "), "/", " "), "'", " "), """", " "), "&", " "), ":", " "), ";", " "), "#", " "), "+", " ")), " ") As w,
+                 !IsBlank(w.Value) && !(w.Value in LegalWords)),
+          Value, " "
+      );
+      NameKey = Concat(
+          ForAll(Split(NameBasic, " ") As w,
+                 Switch(w.Value, "hosp", "hospital", "ctr", "centre", "center", "centre", "univ", "university", "med", "medical", "lab", "laboratory", "spec", "specialist", "diag", "diagnostic", "gen", "general", "comm", "community", w.Value)),
+          Value, " "
+      );
+      KeyWords = Filter(Split(NameKey, " ") As w, Len(w.Value) >= 4);
+      CustomerRows = ForAll(
+          CustomerMaster,
+          {RecordID: Title, Name: CustomerName, Norm: NormalizedName, Country: Country, RegNo: RegistrationNo}
+      );
+      RegMatch = If(
+          !IsBlank(Trim(txtRegistrationNo.Text)),
+          LookUp(CustomerRows, Upper(RegNo) = Upper(Trim(txtRegistrationNo.Text)))
+      );
+      AliasMatch = If(!IsBlank(NameBasic), LookUp(Aliases, Title = NameBasic || Title = NameKey));
+      NameMatch = If(
+          CountRows(KeyWords) > 0 && !IsBlank(ddCustomerCountry.Selected.Value),
+          First(Filter(CustomerRows As c,
+                       c.Country = ddCustomerCountry.Selected.Value &&
+                       CountRows(Filter(KeyWords As k, !(k.Value in c.Norm))) = 0))
+      );
+      DupStatus = If(
+          SelectedType <> "Customer", "Clear",
+          !IsBlank(RegMatch), "Blocked",
+          !IsBlank(AliasMatch), "Blocked",
+          !IsBlank(NameMatch), "Possible match",
+          "Clear"
+      );
+      DupRecordID = If(DupStatus = "Clear", Blank(), Coalesce(RegMatch.RecordID, AliasMatch.RecordID, NameMatch.RecordID));
+      DupMessage = If(
+          !IsBlank(RegMatch),
+              "This customer already exists: " & RegMatch.Name & " (" & RegMatch.RecordID & ") has registration no. " & RegMatch.RegNo & ".",
+          !IsBlank(AliasMatch),
+              "This customer already exists: " & Char(34) & txtCustomerName.Text & Char(34) & " is a known name for " &AliasMatch.CanonicalName & " (" & AliasMatch.RecordID & ").",
+          !IsBlank(NameMatch),
+              "Possible match: " & NameMatch.Name & " (" & NameMatch.RecordID & ", " & NameMatch.Country & "). If this is a different customer, confirm it with the switch.",
+          ""
+      );
+      
+      CanSubmit = !IsBlank(SelectedEntity) && CountRows(MissingFields) = 0 && !EmailInvalid &&
+          DupStatus <> "Blocked" && (DupStatus <> "Possible match" || tglNotDuplicate.Value);
+      StatusText = If(
+          CanSubmit, "Ready to submit.",
+          Trim(
+              If(IsBlank(SelectedEntity), "Choose a business entity. ", "") &
+              If(CountRows(MissingFields) > 0, "Still needed: " & Concat(MissingFields, DisplayLabel, ", ") & ". ", "") &
+              If(EmailInvalid, "Check the contact email. ", "") &
+              Switch(DupStatus,
+                  "Blocked", "This customer already exists, so it can't be submitted again. ",
+                  "Possible match", If(tglNotDuplicate.Value, "", "Confirm the possible match above. "),
+                  "")
+          )
+      );
+    Theme: =PowerAppsTheme

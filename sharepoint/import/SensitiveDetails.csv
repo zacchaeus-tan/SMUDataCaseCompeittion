@@ -1,0 +1,2 @@
+Title,RequestID,PaymentTerms,CreditLimit,BankName,BankAccount
+SD-TEST,REQ-TEST,Net 30,1000,Test Bank,000-TEST
