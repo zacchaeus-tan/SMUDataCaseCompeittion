@@ -1,0 +1,575 @@
+- ScreenContainer2:
+    Control: GroupContainer@1.5.0
+    Variant: AutoLayout
+    Properties:
+      Fill: =RGBA(245, 245, 245, 1)
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =16
+      PaddingBottom: =16
+      PaddingLeft: =16
+      PaddingRight: =16
+      PaddingTop: =16
+      Width: =Parent.Width
+    Children:
+      - HeaderContainer2:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            FillPortions: =0
+            Height: =75
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =12
+            LayoutMinHeight: =16
+            LayoutMinWidth: =16
+            PaddingBottom: =8
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =8
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+          Children:
+            - lblAppTitle2:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =RGBA(50, 49, 48, 1)
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  FillPortions: =1
+                  FocusedBorderThickness: =4
+                  Font: =Font.'Segoe UI'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =40
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  Size: =18
+                  Text: ="OneRecord - My requests"
+            - lblRequestor2:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Right
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =RGBA(96, 94, 92, 1)
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  FillPortions: =0
+                  FocusedBorderThickness: =4
+                  Font: =Font.'Segoe UI'
+                  Height: =40
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  Size: =11
+                  Text: |-
+                    ="Signed in: " & User().FullName
+                  Width: =260
+            - btnGoNew_2:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 120, 212, 1)
+                  BorderStyle: =BorderStyle.Solid
+                  BorderThickness: =1
+                  Color: =RGBA(0, 120, 212, 1)
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  DisabledFill: =RGBA(237, 235, 233, 1)
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  Font: =Font.'Segoe UI'
+                  Height: =36
+                  HoverBorderColor: =RGBA(0, 0, 0, 0)
+                  HoverColor: =RGBA(0, 120, 212, 1)
+                  HoverFill: =RGBA(243, 242, 241, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  OnSelect: =Navigate(Screen1, ScreenTransition.None)
+                  PressedBorderColor: =RGBA(0, 69, 120, 1)
+                  PressedColor: =RGBA(255, 255, 255, 1)
+                  PressedFill: =RGBA(16, 110, 190, 1)
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Size: =11
+                  Text: ="New request"
+                  Width: =140
+            - btnGoMine_2:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  DisabledFill: =RGBA(237, 235, 233, 1)
+                  Fill: =RGBA(0, 120, 212, 1)
+                  FillPortions: =0
+                  Font: =Font.'Segoe UI'
+                  Height: =36
+                  HoverBorderColor: =RGBA(0, 0, 0, 0)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(16, 110, 190, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  OnSelect: =Navigate(MyRequestsScreen, ScreenTransition.None)
+                  PressedBorderColor: =RGBA(0, 69, 120, 1)
+                  PressedColor: =RGBA(255, 255, 255, 1)
+                  PressedFill: =RGBA(16, 110, 190, 1)
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Size: =11
+                  Text: ="My requests"
+                  Width: =140
+      - BodyContainer2:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(245, 245, 245, 1)
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =16
+            LayoutMinHeight: =16
+            LayoutMinWidth: =16
+          Children:
+            - ListPanel:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingBottom: =12
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =12
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  Width: =Max(360, Parent.Width * 0.45)
+                Children:
+                  - FilterRow:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =40
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                      Children:
+                        - ddStatusFilter:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: ="All"
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =36
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =["All", "Pending approval", "Rejected", "Created in SAP"]
+                              Items.Value: =Value
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
+                              Size: =11
+                              Width: =220
+                        - tglShowAll:
+                            Control: Classic/Toggle@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              Color: =RGBA(50, 49, 48, 1)
+                              Default: =false
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              FalseFill: =RGBA(96, 94, 92, 1)
+                              FalseHoverFill: =RGBA(50, 49, 48, 1)
+                              FalseText: ="Showing my requests"
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =36
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              Size: =11
+                              TrueFill: =RGBA(0, 120, 212, 1)
+                              TrueHoverFill: =RGBA(16, 110, 190, 1)
+                              TrueText: ="Showing all requests (MDM)"
+                              Visible: =IsMDM
+                              Width: =260
+                  - lblListEmpty:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(96, 94, 92, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =32
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Size: =11
+                        Text: ="No requests to show."
+                        Visible: =CountRows(galRequests.AllItems) = 0
+                  - galRequests:
+                      Control: Gallery@2.15.0
+                      Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                      Properties:
+                        BorderColor: =RGBA(237, 235, 233, 1)
+                        BorderThickness: =1
+                        FillPortions: =1
+                        Items: =MyRequestList
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        ShowScrollbar: =true
+                        TemplateFill: =If(ThisItem.IsSelected, RGBA(222, 236, 249, 1), RGBA(255, 255, 255, 1))
+                        TemplatePadding: =0
+                        TemplateSize: =76
+                      Children:
+                        - lblRowTitle:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              OnSelect: =Select(Parent)
+                              Size: =12
+                              Text: =ThisItem.Title & " | " & ThisItem.RequestType & " | " & Coalesce(ThisItem.CustomerName, ThisItem.ItemDescription, ThisItem.VendorName, ThisItem.CostCenterName)
+                              Width: =Parent.TemplateWidth - 120
+                              X: =12
+                              Y: =8
+                        - lblRowStatus:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =Switch(ThisItem.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), RGBA(0, 90, 158, 1))
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =36
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              OnSelect: =Select(Parent)
+                              Size: =10
+                              Text: =ThisItem.Entity & "  |  " & ThisItem.Status & " - " & ThisItem.CurrentStage
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =Parent.TemplateWidth - 24
+                              Wrap: =true
+                              X: =12
+                              Y: =34
+                        - lblRowDays:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Right
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =24
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              OnSelect: =Select(Parent)
+                              Size: =10
+                              Text: =DateDiff(Coalesce(ThisItem.SubmittedAt, ThisItem.Created), Coalesce(ThisItem.CompletedAt, Now()), TimeUnit.Days) & " days open"
+                              Width: =100
+                              X: =Parent.TemplateWidth - 112
+                              Y: =8
+                        - rectRowLine:
+                            Control: Rectangle@2.3.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              Fill: =RGBA(237, 235, 233, 1)
+                              Height: =1
+                              Width: =Parent.TemplateWidth
+                              X: =0
+                              Y: =Parent.TemplateHeight - 1
+            - DetailPanel:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =1
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =6
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingBottom: =16
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =16
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                Children:
+                  - lblPickOne:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(96, 94, 92, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =32
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Size: =11
+                        Text: ="Select a request on the left to see where it stands."
+                        Visible: =IsBlank(galRequests.Selected)
+                  - lblDetailTitle:
+                      Control: Label@2.5.1
+                      Properties:
+                        Visible: =!IsBlank(galRequests.Selected)
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =32
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =16
+                        Text: =SelectedRequest.Title & " - " & SelectedRequest.RequestType & " for " & SelectedRequest.Entity
+                  - lblDetailName:
+                      Control: Label@2.5.1
+                      Properties:
+                        Visible: =!IsBlank(galRequests.Selected)
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =26
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =12
+                        Text: =Coalesce(SelectedRequest.CustomerName, SelectedRequest.ItemDescription, SelectedRequest.VendorName, SelectedRequest.CostCenterName)
+                        Wrap: =true
+                  - lblDetailStatus:
+                      Control: Label@2.5.1
+                      Properties:
+                        Visible: =!IsBlank(galRequests.Selected)
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =Switch(SelectedRequest.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), RGBA(0, 90, 158, 1))
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =30
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =12
+                        Text: =SelectedRequest.Status & " - " & SelectedRequest.CurrentStage
+                        Wrap: =true
+                  - lblHeadWaiting:
+                      Control: Label@2.5.1
+                      Properties:
+                        Visible: =!IsBlank(galRequests.Selected)
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =28
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =12
+                        Text: ="Waiting on"
+                  - lblBodyWaiting:
+                      Control: Label@2.5.1
+                      Properties:
+                        Visible: =!IsBlank(galRequests.Selected)
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =40
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =11
+                        Text: =WaitingText
+                        VerticalAlign: =VerticalAlign.Top
+                        Wrap: =true
+                  - lblHeadSubmitted:
+                      Control: Label@2.5.1
+                      Properties:
+                        Visible: =!IsBlank(galRequests.Selected)
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =28
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =12
+                        Text: ="Submitted details"
+                  - lblBodySubmitted:
+                      Control: Label@2.5.1
+                      Properties:
+                        Visible: =!IsBlank(galRequests.Selected)
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =40
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =11
+                        Text: =SubmittedText
+                        VerticalAlign: =VerticalAlign.Top
+                        Wrap: =true
+                  - lblHeadSensitive:
+                      Control: Label@2.5.1
+                      Properties:
+                        Visible: =!IsBlank(galRequests.Selected)
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =28
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =12
+                        Text: ="Sensitive details (only shown to you if SharePoint allows it)"
+                  - lblBodySensitive:
+                      Control: Label@2.5.1
+                      Properties:
+                        Visible: =!IsBlank(galRequests.Selected)
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =40
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =11
+                        Text: =SensitiveText
+                        VerticalAlign: =VerticalAlign.Top
+                        Wrap: =true

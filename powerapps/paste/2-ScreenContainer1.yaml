@@ -22,7 +22,7 @@
             Height: =75
             LayoutAlignItems: =LayoutAlignItems.Center
             LayoutDirection: =LayoutDirection.Horizontal
-            LayoutGap: =16
+            LayoutGap: =12
             LayoutMinHeight: =16
             LayoutMinWidth: =16
             PaddingBottom: =8
@@ -70,8 +70,67 @@
                   LayoutMinWidth: =16
                   Size: =11
                   Text: |-
-                    ="Requestor: " & User().FullName
-                  Width: =320
+                    ="Signed in: " & User().FullName
+                  Width: =260
+            - btnGoNew_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  DisabledFill: =RGBA(237, 235, 233, 1)
+                  Fill: =RGBA(0, 120, 212, 1)
+                  FillPortions: =0
+                  Font: =Font.'Segoe UI'
+                  Height: =36
+                  HoverBorderColor: =RGBA(0, 0, 0, 0)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(16, 110, 190, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  OnSelect: =Navigate(Screen1, ScreenTransition.None)
+                  PressedBorderColor: =RGBA(0, 69, 120, 1)
+                  PressedColor: =RGBA(255, 255, 255, 1)
+                  PressedFill: =RGBA(16, 110, 190, 1)
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Size: =11
+                  Text: ="New request"
+                  Width: =140
+            - btnGoMine_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 120, 212, 1)
+                  BorderStyle: =BorderStyle.Solid
+                  BorderThickness: =1
+                  Color: =RGBA(0, 120, 212, 1)
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  DisabledFill: =RGBA(237, 235, 233, 1)
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  Font: =Font.'Segoe UI'
+                  Height: =36
+                  HoverBorderColor: =RGBA(0, 0, 0, 0)
+                  HoverColor: =RGBA(0, 120, 212, 1)
+                  HoverFill: =RGBA(243, 242, 241, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  OnSelect: =Navigate(MyRequestsScreen, ScreenTransition.None)
+                  PressedBorderColor: =RGBA(0, 69, 120, 1)
+                  PressedColor: =RGBA(255, 255, 255, 1)
+                  PressedFill: =RGBA(16, 110, 190, 1)
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Size: =11
+                  Text: ="My requests"
+                  Width: =140
       - DupBanner:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout

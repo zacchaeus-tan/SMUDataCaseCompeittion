@@ -15,6 +15,7 @@ LISTS = {  # list GUIDs on the team site
     "RoutingRules": "b547dfe1-fea2-4297-b06b-87fdcd985c53",
     "Roles": "ddcffdf3-071e-4c53-a7a1-602cbe86ad9e",
     "ApprovalLog": "0420543c-3d28-47c5-9218-2e31486b0932",
+    "RequiredFields": "6d7f2d26-8be0-409f-8a85-fbc141d462b1",
 }
 # SharePoint internal column names (lists were created from CSV, so columns are field_1..n in CSV order)
 REQ = {"RequestType": "field_1", "Entity": "field_2", "Country": "field_3", "Requestor": "field_4",
@@ -34,6 +35,7 @@ ROLE = {"Role": "field_1", "Entity": "field_2", "PersonName": "field_3", "Person
 LOG = {"RequestID": "field_1", "Timestamp": "field_2", "Actor": "field_3", "ActorRole": "field_4",
        "Action": "field_5", "Detail": "field_6"}
 SENS = {"RequestID": "field_1", "PaymentTerms": "field_2", "CreditLimit": "field_3"}
+RF = {"RequestType": "field_1", "FieldName": "field_2", "Sensitive": "field_8", "VisibleToRoles": "field_9"}
 
 APIS = {
     "shared_sharepointonline": ("SharePoint",

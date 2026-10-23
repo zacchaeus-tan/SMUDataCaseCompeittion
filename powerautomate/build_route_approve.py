@@ -6,7 +6,7 @@ Each approval also writes an "Assigned" row to ApprovalLog, which build_reminder
 """
 from pathlib import Path
 
-from pkg import (LISTS, LOG, REQ, ROLE, RULE, SENS, SITE, after, condition, definition, log_row, sp, teams_chat,
+from pkg import (LISTS, LOG, REQ, RF, ROLE, RULE, SENS, SITE, after, condition, definition, log_row, sp, teams_chat,
                  write_package)
 
 OUT = Path(__file__).with_name("OneRecord-RouteAndApprove.zip")
@@ -96,7 +96,10 @@ def stage_loop(stage):
                     f"**Duplicate check:** @{{{t('DuplicateCheck')}}} @{{{t('PossibleMatchID')}}}\n\n"
                     f"**Your check:** @{{{role}}} (stage {stage})\n\n"
                     f"@{{if({gap}, concat('**Note:** No ', {role}, ' is set up for ', {entity}, "
-                    f"' in Roles, so this came to MDM. Your decision counts for the ', {role}, ' step.'), '')}}"),
+                    f"' in Roles, so this came to MDM. Your decision counts for the ', {role}, ' step.'), '')}}\n\n"
+                    f"@{{if(and(contains(outputs('Sensitive_roles'), concat(';', {role}, ';')), "
+                    f"not(empty(outputs('Sensitive_link')))), concat('**Payment & bank details:** "
+                    f"[View in the restricted SensitiveDetails list](', outputs('Sensitive_link'), ')'), '')}}"),
                 "WebhookApprovalCreationInput/itemLink": "@{triggerBody()?['{Link}']}",
                 "WebhookApprovalCreationInput/itemLinkDescription": "Open the request in SharePoint",
                 "WebhookApprovalCreationInput/enableNotifications": True,
@@ -157,7 +160,22 @@ s1 = stage_loop(1)
 actions["Find_MDM_analyst"] = after({"type": "Query", "inputs": {
     "from": "@outputs('Get_roles')?['body/value']",
     "where": f"@equals(item()?['{ROLE['Role']}'], 'MDM Analyst')"}}, "Get_roles")
-actions["Filter_stage_1_rules"] = after(s1["Filter_stage_1_rules"], "Find_MDM_analyst")
+# Who may see sensitive fields for this request type (RequiredFields rows with Sensitive = Yes), and the
+# request's row in SensitiveDetails (only Customer/Vendor requests have one). Cards link to it; values stay out.
+actions["Get_required_fields"] = after(sp("GetItems", "RequiredFields", **{
+    "$filter": f"{RF['RequestType']} eq '@{{triggerBody()?['{REQ['RequestType']}']}}'"}), "Find_MDM_analyst")
+actions["Sensitive_fields"] = after({"type": "Query", "inputs": {
+    "from": "@outputs('Get_required_fields')?['body/value']",
+    "where": f"@equals(item()?['{RF['Sensitive']}'], 'Yes')"}}, "Get_required_fields")
+actions["Sensitive_role_lists"] = after({"type": "Select", "inputs": {
+    "from": "@body('Sensitive_fields')", "select": f"@item()?['{RF['VisibleToRoles']}']"}}, "Sensitive_fields")
+actions["Sensitive_roles"] = after({"type": "Compose", "inputs":
+    "@concat(';', replace(join(body('Sensitive_role_lists'), ';'), '; ', ';'), ';')"}, "Sensitive_role_lists")
+actions["Get_sensitive_item"] = after(sp("GetItems", "SensitiveDetails", **{
+    "$filter": f"{SENS['RequestID']} eq '@{{triggerBody()?['Title']}}'", "$top": 1}), "Sensitive_roles")
+actions["Sensitive_link"] = after({"type": "Compose", "inputs":
+    "@{first(outputs('Get_sensitive_item')?['body/value'])?['{Link}']}"}, "Get_sensitive_item")
+actions["Filter_stage_1_rules"] = after(s1["Filter_stage_1_rules"], "Sensitive_link")
 actions["Mark_stage_1"] = update_request(
     ["Filter_stage_1_rules"], Status="Pending approval",
     CurrentStage="Stage 1: waiting for @{length(body('Filter_stage_1_rules'))} approvers in parallel")
@@ -170,36 +188,100 @@ actions["Mark_stage_2"] = update_request(["Filter_stage_2_rules"], CurrentStage=
 actions["Stage_2_approvals"] = after(s2["Stage_2_approvals"], "Mark_stage_2")
 actions.update(rejected_gate(2, "Stage_2_approvals"))
 
-# Approved: build the SAP Business One import file
-actions["Get_sensitive_details"] = after(sp(
-    "GetItems", "SensitiveDetails", **{"$filter": f"{SENS['RequestID']} eq '@{{triggerBody()?['Title']}}'"}),
-    "If_rejected_after_stage_2")
-sens = f"first(outputs('Get_sensitive_details')?['body/value'])"
-record = {"RequestID": "@{triggerBody()?['Title']}"}
-record.update({k: f"@{{{t(k)}}}" for k in ["RequestType", "Entity", "Country"]})
-record["Name"] = f"@{{{NAME_EXPR}}}"
-record.update({k: f"@{{{t(k)}}}" for k in [
-    "RegistrationNo", "BillingAddress", "ContactEmail", "Segment", "ProductFamily", "UnitOfMeasure", "HSCode",
-    "IsRegulated", "RegulatoryLicenceNo", "ShelfLifeMonths", "TaxID", "SuppliesRegulatedGoods", "ISO13485CertNo",
-    "Department", "Owner", "BudgetYear"]})
-record["PaymentTerms"] = f"@{{{sens}?['{SENS['PaymentTerms']}']}}"
-record["CreditLimit"] = f"@{{{sens}?['{SENS['CreditLimit']}']}}"
-actions["SAP_import_record"] = after({"type": "Compose", "inputs": record}, "Get_sensitive_details")
-actions["Create_CSV_table"] = after({"type": "Table", "inputs": {
-    "from": "@createArray(outputs('SAP_import_record'))", "format": "CSV"}}, "SAP_import_record")
-actions["Save_SAP_import_file"] = after(sp(
-    "CreateFile", folderPath="/Shared Documents/SAP_Imports",
-    name="@{triggerBody()?['Title']}-SAP-import.csv", body="@body('Create_CSV_table')"), "Create_CSV_table")
+# Approved: write a SAP Business One Data Transfer Workbench (DTW) file for the new record.
+# Tab-delimited .txt with DTW's two header rows (object property names, then database column names) and one data
+# row. The flow proposes the SAP code from the request number, so it is unique and never clashes with existing
+# codes (C1..., V2..., A-1...). Segment / payment terms go in as text; real SAP uses numeric codes (MDM maps them).
+TAB, CRLF = "decodeUriComponent('%09')", "decodeUriComponent('%0D%0A')"
+sens = "first(outputs('Get_sensitive_item')?['body/value'])"
+rid = "triggerBody()?['Title']"
+req_no = "triggerBody()?['ID']"
+
+
+def txt(expr):
+    """A value as single-line text (tabs and line breaks would break the row)."""
+    return (f"replace(replace(replace(string(coalesce({expr}, '')), {TAB}, ' '), "
+            f"decodeUriComponent('%0D'), ' '), decodeUriComponent('%0A'), ' ')")
+
+
+def yes_no(expr):
+    return f"if(equals({expr}, true), 'tYES', 'tNO')"
+
+
+SAP_CODE = (f"if(equals({t('RequestType')}, 'Customer'), concat('C2', formatNumber({req_no}, '0000')), "
+            f"if(equals({t('RequestType')}, 'Vendor'), concat('V3', formatNumber({req_no}, '000')), "
+            f"if(equals({t('RequestType')}, 'Item'), concat({t('ProductFamily')}, '-', string(add(5000, {req_no}))), "
+            f"concat({t('Entity')}, '-', toUpper(substring(concat({t('Department')}, 'XXX'), 0, 3)), string({req_no})))))")
+code = "outputs('SAP_code')"
+
+# (DTW object, file object name, [(property, database column, value expression)])
+DTW = {
+    "Customer": ("oBusinessPartners", "BusinessPartners", [
+        ("RecordKey", "RecordKey", "'1'"), ("CardCode", "CardCode", code),
+        ("CardName", "CardName", txt(t("CustomerName"))), ("CardType", "CardType", "'cCustomer'"),
+        ("GroupCode", "GroupCode", txt(t("Segment"))), ("FederalTaxID", "LicTradNum", txt(t("RegistrationNo"))),
+        ("Address", "Address", txt(t("BillingAddress"))), ("Country", "Country", txt(t("Country"))),
+        ("EmailAddress", "E_Mail", txt(t("ContactEmail"))),
+        ("PayTermsGrpCode", "GroupNum", txt(f"{sens}?['{SENS['PaymentTerms']}']")),
+        ("CreditLimit", "CreditLine", txt(f"{sens}?['{SENS['CreditLimit']}']")),
+        ("U_Entity", "U_Entity", txt(t("Entity"))), ("U_OneRecordID", "U_OneRecordID", rid)]),
+    "Vendor": ("oBusinessPartners", "BusinessPartners", [
+        ("RecordKey", "RecordKey", "'1'"), ("CardCode", "CardCode", code),
+        ("CardName", "CardName", txt(t("VendorName"))), ("CardType", "CardType", "'cSupplier'"),
+        ("FederalTaxID", "LicTradNum", txt(t("TaxID"))), ("Country", "Country", txt(t("Country"))),
+        ("PayTermsGrpCode", "GroupNum", txt(f"{sens}?['{SENS['PaymentTerms']}']")),
+        ("DefaultBankCode", "BankCode", txt(f"{sens}?['field_4']")),
+        ("DefaultAccount", "DflAccount", txt(f"{sens}?['field_5']")),
+        ("U_Regulated", "U_Regulated", yes_no(t("SuppliesRegulatedGoods"))),
+        ("U_ISO13485", "U_ISO13485", txt(t("ISO13485CertNo"))),
+        ("U_Entity", "U_Entity", txt(t("Entity"))), ("U_OneRecordID", "U_OneRecordID", rid)]),
+    "Item": ("oItems", "Items", [
+        ("RecordKey", "RecordKey", "'1'"), ("ItemCode", "ItemCode", code),
+        ("ItemName", "ItemName", txt(t("ItemDescription"))),
+        ("ItemsGroupCode", "ItmsGrpCod", txt(t("ProductFamily"))),
+        ("InventoryUOM", "InvntryUom", txt(t("UnitOfMeasure"))),
+        ("SupplierCatalogNo", "SuppCatNum", txt("triggerBody()?['ManufacturerPartNo']")),
+        ("U_HSCode", "U_HSCode", txt(t("HSCode"))), ("U_Regulated", "U_Regulated", yes_no(t("IsRegulated"))),
+        ("U_LicenceNo", "U_LicenceNo", txt(t("RegulatoryLicenceNo"))),
+        ("U_ShelfLifeMonths", "U_ShelfLifeMonths", txt(t("ShelfLifeMonths"))),
+        ("U_Entity", "U_Entity", txt(t("Entity"))), ("U_OneRecordID", "U_OneRecordID", rid)]),
+    "Cost Center": ("oProfitCenters", "ProfitCenters", [
+        ("RecordKey", "RecordKey", "'1'"), ("CenterCode", "PrcCode", code),
+        ("CenterName", "PrcName", txt(t("CostCenterName"))), ("InWhichDimension", "DimCode", "'1'"),
+        ("U_Department", "U_Department", txt(t("Department"))), ("U_Owner", "U_Owner", txt(t("Owner"))),
+        ("U_BudgetYear", "U_BudgetYear", txt(t("BudgetYear"))),
+        ("U_Entity", "U_Entity", txt(t("Entity"))), ("U_OneRecordID", "U_OneRecordID", rid)]),
+}
+
+
+def dtw_body(cols):
+    row = lambda xs: f"join(createArray({', '.join(xs)}), {TAB})"
+    return (f"@concat({row([repr(c[0]) for c in cols])}, {CRLF}, {row([repr(c[1]) for c in cols])}, {CRLF}, "
+            f"{row([c[2] for c in cols])}, {CRLF})")
+
+
+actions["SAP_code"] = after({"type": "Compose", "inputs": f"@{SAP_CODE}"}, "If_rejected_after_stage_2")
+actions["SAP_file_name"] = after({"type": "Compose", "inputs":
+    "@concat(triggerBody()?['Title'], '_', " + "".join(
+        f"if(equals({t('RequestType')}, '{k}'), '{v[1]}', " for k, v in DTW.items()) + "'Record'"
+    + ")" * len(DTW) + ", '_DTW.txt')"}, "SAP_code")
+cases = {}
+for k, (obj, _, cols) in DTW.items():
+    key = k.replace(" ", "_")
+    cases[key] = {"case": k, "actions": {f"Save_DTW_{key}": sp(
+        "CreateFile", folderPath="/Shared Documents/SAP_Imports", name="@{outputs('SAP_file_name')}",
+        body=dtw_body(cols))}}
+actions["Write_SAP_import_file"] = after({"type": "Switch", "expression": f"@{t('RequestType')}",
+                                          "cases": cases, "default": {"actions": {}}}, "SAP_file_name")
 actions["Mark_created_in_SAP"] = update_request(
-    ["Save_SAP_import_file"], Status="Created in SAP", CompletedAt="@utcNow()",
-    CurrentStage="Approved. SAP import file: SAP_Imports/@{triggerBody()?['Title']}-SAP-import.csv")
-actions["Log_SAP_file"] = after(sp("PostItem", "ApprovalLog", **{
-    "item/Title": "@triggerBody()?['Title']", f"item/{LOG['RequestID']}": "@triggerBody()?['Title']",
-    f"item/{LOG['Timestamp']}": "@utcNow()", f"item/{LOG['Actor']}": "OneRecord",
-    f"item/{LOG['ActorRole']}": "System", f"item/{LOG['Action']}": "SAP import file created",
-    f"item/{LOG['Detail']}": "SAP_Imports/@{triggerBody()?['Title']}-SAP-import.csv"}), "Mark_created_in_SAP")
+    ["Write_SAP_import_file"], Status="Created in SAP", CompletedAt="@utcNow()", SAPCode="@{outputs('SAP_code')}",
+    CurrentStage="Approved. SAP code @{outputs('SAP_code')}; import file SAP_Imports/@{outputs('SAP_file_name')}")
+actions["Log_SAP_file"] = after(log_row(
+    "@triggerBody()?['Title']", "OneRecord", "System", "SAP import file created",
+    "SAP_Imports/@{outputs('SAP_file_name')} (proposed code @{outputs('SAP_code')})"), "Mark_created_in_SAP")
 actions["Tell_requestor_approved"] = teams_to_requestor(
-    "Good news: your request @{triggerBody()?['Title']} was approved by every approver and the SAP import file has been created.",
+    "Good news: your request @{triggerBody()?['Title']} was approved by every approver. Its proposed SAP code is "
+    "@{outputs('SAP_code')} and the SAP import file has been created.",
     "Log_SAP_file")
 
 flow = definition({"When_a_request_is_submitted": {

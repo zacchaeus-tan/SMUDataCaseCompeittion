@@ -167,4 +167,99 @@ App:
                   "")
           )
       );
+      
+      // ---- My requests screen
+      RolesRows = ForAll(Roles, {Role: Role, Entity: Entity, Name: PersonName, Email: Lower(PersonEmail)});
+      IsMDM = !IsBlank(LookUp(RolesRows, Role = "MDM Analyst" && Email = Lower(User().Email)));
+      ShowAllRequests = IsMDM && tglShowAll.Value;
+      StatusFilter = ddStatusFilter.Selected.Value;
+      MyRequestList = Sort(
+          Filter(Requests,
+                 (ShowAllRequests || 'Created By'.Email = User().Email) &&
+                 (StatusFilter = "All" || Status = StatusFilter)),
+          ID, SortOrder.Descending
+      );
+      SelectedRequest = galRequests.Selected;
+      // The ID is read into a plain text value first: a field of the gallery's selected record didn't
+      // translate into the SharePoint query (it returned no rows), a plain value does.
+      SelectedRequestID = Text(galRequests.Selected.Title);
+      SelectedLog = With(
+          {id: SelectedRequestID},
+          ForAll(
+              Filter(ApprovalLog, RequestID = id),
+              {Role: ActorRole, Action: Action, Actor: Lower(Actor), At: Timestamp}
+          )
+      );
+      // Still waiting: an Assigned row with no Approve/Reject from the same role yet
+      WaitingOn = Filter(
+          SelectedLog As a,
+          a.Action = "Assigned" &&
+          IsBlank(LookUp(SelectedLog As d, d.Role = a.Role && (d.Action = "Approve" || d.Action = "Reject")))
+      );
+      WaitingText = If(
+          CountRows(WaitingOn) = 0, "No one. " & SelectedRequest.Status & ".",
+          Concat(
+              WaitingOn As w,
+              w.Role & " - " &
+              Coalesce(
+                  LookUp(RolesRows, Role = w.Role && Email = w.Actor && (Entity = SelectedRequest.Entity || Entity = "Any")).Name,
+                  LookUp(RolesRows, Email = w.Actor).Name,
+                  w.Actor
+              ) & " (waiting " & DateDiff(w.At, Now(), TimeUnit.Days) & " days)",
+              Char(10)
+          )
+      );
+      SubmittedText = With(
+          {r: SelectedRequest},
+          Concat(
+              Filter(
+                  Table(
+                      {L: "Requestor", V: r.Requestor},
+                      {L: "Submitted", V: Text(r.SubmittedAt, "dd mmm yyyy hh:mm")},
+                      {L: "Customer name", V: r.CustomerName},
+                      {L: "Item description", V: r.ItemDescription},
+                      {L: "Vendor name", V: r.VendorName},
+                      {L: "Cost centre name", V: r.CostCenterName},
+                      {L: "Country", V: r.Country},
+                      {L: "Registration no.", V: r.RegistrationNo},
+                      {L: "Billing address", V: r.BillingAddress},
+                      {L: "Contact email", V: r.ContactEmail},
+                      {L: "Segment", V: r.Segment},
+                      {L: "Manufacturer part no.", V: r.ManufacturerPartNo},
+                      {L: "Product family", V: r.ProductFamily},
+                      {L: "Unit of measure", V: r.UnitOfMeasure},
+                      {L: "HS code", V: r.HSCode},
+                      {L: "Regulated", V: If(r.RequestType = "Item", If(r.IsRegulated, "Yes", "No"))},
+                      {L: "Regulatory licence no.", V: r.RegulatoryLicenceNo},
+                      {L: "Shelf life (months)", V: Text(r.ShelfLifeMonths)},
+                      {L: "Tax ID", V: r.TaxID},
+                      {L: "Supplies regulated goods", V: If(r.RequestType = "Vendor", If(r.SuppliesRegulatedGoods, "Yes", "No"))},
+                      {L: "ISO 13485 certificate no.", V: r.ISO13485CertNo},
+                      {L: "Department", V: r.Department},
+                      {L: "Owner", V: r.Owner},
+                      {L: "Budget year", V: Text(r.BudgetYear)},
+                      {L: "Duplicate check", V: r.DuplicateCheck & If(IsBlank(r.PossibleMatchID), "", " (" & r.PossibleMatchID & ")")}
+                  ),
+                  !IsBlank(V)
+              ),
+              L & ": " & V, Char(10)
+          )
+      );
+      SensitiveRow = With({id: SelectedRequestID}, LookUp(SensitiveDetails, RequestID = id));
+      SensitiveText = If(
+          !(SelectedRequest.RequestType in ["Customer", "Vendor"]), "None for this request type.",
+          IsBlank(SensitiveRow), "Not visible to you.",
+          Concat(
+              Filter(
+                  Table(
+                      {L: "Payment terms", V: SensitiveRow.PaymentTerms},
+                      {L: "Credit limit (SGD)", V: Text(SensitiveRow.CreditLimit, "#,##0")},
+                      {L: "Bank name", V: SensitiveRow.BankName},
+                      {L: "Bank account", V: SensitiveRow.BankAccount}
+                  ),
+                  !IsBlank(V)
+              ),
+              L & ": " & V, Char(10)
+          )
+      );
     Theme: =PowerAppsTheme
