@@ -20,9 +20,17 @@ CHART_TEMPLATE = pio.templates.merge_templates(pio.templates["plotly_white"], go
 )))
 
 
+KPI_HEIGHT = 136  # every KPI card the same height, with or without a change figure
+
+
 def chart(fig):
     fig.update_layout(template=CHART_TEMPLATE)
-    st.plotly_chart(fig, width="stretch", theme=None, config={"displayModeBar": False})
+    st.plotly_chart(fig, theme=None, config={"displayModeBar": False})
+
+
+def table_height(rows):
+    """Pixel height that shows every row of a st.dataframe without scrolling."""
+    return 35 * (rows + 1) + 3
 
 
 def header(section, headline):
