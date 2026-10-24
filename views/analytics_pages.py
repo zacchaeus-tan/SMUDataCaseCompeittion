@@ -10,8 +10,9 @@ from onerecord import advisor, classify, process
 from onerecord.config import COUNTRIES, CURRENT, PRIOR_YEAR, PRODUCTS
 
 from . import common as c
+from . import theme
 
-COLORS = {"A": "#2a6fdb", "B": "#e07b39", "C": "#5b9a68"}
+COLORS = theme.PRODUCT
 ALL = "ALL"  # "All countries" option in the forecast picker
 # one fixed colour per country on every chart (Okabe-Ito, readable with colour blindness)
 COUNTRY_COLORS = {"SG": "#0072B2", "MY": "#E69F00", "TH": "#009E73", "ID": "#CC79A7", "VN": "#56B4E9"}
@@ -183,9 +184,9 @@ def forecasting():
             "Learned impact on units": st.column_config.NumberColumn(format="percent")})
 
     s1, s2, s3 = st.columns([2, 2, 1.3], vertical_alignment="bottom")
-    country = s1.selectbox("Country", [ALL, *c.COUNTRY_ORDER], index=1 + c.COUNTRY_ORDER.index("TH"),
+    country = c.select(s1, "Country", [ALL, *c.COUNTRY_ORDER], index=1 + c.COUNTRY_ORDER.index("TH"),
                            format_func=lambda k: "All countries" if k == ALL else COUNTRIES[k])
-    prod = s2.selectbox("Product", list(PRODUCTS), format_func=lambda p: c.PRODUCT_LABEL[p])
+    prod = c.select(s2, "Product", list(PRODUCTS), format_func=lambda p: c.PRODUCT_LABEL[p])
     show_ma6 = s3.toggle("Show 6-month average", disabled=country == ALL,
                          help="Pick a single country to compare with the 6-month average")
     if country == ALL:

@@ -1,22 +1,23 @@
 <!-- One row of KPI cards, rendered in its own frame by views/common.py: kpi_row. __COLUMNS__, __CARD_HEIGHT__ and
      __CARDS__ are filled in from Python. Numbers count up (Magic UI "Number Ticker"). -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* colours mirror views/theme.py */
   :root {
-    --ink: #1c2430; --muted: #5b6675; --line: #e3e7ed;
-    --good: #1a7f4b; --good-bg: #e6f4ec;
-    --bad: #c4571b; --bad-bg: #fbeee6;
-    --neutral: #1f4e79; --neutral-bg: #e8eff7;
+    --ink: #0b2545; --muted: #334155; --line: #e2e8f0;
+    --good: #15803d; --good-bg: #e3f6ea;
+    --bad: #b91c1c; --bad-bg: #fde8e8;
+    --neutral: #0f766e; --neutral-bg: #e6f4f2;
   }
   html, body { margin: 0; background: transparent; }
-  body { font-family: "Source Sans 3", "Source Sans Pro", -apple-system, "Segoe UI", sans-serif; color: var(--ink); }
+  body { font-family: "Poppins", -apple-system, "Segoe UI", sans-serif; color: var(--ink); }
   .row { display: grid; grid-template-columns: repeat(__COLUMNS__, minmax(0, 1fr)); gap: 16px; padding: 2px 2px 8px; }
   .card {
     position: relative; box-sizing: border-box; height: __CARD_HEIGHT__px; overflow: hidden;
     display: flex; flex-direction: column; justify-content: space-between;
-    padding: 14px 18px; background: #fff; border: 1px solid var(--line); border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+    padding: 14px 18px; background: #fff; border: none; border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(11, 37, 69, 0.07);
   }
   .good { --tone: var(--good); --tone-bg: var(--good-bg); }
   .bad { --tone: var(--bad); --tone-bg: var(--bad-bg); }
@@ -27,7 +28,7 @@
     border: 1px solid #9aa3ad; border-radius: 50%; font-size: 10px; color: #6b7684; cursor: help;
   }
   .value {
-    font-size: 32px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.1;
+    font-size: 28px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.1;
     font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .delta {
@@ -54,6 +55,7 @@
     try { from = store && store.getItem(key) !== null ? +store.getItem(key) : 0; } catch (e) {}
     try { store && store.setItem(key, to); } catch (e) {}
     if (still || from === to) return show(el, to);
+    show(el, from);  // start from the old value straight away, so the final number doesn't flash first
     const start = performance.now(), ms = 1100;
     const step = (now) => {
       const t = Math.min(1, (now - start) / ms), ease = 1 - Math.pow(1 - t, 3);

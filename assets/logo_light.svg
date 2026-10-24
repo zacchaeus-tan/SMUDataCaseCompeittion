@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="48" viewBox="0 0 220 48">
+  <rect x="2" y="8" width="32" height="32" rx="8" fill="#ffffff"/>
+  <rect x="10" y="16" width="16" height="4" rx="2" fill="#0f766e"/>
+  <rect x="10" y="22" width="16" height="4" rx="2" fill="#14b8a6"/>
+  <rect x="10" y="28" width="10" height="4" rx="2" fill="#14b8a6"/>
+  <text x="44" y="32" font-family="Poppins, Helvetica, Arial, sans-serif" font-size="21" font-weight="700"
+        fill="#ffffff" letter-spacing="0.5">ONERECORD</text>
+</svg>

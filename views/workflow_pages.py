@@ -60,12 +60,12 @@ def new_request():
     top = st.columns(3)
     bus = wf.business_units(con)
     bu_name = dict(zip(bus.Title, bus.BusinessUnitName))
-    rtype = top[0].selectbox("What do you need?", wf.request_types(con), key="req_type",
+    rtype = c.select(top[0], "What do you need?", wf.request_types(con), key="req_type",
                              help="From the RequiredFields list: a new data domain appears here once its fields exist")
-    entity = top[1].selectbox("Business entity", list(bus.Title), key="req_entity",
+    entity = c.select(top[1], "Business entity", list(bus.Title), key="req_entity",
                               format_func=lambda k: bu_name.get(k, k),
                               help="From the BusinessUnits list: the MDM team adds a new BU there, no IT change")
-    country = top[2].selectbox("Country", list(COUNTRIES), format_func=lambda k: COUNTRIES[k], key="req_country")
+    country = c.select(top[2], "Country", list(COUNTRIES), format_func=lambda k: COUNTRIES[k], key="req_country")
 
     fields = wf.form_fields(con, rtype)
     values = {"Country": country} if rtype in ("Customer",) else {}
@@ -84,9 +84,9 @@ def new_request():
         key = f"{rtype}_{f.FieldName}"
         help_ = (f.HelpText or None)
         if f.FieldType == "Yes/No":
-            values[f.FieldName] = col.selectbox(label, ["", "Yes", "No"], key=key, help=help_)
+            values[f.FieldName] = c.select(col, label, ["", "Yes", "No"], key=key, help=help_)
         elif f.FieldType == "Choice" and f.FieldName in CHOICES:
-            values[f.FieldName] = col.selectbox(label, [""] + CHOICES[f.FieldName], key=key, help=help_)
+            values[f.FieldName] = c.select(col, label, [""] + CHOICES[f.FieldName], key=key, help=help_)
         else:
             values[f.FieldName] = col.text_input(label, key=key, help=help_)
     if (fields.Sensitive == "Yes").any():
@@ -149,7 +149,7 @@ def my_requests():
     st.dataframe(df[list(STATUS_COLS)], hide_index=True, width="stretch", column_config=STATUS_COLS)
     if df.empty:
         return
-    rid = st.selectbox("Open a request", df.id, index=len(df) - 1)
+    rid = c.select(st, "Open a request", df.id, index=len(df) - 1)
     req = df[df.id == rid].iloc[0]
     ap = wf.table(con, "approvals")
     ap = ap[ap.request_id == rid]
@@ -277,8 +277,8 @@ def audit_log():
     con = c.con()
     log = wf.table(con, "log").drop(columns=["id"])
     f1, f2 = st.columns(2)
-    rid = f1.selectbox("Request", ["All"] + sorted(log.request_id.unique().tolist()))
-    act = f2.multiselect("Action", sorted(log.action.unique()))
+    rid = c.select(f1, "Request", ["All"] + sorted(log.request_id.unique().tolist()))
+    act = f2.multiselect("Action", sorted(log.action.unique()), filter_mode=None)
     if rid != "All":
         log = log[log.request_id == rid]
     if act:
@@ -310,7 +310,7 @@ def rules():
         g = st.columns([2, 2, 2])
         head = g[0].text_input("BU Head (approver)", "LGD BU Head")
         email = g[1].text_input("BU Head email", "<teammate-2 SMU email>")
-        tz = g[2].selectbox("BU Head time zone", ["Asia/Singapore", "Asia/Kuala_Lumpur", "Asia/Bangkok",
+        tz = c.select(g[2], "BU Head time zone", ["Asia/Singapore", "Asia/Kuala_Lumpur", "Asia/Bangkok",
                                                   "Asia/Jakarta", "Asia/Ho_Chi_Minh"], index=4)
         qa = st.checkbox("Every item from this BU also needs Quality/Regulatory sign-off (new regulatory requirement)",
                          value=True)

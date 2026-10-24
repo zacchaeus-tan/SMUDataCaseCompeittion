@@ -1,5 +1,22 @@
-/* Page-wide styles, injected once per run from app.py (views/common.py: page_style). */
+/* Page-wide styles, injected once per run from app.py (views/common.py: page_style).
+   Colours mirror views/theme.py. */
 
+:root {
+  --or-primary: #0f766e;
+  --or-navy: #0b2545;
+  --or-accent: #14b8a6;
+  --or-page: #f7fafc;
+  --or-card: #ffffff;
+  --or-text: #334155;
+  --or-muted: #94a3b8;
+  --or-good: #16a34a;
+  --or-bad: #dc2626;
+  --or-warn: #f59e0b;
+  --or-shadow: 0 2px 12px rgba(11, 37, 69, 0.07);
+  --or-radius: 14px;
+}
+
+/* ---------------------------------------------------------------- fade-in */
 /* Top-level blocks fade in, one after another, when they first appear */
 @keyframes or-fade {
   from { opacity: 0; }
@@ -21,3 +38,113 @@
 @media (prefers-reduced-motion: reduce) {
   [data-testid="stMainBlockContainer"] * { animation: none !important; }
 }
+
+/* ---------------------------------------------------------------- smooth controls */
+/* the slider handle glides between stops instead of jumping */
+[data-testid="stSlider"] [style*="left:"] { transition: left 0.18s ease-out; }
+/* keep the page at full strength while it updates after a filter change (no grey flash) */
+[data-testid="stMain"] [data-stale="true"] { opacity: 1 !important; transition: none !important; }
+
+/* ---------------------------------------------------------------- layout */
+[data-testid="stMainBlockContainer"] { padding-top: 1rem; padding-bottom: 1rem; max-width: 1500px; }
+[data-testid="stMainBlockContainer"] [data-testid="stVerticalBlock"] { gap: 0.75rem; }
+[class*="st-key-card"] [data-testid="stVerticalBlock"] { gap: 0.4rem; }
+[class*="st-key-card"] h5 { padding: 0 0 2px; }
+h5 { font-weight: 600 !important; color: var(--or-navy); }
+
+/* Cards: charts, tables, expanders, metrics and any container keyed "card-..." sit on white panels */
+[data-testid="stPlotlyChart"],
+[data-testid="stDataFrame"],
+[data-testid="stTable"],
+[data-testid="stExpander"] details,
+[data-testid="stMetric"],
+[class*="st-key-card"] {
+  background: var(--or-card);
+  border-radius: var(--or-radius);
+  box-shadow: var(--or-shadow);
+  border: none !important;
+}
+[data-testid="stPlotlyChart"] { padding: 8px 10px; box-sizing: border-box; }
+[data-testid="stDataFrame"], [data-testid="stTable"] { padding: 6px; box-sizing: border-box; }
+[class*="st-key-card"] { padding: 14px 18px; }
+/* a chart or table inside a card is part of that card, not a second card */
+[class*="st-key-card"] [data-testid="stPlotlyChart"],
+[class*="st-key-card"] [data-testid="stDataFrame"],
+[class*="st-key-card"] [data-testid="stTable"] { box-shadow: none; padding: 0; background: transparent; }
+
+/* metrics: compact white cards, value in navy */
+[data-testid="stMetric"] { padding: 12px 18px; }
+[data-testid="stMetricLabel"] p { font-size: 13px; color: var(--or-text); }
+[data-testid="stMetricValue"] { font-size: 28px; font-weight: 600; color: var(--or-navy); }
+
+/* ---------------------------------------------------------------- page header */
+.or-topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  background: var(--or-card); border-radius: var(--or-radius); box-shadow: var(--or-shadow); padding: 10px 20px;
+}
+.or-topbar > div:first-child { flex: 1 1 420px; min-width: 0; }
+.or-topbar .or-section { font-size: 12.5px; font-weight: 600; color: var(--or-primary); letter-spacing: 0.02em; }
+.or-topbar h1 { margin: 0; padding: 0; font-size: 20px; line-height: 1.3; font-weight: 600; color: var(--or-navy); }
+.or-topbar .or-who { display: flex; align-items: center; gap: 12px; }
+.or-topbar .or-period {
+  font-size: 12px; color: var(--or-text); background: var(--or-page); border-radius: 999px; padding: 5px 14px;
+}
+.or-topbar .or-avatar {
+  display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--or-primary); color: #fff; font-size: 12.5px; font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- sidebar */
+[data-testid="stSidebar"] [data-testid="stPageLink"] a { border-radius: 12px; padding: 5px 12px; color: #ffffff; }
+[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover { background: rgba(255, 255, 255, 0.14); }
+[data-testid="stSidebar"] [data-testid="stPageLink"] a span { color: inherit; }
+/* current page: a light pill that runs into the page, like a tab */
+[data-testid="stSidebar"] [class*="st-key-navon"] a,
+[data-testid="stSidebar"] [class*="st-key-navon"] a:hover {
+  background: var(--or-page); color: var(--or-navy); font-weight: 600;
+  border-radius: 24px 0 0 24px; margin-right: -2rem; padding-right: 2rem;
+}
+[data-testid="stSidebar"] .or-navlabel {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72); margin: 14px 0 2px 12px;
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] details {
+  background: rgba(255, 255, 255, 0.08); box-shadow: none; border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] summary { color: #ffffff; }
+
+/* ---------------------------------------------------------------- overview */
+/* each action: number, tag, title, reason, then its evidence link aligned with the text; a hairline between items */
+[class*="st-key-act-"] { gap: 2px !important; padding-top: 8px; border-top: 1px solid #eef2f6; }
+.st-key-act-1 { padding-top: 0; border-top: none; }
+[class*="st-key-act-"] [data-testid="stHorizontalBlock"] { gap: 8px; }
+[class*="st-key-act-"] [data-testid="stPageLink"] { display: flex; justify-content: flex-end; }
+[class*="st-key-act-"] [data-testid="stPageLink"] a { padding: 0; min-height: 0; color: var(--or-primary); }
+[class*="st-key-act-"] [data-testid="stPageLink"] a p { font-size: 12.5px; font-weight: 600; }
+[class*="st-key-act-"] [data-testid="stPageLink"] a span { color: var(--or-primary); font-size: 16px; }
+[class*="st-key-card"] h5 { padding-top: 0 !important; margin-top: 0; }
+.or-action { display: flex; gap: 12px; align-items: center; }
+.or-body { margin-left: 38px; }
+.or-body .or-why b { color: var(--or-navy); font-weight: 600; }
+.or-action .or-num {
+  flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--or-primary); color: #fff; font-size: 13px; font-weight: 600;
+}
+.or-body .or-what { font-size: 14.5px; font-weight: 600; color: var(--or-navy); line-height: 1.3; }
+.or-body .or-why { font-size: 13px; color: var(--or-text); line-height: 1.45; margin-top: 2px; }
+.or-tag {
+  display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; margin-right: 6px;
+  vertical-align: 1px;
+}
+.or-tag.bad { background: #fde8e8; color: #b91c1c; }
+.or-tag.good { background: #e3f6ea; color: #15803d; }
+.or-tag.warn { background: #fff3d6; color: #92400e; }
+
+.or-strip {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px;
+  background: var(--or-card); border-radius: var(--or-radius); box-shadow: var(--or-shadow);
+  padding: 9px 18px; font-size: 13px; color: var(--or-text);
+}
+.or-strip b { color: var(--or-navy); font-size: 14px; }
+.or-strip .or-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.or-strip .or-title { font-weight: 600; color: var(--or-primary); }
