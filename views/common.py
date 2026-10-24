@@ -27,7 +27,6 @@ CHART_TEMPLATE = pio.templates.merge_templates(pio.templates["plotly_white"], go
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 KPI_HEIGHT = 132  # every KPI card the same height, with or without a change figure
-KPI_ROW = (ASSETS / "kpi_row.html").read_text()
 
 
 def page_style():
@@ -76,7 +75,8 @@ def kpi(label, value, *, prefix="", suffix="", decimals=0, delta=None, tone="neu
 
 def kpi_row(cards):
     """A row of equal-sized KPI cards."""
-    html = (KPI_ROW.replace("__COLUMNS__", str(len(cards))).replace("__CARD_HEIGHT__", str(KPI_HEIGHT))
+    template = (ASSETS / "kpi_row.html").read_text()  # read each time, so edits show on refresh
+    html = (template.replace("__COLUMNS__", str(len(cards))).replace("__CARD_HEIGHT__", str(KPI_HEIGHT))
             .replace("__CARDS__", "".join(cards)))
     components.html(html, height=KPI_HEIGHT + 12)
 
