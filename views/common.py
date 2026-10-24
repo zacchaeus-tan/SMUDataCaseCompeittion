@@ -52,8 +52,10 @@ KPI_HEIGHT = 132  # every KPI card the same height, with or without a change fig
 
 
 def page_style():
-    """Page-wide CSS: sections fade in on load."""
+    """Page-wide CSS, plus the script that draws line charts from left to right as they come on screen."""
     st.html(f"<style>{(ASSETS / 'app.css').read_text()}</style>")
+    with st.container(key="orscript"):  # hidden (app.css); the script works on the page around its frame
+        components.html(f"<script>{(ASSETS / 'chart_draw.js').read_text()}</script>", height=0)
 
 
 def chart(fig):
