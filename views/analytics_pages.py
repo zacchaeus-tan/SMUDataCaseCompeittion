@@ -33,19 +33,26 @@ def _definition():
 
 # --------------------------------------------------------------------------- growth
 def growth():
-    st.title("Five-country growth")
     g = c.regional()["growth"]
     g["country_name"] = g.country.map(COUNTRIES)
+    ab = g[g["product"] != "C"]
+    by_country = ab.groupby("country")[["units_now", "units_prev"]].sum()
+    lead = (by_country.units_now / by_country.units_prev - 1).nlargest(2).index.map(COUNTRIES)
+    worst = ab.loc[ab.unit_growth.idxmin()]
+    headline = f"{lead[0]} and {lead[1]} lead growth"
+    if worst.unit_growth < 0:
+        headline += f", while {COUNTRIES[worst.country]} product {worst['product']} is down {-worst.unit_growth:.0%}"
+    c.header("Five-country growth", headline)
 
     tot_now, tot_prev = g.units_now.sum(), g.units_prev.sum()
     val_now, val_prev = g.value_now.sum(), g.value_prev.sum()
     k = st.columns(4)
-    k[0].metric("Units, Apr–Sep 2026", f"{tot_now:,.0f}", c.pct(tot_now / tot_prev - 1))
-    k[1].metric("Order value (SGD)", f"{val_now / 1e6:,.2f}M", c.pct(val_now / val_prev - 1))
+    k[0].metric("Units, Apr–Sep 2026", f"{tot_now:,.0f}", c.pct(tot_now / tot_prev - 1), border=True)
+    k[1].metric("Order value (SGD)", f"{val_now / 1e6:,.2f}M", c.pct(val_now / val_prev - 1), border=True)
     k[2].metric("Active customers", f"{c.regional()['clean'].query('month >= @CURRENT[0]').customer_id.nunique()}",
-                help="Real customers after merging duplicate records")
+                help="Real customers after merging duplicate records", border=True)
     best = g.loc[g[g["product"] != "C"].unit_growth.idxmax()]
-    k[3].metric("Fastest growing (A/B)", f"{best.country}, product {best['product']}", c.pct(best.unit_growth))
+    k[3].metric("Fastest growing (A/B)", f"{best.country}, product {best['product']}", c.pct(best.unit_growth), border=True)
     _definition()
 
     _growth_map(g)
@@ -57,7 +64,7 @@ def growth():
         fig = px.imshow(m, text_auto="+.0%", color_continuous_scale=DIVERGING, zmin=-0.3, zmax=0.3, aspect="auto",
                         labels=dict(color="YoY", x="Product", y=""))
         fig.update_layout(height=330, margin=dict(l=0, r=0, t=10, b=0), coloraxis_showscale=False)
-        st.plotly_chart(fig, width="stretch")
+        c.chart(fig)
         st.caption("Product C (equipment) sells only 30–50 units per country each half-year, so its growth "
                    "figures swing a lot. Treat them as a rough guide.")
     with right:
@@ -80,7 +87,7 @@ def growth():
                   category_orders={"country": c.COUNTRY_ORDER}, color_discrete_map=COUNTRY_COLORS)
     fig.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units", xaxis_title="",
                       legend_title="")
-    st.plotly_chart(fig, width="stretch")
+    c.chart(fig)
 
     st.markdown("##### Takeaways")
     vn_b = g[(g.country == "VN") & (g["product"] == "B")].iloc[0]
@@ -131,23 +138,24 @@ def _growth_map(g):
                     showcountries=True, countrycolor="#bbb", showland=True, landcolor="#f2f2f2",
                     showocean=True, oceancolor="#e8f0f8", showframe=False)
     fig.update_layout(height=430, margin=dict(l=0, r=0, t=10, b=0))
-    st.plotly_chart(fig, width="stretch")
+    c.chart(fig)
     st.caption("Colour shows year-on-year growth in units. Bubble size shows units ordered in Apr–Sep 2026.")
 
 
 # --------------------------------------------------------------------------- forecasting
 def forecasting():
-    st.title("Forecasting")
     f = c.forecasts()
     bt, acc = f["backtest"], f["accuracy"]
     from onerecord.forecast import wape
     ab = bt[bt["product"] != "C"]
+    cut = 1 - wape(ab, "calendar_model") / wape(ab, "baseline_ma6")
+    c.header("Forecasting", f"The calendar model cuts forecast error by {cut:.0%} compared with the 6-month average")
     k = st.columns(4)
-    k[0].metric("Today: 6-month average", f"{wape(ab, 'baseline_ma6'):.1%} error")
+    k[0].metric("Today: 6-month average", f"{wape(ab, 'baseline_ma6'):.1%} error", border=True)
     k[1].metric("OneRecord calendar model", f"{wape(ab, 'calendar_model'):.1%} error",
-                f"{wape(ab, 'calendar_model') / wape(ab, 'baseline_ma6') - 1:+.0%}", delta_color="inverse")
-    k[2].metric("Series improved", f"{(acc[acc['product'] != 'C'].Improvement > 0).sum()} of 10", help="Products A and B")
-    k[3].metric("Horizon tested", "1–3 months", help="Rolling origins Apr–Sep 2026; error = WAPE")
+                f"{wape(ab, 'calendar_model') / wape(ab, 'baseline_ma6') - 1:+.0%}", delta_color="inverse", border=True)
+    k[2].metric("Series improved", f"{(acc[acc['product'] != 'C'].Improvement > 0).sum()} of 10", help="Products A and B", border=True)
+    k[3].metric("Horizon tested", "1–3 months", help="Rolling origins Apr–Sep 2026; error = WAPE", border=True)
     st.caption("Error is measured as WAPE: total absolute error divided by actual units. It covers Products A and "
                "B, forecasting 1–3 months ahead from each month Apr–Sep 2026, using only the data available at "
                "the time.")
@@ -190,7 +198,7 @@ def forecasting():
                     line=dict(color=COLORS[prod], dash="dash"))
     fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units",
                       legend=dict(orientation="h", y=-0.2))
-    st.plotly_chart(fig, width="stretch")
+    c.chart(fig)
     row = acc[(acc.country == country) & (acc["product"] == prod)].iloc[0]
     st.caption(f"{COUNTRIES[country]}, product {prod}: the 6-month average's error is {row['MA6 error']:.1%}, "
                f"the model's is {row['Model error']:.1%}.")
@@ -264,28 +272,67 @@ def _ai_brief(plan):
 
 
 # --------------------------------------------------------------------------- actions
-def actions():
-    st.title("Sales actions")
-    cmp = c.regional()["compare"]
-    k = st.columns(4)
-    k[0].metric("Customer records in SAP", cmp["raw_customers"])
-    k[1].metric("Real customers", cmp["clean_customers"], f"{cmp['clean_customers'] - cmp['raw_customers']}",
-                delta_color="off")
-    k[2].metric("Drop-off alerts", len(cmp["clean_drop"]), f"{len(cmp['clean_drop']) - len(cmp['raw_drop'])} vs raw",
-                delta_color="inverse", help="With duplicate records, a customer whose orders moved to a new record "
-                                            "looks like they stopped ordering.")
-    k[3].metric("Cross-sell leads", len(cmp["clean_xsell"]), f"{len(cmp['clean_xsell']) - len(cmp['raw_xsell'])} vs raw",
-                delta_color="inverse", help="With duplicate records, one hospital can be split into an A-only and a "
-                                            "B-only record, which looks like a cross-sell gap.")
+def _flag_false(raw, clean, golden):
+    """Label each alert raised on raw SAP records: real, the same customer counted again, or a false alarm."""
+    cust = raw.id.map(golden).fillna(raw.id)
+    status = pd.Series("False alarm", index=raw.index)
+    status[cust.isin(clean.id)] = "Real"
+    status[cust.isin(clean.id) & cust.duplicated()] = "Counted twice"
+    return raw.assign(status=status).sort_values("status", key=lambda s: s.eq("Real"), kind="stable")
 
+
+STATUS_COL = st.column_config.TextColumn("Check", help="False alarm or counted twice: caused by duplicate records, "
+                                                       "and gone once duplicates are merged")
+
+
+def actions():
+    cmp = c.regional()["compare"]
+    c.header("Sales actions", f"{len(cmp['clean_drop'])} customers are ordering much less, with about "
+                              f"S${cmp['clean_drop'].value_at_risk_per_q.sum():,.0f} a quarter at risk")
+    raw = st.toggle("Show raw SAP records (before duplicates are merged)",
+                    help="Runs the same analysis on the customer records as they sit in SAP today")
+    if raw:
+        golden = c.data_quality()["clusters"].set_index("record_id").golden_id
+        drop = _flag_false(cmp["raw_drop"], cmp["clean_drop"], golden)
+        xsell = _flag_false(cmp["raw_xsell"], cmp["clean_xsell"], golden)
+        false_drop, false_xsell = (drop.status != "Real").sum(), (xsell.status != "Real").sum()
+    else:
+        drop, xsell = cmp["clean_drop"], cmp["clean_xsell"]
+
+    k = st.columns(4)
+    if raw:
+        k[0].metric("Customer records in SAP", cmp["raw_customers"], border=True)
+        k[1].metric("Drop-off alerts", len(drop), f"{false_drop} not real", delta_color="off", border=True)
+        k[2].metric("Cross-sell leads", len(xsell), f"{false_xsell} not real", delta_color="off", border=True)
+    else:
+        k[0].metric("Real customers", cmp["clean_customers"],
+                    f"{cmp['clean_customers'] - cmp['raw_customers']} duplicates merged", delta_color="off",
+                    border=True)
+        k[1].metric("Drop-off alerts", len(drop), f"{len(drop) - len(cmp['raw_drop'])} vs raw records",
+                    delta_color="inverse", border=True,
+                    help="With duplicate records, a customer whose orders moved to a new record looks like they "
+                         "stopped ordering.")
+        k[2].metric("Cross-sell leads", len(xsell), f"{len(xsell) - len(cmp['raw_xsell'])} vs raw records",
+                    delta_color="inverse", border=True,
+                    help="With duplicate records, one hospital can be split into an A-only and a B-only record, "
+                         "which looks like a cross-sell gap.")
+    k[3].metric("Value at risk per quarter", f"S${drop.value_at_risk_per_q.sum():,.0f}", border=True)
+    if raw:
+        st.warning(f"On raw records, {false_drop} of {len(drop)} drop-off alerts and {false_xsell} of {len(xsell)} "
+                   f"cross-sell leads are false or counted twice, because the same customer has more than one record. "
+                   f"Turn the switch off to see the cleaned view.")
+
+    status = ["status"] if raw else []
     t1, t2 = st.tabs(["Customers dropping off", "Cross-sell opportunities"])
     with t1:
-        d = cmp["clean_drop"]
+        d = drop
         st.markdown(f"{len(d)} established customers ordered at least 40% less last quarter than in the same "
                     f"quarter last year, and than their own recent average. Value at risk is about "
                     f"S${d.value_at_risk_per_q.sum():,.0f} per quarter.")
-        st.dataframe(d[["name", "country", "units_last_q", "units_same_q_last_year", "change", "value_at_risk_per_q",
-                        "last_order"]], hide_index=True, width="stretch", column_config={
+        st.dataframe(d[status + ["name", "country", "units_last_q", "units_same_q_last_year", "change",
+                                 "value_at_risk_per_q", "last_order"]], hide_index=True, width="stretch",
+                     column_config={
+            "status": STATUS_COL,
             "name": st.column_config.TextColumn("Customer"),
             "country": COUNTRY_COL,
             "units_last_q": st.column_config.NumberColumn("Units last quarter"),
@@ -296,12 +343,14 @@ def actions():
         st.markdown("**Suggested next step:** account managers call the top 10 by value within two weeks and record "
                     "the reason (competitor, budget, service issue), so patterns by country become visible.")
     with t2:
-        x = cmp["clean_xsell"]
+        x = xsell
         st.markdown(f"{len(x)} customers buy only one of Products A and B, while most similar customers buy both. "
                     f"If all of them bought both, that would be worth about "
                     f"S${x.est_value_sgd_per_year.sum() / 1e6:,.1f}M a year.")
-        st.dataframe(x[["name", "country", "segment", "buys", "missing", "peers_buying_both", "est_units_per_year",
-                        "est_value_sgd_per_year"]], hide_index=True, width="stretch", column_config={
+        st.dataframe(x[status + ["name", "country", "segment", "buys", "missing", "peers_buying_both",
+                                 "est_units_per_year", "est_value_sgd_per_year"]], hide_index=True, width="stretch",
+                     column_config={
+            "status": STATUS_COL,
             "name": st.column_config.TextColumn("Customer"),
             "country": COUNTRY_COL,
             "segment": st.column_config.TextColumn("Segment"),
@@ -324,17 +373,19 @@ REVIEW_COLS = {"message_id": "Message", "subject": "Subject", "body": "Body", "p
 
 
 def inbound():
-    st.title("Orders, enquiries and requests")
-    st.caption("The regional view counts orders only. This page shows how incoming emails are sorted.")
     t = c.triage()
     main, hold = t["main"], t["holdout"]
+    c.header("Orders vs enquiries", f"Rules sort {(main.predicted == main.true_label).mean():.0%} of the mailbox "
+                                    f"correctly and pass {(hold.predicted == 'review').sum()} of {len(hold)} messy "
+                                    f"emails to a person")
+    st.caption("The regional view counts orders only. This page shows how incoming emails are sorted.")
     with st.expander("How emails are sorted"):
         st.markdown("First by channel (a dedicated order inbox, and the form for setup requests), then by rules the "
                     "MDM team can read, then by an AI prompt for whatever is left. Anything uncertain goes to a "
                     "person. There is no custom model to train or maintain.")
     k = st.columns(4)
     for i, lab in enumerate(["purchase_order", "enquiry", "follow_up", "mdm_request"]):
-        k[i].metric(classify.LABELS[lab], int((main.predicted == lab).sum()))
+        k[i].metric(classify.LABELS[lab], int((main.predicted == lab).sum()), border=True)
     by = main[main.predicted != "review"].groupby(["country", "predicted"]).size().reset_index(name="emails")
     by["predicted"] = by.predicted.map(classify.LABELS)
     label_order = [classify.LABELS[lab] for lab in ["purchase_order", "enquiry", "follow_up", "mdm_request"]]
@@ -342,20 +393,20 @@ def inbound():
                  category_orders={"country": c.COUNTRY_ORDER, "predicted": label_order},
                  color_discrete_sequence=LABEL_COLORS)
     fig.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=0), legend_title="", xaxis_title="")
-    st.plotly_chart(fig, width="stretch")
+    c.chart(fig)
 
     a, b = st.columns(2)
     with a:
         st.markdown("##### Accuracy on the mailbox sample (660 emails)")
         acc = (main.predicted == main.true_label).mean()
-        st.metric("Correct", f"{acc:.0%}")
+        st.metric("Correct", f"{acc:.0%}", border=True)
         st.caption("Likely optimistic, because the synthetic emails follow patterns the rules were written for.")
     with b:
         st.markdown("##### Stress test: 24 hand-written messy emails")
         auto = hold[hold.predicted != "review"]
         st.metric("Labelled by rules", f"{len(auto)} of {len(hold)}",
                   f"{(auto.predicted == auto.true_label).mean():.0%} of those correct" if len(auto) else None,
-                  delta_color="off")
+                  delta_color="off", border=True)
         st.caption("The rules made no mistakes, but sent most of the messy emails to review. The AI step is "
                    "meant to handle these.")
     st.markdown("##### Review queue (stress test)")
@@ -378,16 +429,18 @@ def inbound():
 
 # --------------------------------------------------------------------------- data quality
 def quality():
-    st.title("Data quality")
     q = c.data_quality()
     cl, pairs, s = q["clusters"], q["pairs"], q["score"]
     dups = cl[cl.cluster_size > 1]
+    is_dup = cl.record_id != cl.golden_id
+    c.header("Data quality", f"{is_dup.sum()} of {len(cl)} customer records ({is_dup.mean():.0%}) are duplicates "
+                             f"of another record")
     k = st.columns(4)
-    k[0].metric("Customer records", len(cl))
+    k[0].metric("Customer records", len(cl), border=True)
     k[1].metric("Duplicate records found", int((cl.record_id != cl.golden_id).sum()),
-                f"{(cl.record_id != cl.golden_id).mean():.0%} of records", delta_color="off")
-    k[2].metric("Sent to human review", int((pairs.decision == "review").sum()))
-    k[3].metric("Duplicate item codes", len(q["item_map"]))
+                f"{(cl.record_id != cl.golden_id).mean():.0%} of records", delta_color="off", border=True)
+    k[2].metric("Sent to human review", int((pairs.decision == "review").sum()), border=True)
+    k[3].metric("Duplicate item codes", len(q["item_map"]), border=True)
     st.caption(f"Checked against the synthetic answer key: precision {s['precision']:.0%}, recall {s['recall']:.0%} "
                f"({s['found_pairs']} of {s['true_pairs']} duplicate pairs). Real SAP data will be messier, which "
                f"is why borderline matches go to human review.")
@@ -431,7 +484,6 @@ def _inputs(spec):
 
 
 def business_case():
-    st.title("Business case")
     d = c.raw()
     bd, touch = c.process_baseline()
     summary = st.container()  # filled in once the assumptions below have been read
@@ -458,30 +510,30 @@ def business_case():
 
     st.markdown("##### Where the time goes today")
     k = st.columns(4)
-    k[0].metric("Median time to SAP", f"{d['requests'].cycle_days.median():.1f} days")
-    k[1].metric("Slowest 10%", f"{d['requests'].cycle_days.quantile(.9):.0f}+ days")
-    k[2].metric("Bounced back at least once", f"{(d['requests'].bounces > 0).mean():.0%}")
-    k[3].metric("Time spent on actual work", f"{touch:.1%}", help="The rest of the time is spent waiting")
+    k[0].metric("Median time to SAP", f"{d['requests'].cycle_days.median():.1f} days", border=True)
+    k[1].metric("Slowest 10%", f"{d['requests'].cycle_days.quantile(.9):.0f}+ days", border=True)
+    k[2].metric("Bounced back at least once", f"{(d['requests'].bounces > 0).mean():.0%}", border=True)
+    k[3].metric("Time spent on actual work", f"{touch:.1%}", help="The rest of the time is spent waiting", border=True)
     fig = px.bar(bd, x="share", y="stage", orientation="h", text_auto=".0%", color_discrete_sequence=["#1f4e79"])
     fig.update_layout(height=220, margin=dict(l=0, r=0, t=10, b=0), xaxis_tickformat=".0%", yaxis_title="",
                       xaxis_title="share of elapsed time")
-    st.plotly_chart(fig, width="stretch")
+    c.chart(fig)
 
     st.markdown("##### With OneRecord (simulated on the same 150 requests)")
     sim = process.simulate(d["requests"], d["steps"], bounce_avoided=bounce / 100, notice_cut=notice / 100,
                            escalate_after_days=esc)
     now_med, fut_med = sim.cycle_days.median(), sim.future_days.median()
     k = st.columns(3)
-    k[0].metric("Median time to SAP", f"{fut_med:.1f} days", f"{fut_med - now_med:+.1f} days", delta_color="inverse")
+    k[0].metric("Median time to SAP", f"{fut_med:.1f} days", f"{fut_med - now_med:+.1f} days", delta_color="inverse", border=True)
     k[1].metric("Slowest 10%", f"{sim.future_days.quantile(.9):.1f} days",
-                f"{sim.future_days.quantile(.9) - sim.cycle_days.quantile(.9):+.1f}", delta_color="inverse")
-    k[2].metric("Faster", f"{1 - fut_med / now_med:.0%}")
+                f"{sim.future_days.quantile(.9) - sim.cycle_days.quantile(.9):+.1f}", delta_color="inverse", border=True)
+    k[2].metric("Faster", f"{1 - fut_med / now_med:.0%}", border=True)
     long = pd.concat([sim.assign(scenario="Today (email)", days=sim.cycle_days),
                       sim.assign(scenario="OneRecord", days=sim.future_days)])
     fig = px.histogram(long, x="days", color="scenario", barmode="overlay", nbins=40, opacity=0.7,
                        color_discrete_map=SCENARIO_COLORS)
     fig.update_layout(height=260, margin=dict(l=0, r=0, t=10, b=0), legend_title="")
-    st.plotly_chart(fig, width="stretch")
+    c.chart(fig)
     c.assumption("parallel approvals use the same historical approver waiting times, and only the settings above "
                  "change. These are simulated results; a 4-week pilot with one entity would confirm them.")
 
@@ -503,12 +555,15 @@ def business_case():
     left.dataframe(pd.DataFrame({"Benefit (SGD / year)": benefits}).round(0), width="stretch")
     right.dataframe(pd.DataFrame({"Cost (SGD, year 1)": costs}).round(0), width="stretch")
     with summary:
+        c.header("Business case", f"Pays back in {12 * co / b:.1f} months, with requests reaching SAP in "
+                                  f"{fut_med:.1f} days instead of {now_med:.1f}" if b else
+                                  "These assumptions don't produce a benefit")
         k = st.columns(4)
-        k[0].metric("Payback", f"{12 * co / b:.1f} months" if b else "—")
-        k[1].metric("Annual benefit", f"S${b:,.0f}")
-        k[2].metric("Year-1 cost", f"S${co:,.0f}")
+        k[0].metric("Payback", f"{12 * co / b:.1f} months" if b else "—", border=True)
+        k[1].metric("Annual benefit", f"S${b:,.0f}", border=True)
+        k[2].metric("Year-1 cost", f"S${co:,.0f}", border=True)
         k[3].metric("Median time to SAP", f"{fut_med:.1f} days", f"{fut_med - now_med:+.1f} days",
-                    delta_color="inverse")
+                    delta_color="inverse", border=True)
     c.assumption("sales-driven benefits are counted at gross margin rather than order value. Rates, hours, margin "
                  "and conversion are placeholders to agree with Lives Group. Staff time savings alone don't cover "
                  "the build cost; most of the benefit comes from new accounts going live sooner and from sales "

@@ -7,6 +7,8 @@ Two halves:
   - Workflow mock-up: what the Power Apps form + Power Automate flows do (production runs in Microsoft 365)
   - Regional business view: clean five-country growth, forecasting and sales actions
 """
+from pathlib import Path
+
 import streamlit as st
 
 st.set_page_config(page_title="OneRecord · Lives Group", page_icon="🗂️", layout="wide")
@@ -36,6 +38,8 @@ pages = {
     ],
 }
 
+ASSETS = Path(__file__).parent / "assets"
+st.logo(str(ASSETS / "logo.svg"), size="large", icon_image=str(ASSETS / "icon.svg"))
 nav = st.navigation(pages)
 common.sidebar()
 common.clock_events()

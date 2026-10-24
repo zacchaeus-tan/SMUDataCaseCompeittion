@@ -1,5 +1,7 @@
 """Shared loaders, cached analytics and small UI helpers for the Streamlit app."""
 import pandas as pd
+import plotly.graph_objects as go
+import plotly.io as pio
 import streamlit as st
 
 from onerecord import advisor, classify, dedup, forecast, insights, process, workflow
@@ -7,6 +9,26 @@ from onerecord.config import COUNTRIES, DATA, KEY, PRODUCTS
 
 COUNTRY_ORDER = list(COUNTRIES)
 PRODUCT_LABEL = {p: f"{p}: {n}" for p, n in PRODUCTS.items()}
+
+# one chart style for the whole app, on top of plotly_white
+CHART_TEMPLATE = pio.templates.merge_templates(pio.templates["plotly_white"], go.layout.Template(layout=dict(
+    font=dict(family="Source Sans 3, Source Sans Pro, sans-serif", size=13, color="#1c2430"),
+    xaxis=dict(showgrid=False, linecolor="#d0d5dc", ticks="outside", tickcolor="#d0d5dc"),
+    yaxis=dict(gridcolor="#eef1f4", zeroline=False),
+    legend=dict(orientation="h", x=0, y=1.02, yanchor="bottom", title_text=""),
+    hoverlabel=dict(bgcolor="white", bordercolor="#d0d5dc", font_size=12),
+)))
+
+
+def chart(fig):
+    fig.update_layout(template=CHART_TEMPLATE)
+    st.plotly_chart(fig, width="stretch", theme=None, config={"displayModeBar": False})
+
+
+def header(section, headline):
+    """Page header: the section name small, the finding as the headline."""
+    st.caption(section.upper())
+    st.header(headline, anchor=False)
 
 
 @st.cache_data(show_spinner=False)
