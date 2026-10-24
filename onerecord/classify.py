@@ -61,7 +61,7 @@ def classify_all(msgs: pd.DataFrame) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- optional AI step (stage 2)
-# Only messages the rules could not decide are sent. Prototype uses Claude; production would run the same
+# Only messages the rules could not decide are sent. Prototype uses OpenAI; production would run the same
 # plain-English prompt through Power Automate's AI prompt action. No training, no model to maintain.
 AI_PROMPT = """You sort emails arriving in the shared sales mailbox of a medical-supplies distributor in
 Southeast Asia (emails may be in English, Malay, Bahasa Indonesia, Thai or Vietnamese).
@@ -87,37 +87,18 @@ AI_SCHEMA = {
 
 
 def ai_available() -> bool:
-    import os
-    return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+    from . import ai
+    return ai.available()
 
 
 def ai_classify(subject: str, body: str, attachment: str = ""):
     """Returns (label, confidence, reason). Low confidence or any failure -> stays in human review."""
-    import json
+    from . import ai
 
-    import anthropic
-
-    client = anthropic.Anthropic()
-    try:
-        response = client.beta.messages.create(
-            model="claude-opus-5-5",
-            max_tokens=2000,
-            system=AI_PROMPT,
-            messages=[{"role": "user", "content": f"Subject: {subject}\nAttachment: {attachment or 'none'}\n\n{body}"}],
-            output_config={"effort": "low", "format": {"type": "json_schema", "schema": AI_SCHEMA}},
-            betas=["server-side-fallback-2026-07-01"],
-            fallbacks="default",
-        )
-    except anthropic.APIConnectionError:
-        return "review", "low", "AI step unreachable (network)"
-    except anthropic.RateLimitError:
-        return "review", "low", "AI step rate-limited"
-    except anthropic.APIStatusError as e:
-        return "review", "low", f"AI step error {e.status_code}"
-    if response.stop_reason == "refusal":
-        return "review", "low", "AI declined to classify"
-    text = next((b.text for b in response.content if b.type == "text"), "")
-    out = json.loads(text)
+    out, err = ai.structured(AI_PROMPT, f"Subject: {subject}\nAttachment: {attachment or 'none'}\n\n{body}",
+                             AI_SCHEMA, "email_label", max_tokens=300)
+    if err:
+        return "review", "low", err
     if out["confidence"] == "low":
         return "review", "low", f"AI unsure (leans {LABELS[out['label']]}): {out['reason']}"
     return out["label"], "ai", f"AI: {out['reason']}"

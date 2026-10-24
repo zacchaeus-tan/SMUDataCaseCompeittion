@@ -123,7 +123,7 @@ def forecasts():
                 plan=forecast.stock_plan(Y, ahead, acc))
 
 
-@st.cache_data(show_spinner="Claude is reading the regional numbers…")
+@st.cache_data(show_spinner="The AI is reading the regional numbers…")
 def ai_brief(facts_json: str, focus: str):
     """Cached on the exact facts + focus, so reruns of the page don't call the API again."""
     import json

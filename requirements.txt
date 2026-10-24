@@ -3,4 +3,4 @@ numpy>=2.0
 rapidfuzz>=3.9
 streamlit>=1.40
 plotly>=5.20
-anthropic>=1.0   # optional: AI step for ambiguous emails (needs ANTHROPIC_API_KEY)
+openai>=2.0   # optional: AI step for ambiguous emails and the AI action brief (needs OPENAI_API_KEY)

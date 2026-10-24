@@ -5,7 +5,7 @@ for sales and supply chain.
 
 Production: a monthly Power Automate flow runs this prompt through the AI prompt action (AI Builder) and posts
 the brief to the regional sales channel in Teams - no API key for IT to manage, no model to train.
-This prototype runs the same prompt through Claude only to preview the output.
+This prototype runs the same prompt through OpenAI only to preview the output.
 
 The AI never sees raw orders or customer master data, only the summary below, and it is told to cite those
 numbers, so every recommendation can be checked against the dashboard.
@@ -86,31 +86,9 @@ def facts(growth: pd.DataFrame, plan: pd.DataFrame, drops: pd.DataFrame, xsell: 
 
 def recommend(data: dict, focus: str = ""):
     """Returns (brief dict, None) or (None, reason) when the AI step is unavailable or declines."""
-    import anthropic
+    from . import ai
 
     ask = "Summary data:\n" + json.dumps(data, default=str)
     if focus.strip():
         ask += f"\n\nThe reader asked you to focus on: {focus.strip()}"
-    client = anthropic.Anthropic()
-    try:
-        response = client.beta.messages.create(
-            model="claude-opus-5-5",
-            max_tokens=16000,
-            system=SYSTEM,
-            messages=[{"role": "user", "content": ask}],
-            output_config={"effort": "medium", "format": {"type": "json_schema", "schema": SCHEMA}},
-            betas=["server-side-fallback-2026-07-01"],
-            fallbacks="default",
-        )
-    except anthropic.APIConnectionError:
-        return None, "AI step unreachable (network)"
-    except anthropic.RateLimitError:
-        return None, "AI step rate-limited, try again in a minute"
-    except anthropic.APIStatusError as e:
-        return None, f"AI step error {e.status_code}"
-    if response.stop_reason == "refusal":
-        return None, "AI declined to answer"
-    if response.stop_reason == "max_tokens":
-        return None, "AI answer was cut off"
-    text = next((b.text for b in response.content if b.type == "text"), "")
-    return json.loads(text), None
+    return ai.structured(SYSTEM, ask, SCHEMA, "action_brief", max_tokens=2000)

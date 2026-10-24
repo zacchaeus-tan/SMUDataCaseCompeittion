@@ -131,7 +131,8 @@ streamlit run app.py
 ```
 
 Use the sidebar to switch persona (Amy, Wei Jie, Priya…) and to fast-forward the demo clock so reminders
-and escalation fire. The optional AI step for ambiguous emails needs an `ANTHROPIC_API_KEY`; without one, those emails stay in human review.
+and escalation fire. The optional AI step for ambiguous emails and the AI action brief need an `OPENAI_API_KEY`
+(model `gpt-5.4-nano` by default; set `OPENAI_MODEL` to change it). Without a key, those emails stay in human review.
 
 ### Demo script (Amy's story)
 

@@ -288,7 +288,7 @@ def _ai_brief(plan):
     focus = st.text_input("Focus (optional)", placeholder="e.g. Vietnam, or year-end budget flush",
                           key="ai_focus")
     if not classify.ai_available():
-        st.info("The preview needs an ANTHROPIC_API_KEY on this machine. The stock plan above works without it.")
+        st.info("The preview needs an OPENAI_API_KEY on this machine. The stock plan above works without it.")
     elif st.button("Preview the AI action brief", type="primary"):
         st.session_state["ai_brief"] = c.ai_brief(json.dumps(data), focus)
     res = st.session_state.get("ai_brief")
@@ -307,7 +307,7 @@ def _ai_brief(plan):
                     st.markdown(f"**First step:** {a['first_step']}  \n**Evidence:** {a['evidence']}  \n"
                                 f"**Expected impact:** {a['expected_impact']}")
             c.assumption("AI suggestions are input for the monthly sales meeting, and every figure they cite can "
-                         "be checked in the data below. The preview uses Claude; production would run the same "
+                         "be checked in the data below. The preview uses OpenAI; production would run the same "
                          "prompt in Power Automate.")
     with st.expander("Data sent to the AI (summary figures only, no customer master data or raw orders)"):
         st.json(data, expanded=False)
@@ -461,7 +461,7 @@ def inbound():
         if "ai_res" in st.session_state:
             view["after_ai"], _, view["ai_reason"] = zip(*st.session_state["ai_res"])
     else:
-        st.caption("The AI step needs an ANTHROPIC_API_KEY on this machine. In production it is Power Automate's "
+        st.caption("The AI step needs an OPENAI_API_KEY on this machine. In production it is Power Automate's "
                    "AI prompt action, using the same instructions.")
     st.dataframe(view.rename(columns=REVIEW_COLS), hide_index=True, width="stretch")
     with st.expander("AI instructions (the MDM team can edit these without retraining)"):
