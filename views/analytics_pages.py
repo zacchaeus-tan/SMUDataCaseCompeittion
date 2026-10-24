@@ -165,7 +165,7 @@ def forecasting():
         c.kpi("Series improved", (acc[acc["product"] != "C"].Improvement > 0).sum(), suffix=" of 10",
               help="Products A and B"),
         c.kpi("Horizon tested", "1–3 months", help="Rolling origins Apr–Sep 2026; error = WAPE"),
-    ], beam=1)
+    ])
     st.caption("Error is measured as WAPE: total absolute error divided by actual units. It covers Products A and "
                "B, forecasting 1–3 months ahead from each month Apr–Sep 2026, using only the data available at "
                "the time.")
@@ -331,9 +331,8 @@ def actions():
     cmp = c.regional()["compare"]
     c.header("Sales actions", f"{len(cmp['clean_drop'])} customers are ordering much less, with about "
                               f"S${cmp['clean_drop'].value_at_risk_per_q.sum():,.0f} a quarter at risk")
-    with st.container(key="beam_raw_toggle", border=True):  # border beam draws the eye to the demo switch
-        raw = st.toggle("Show raw SAP records (before duplicates are merged)",
-                        help="Runs the same analysis on the customer records as they sit in SAP today")
+    raw = st.toggle("Show raw SAP records (before duplicates are merged)",
+                    help="Runs the same analysis on the customer records as they sit in SAP today")
     if raw:
         golden = c.data_quality()["clusters"].set_index("record_id").golden_id
         drop = _flag_false(cmp["raw_drop"], cmp["clean_drop"], golden)
@@ -611,7 +610,7 @@ def business_case():
             c.kpi("Year-1 cost", co, prefix="S$"),
             c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days", delta=f"{fut_med - now_med:+.1f} days",
                   tone=c.tone(fut_med - now_med, up_is_good=False)),
-        ], beam=0)
+        ])
     c.assumption("sales-driven benefits are counted at gross margin rather than order value. Rates, hours, margin "
                  "and conversion are placeholders to agree with Lives Group. Staff time savings alone don't cover "
                  "the build cost; most of the benefit comes from new accounts going live sooner and from sales "

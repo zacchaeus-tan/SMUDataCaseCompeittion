@@ -133,6 +133,17 @@ streamlit run app.py
 Use the sidebar to switch persona (Amy, Wei Jie, Priya…) and to fast-forward the demo clock so reminders
 and escalation fire. The optional AI step for ambiguous emails needs an `ANTHROPIC_API_KEY`; without one, those emails stay in human review.
 
+### Demo script (Amy's story)
+
+1. As **Amy**, open *New request*, choose Item, set regulated to **Yes** (the licence field appears) and type
+   *Dengue NS1 rapid test 25T* to trigger the duplicate warning.
+2. As **Wei Jie**, **QA** and the **BU Head**, open *Approvals* and approve. The three checks run at the same time.
+3. In the sidebar, press **+3 days** on a stalled request to fire a reminder and an escalation.
+4. As **Priya**, open *MDM check*, approve, and download the SAP file.
+5. As **Priya**, open *Rules* and onboard Marcus's new BU. Then as **Marcus**, a *New request* for that BU routes to
+   its own BU Head, with no IT change.
+6. Finish on *Five-country growth*, *Forecasting* and *Sales actions*.
+
 ## Repository map
 
 | Path | What |

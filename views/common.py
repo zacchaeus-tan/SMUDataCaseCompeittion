@@ -31,7 +31,7 @@ KPI_ROW = (ASSETS / "kpi_row.html").read_text()
 
 
 def page_style():
-    """Page-wide CSS: blur-fade on load, border beam on highlighted containers."""
+    """Page-wide CSS: sections fade in on load."""
     st.html(f"<style>{(ASSETS / 'app.css').read_text()}</style>")
 
 
@@ -74,11 +74,8 @@ def kpi(label, value, *, prefix="", suffix="", decimals=0, delta=None, tone="neu
             f'<div class="value"{number}>{escape(shown)}</div><div class="delta">{escape(delta or "")}</div></div>')
 
 
-def kpi_row(cards, beam=None):
-    """A row of equal-sized KPI cards; `beam` is the index of the one card to highlight with a border beam."""
-    if beam is not None:
-        cards = [card.replace('class="card ', 'class="card beam ', 1) if i == beam else card
-                 for i, card in enumerate(cards)]
+def kpi_row(cards):
+    """A row of equal-sized KPI cards."""
     html = (KPI_ROW.replace("__COLUMNS__", str(len(cards))).replace("__CARD_HEIGHT__", str(KPI_HEIGHT))
             .replace("__CARDS__", "".join(cards)))
     components.html(html, height=KPI_HEIGHT + 12)
@@ -171,15 +168,15 @@ def role() -> str:
 
 def sidebar():
     with st.sidebar:
-        st.markdown("### Viewing as")
+        st.markdown("**Viewing as**")
         st.selectbox("Persona", list(workflow.PERSONAS), key="persona", label_visibility="collapsed",
                      help="Switch persona to see the request from each person's side. Sensitive fields are only "
                           "visible to Finance and MDM.")
         st.caption(f"Role: **{role()}**")
         st.divider()
-        st.markdown("### Demo clock")
+        st.markdown("**Demo clock**")
         c = con()
-        st.caption(f"Simulated time: **{workflow.now(c):%a %d %b %Y, %H:%M}**")
+        st.caption(f"Simulated time: {workflow.now(c):%a %d %b %Y, %H:%M}")
         col1, col2 = st.columns(2)
         if col1.button("+1 day", width="stretch"):
             _advance(1)
@@ -202,7 +199,7 @@ def clock_events():
     ev = st.session_state.pop("clock_events", None)
     if ev:
         for e in ev:
-            st.toast(e, icon="⏰")
+            st.toast(e)
 
 
 def pct(x, signed=True):

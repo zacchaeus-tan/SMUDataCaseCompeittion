@@ -23,35 +23,28 @@ def render():
 
     left, right = st.columns(2)
     with left:
-        st.markdown("##### What this prototype shows")
+        st.markdown("##### Workflow mock-up")
         st.markdown(
-            "**Workflow mock-up** — what the Power Apps form and Power Automate flows do:\n"
-            "1. *New request* — the form asks only for the fields that apply and blocks duplicates\n"
-            "2. *Approvals* — every check runs **in parallel** as a Teams card, with reminders and escalation\n"
-            "3. *MDM check* — Priya approves once and gets an SAP B1 import file\n"
-            "4. *Audit log* and *Rules* — who did what, and rules the MDM team edits without IT\n\n"
-            "**Regional business view** — clean data put to work: five-country growth, a forecast that beats "
-            "the 6-month average, sales actions, and the business case.")
+            "A working copy of the Microsoft 365 build. A requestor fills in a form that only asks for the fields "
+            "that apply and checks for duplicates while they type. Every approver gets a card at the same time, with "
+            "reminders and escalation if nobody responds. The MDM team does a final check and gets a file to load "
+            "into SAP B1. Every step is logged, and the rules behind it are tables the MDM team edits themselves.")
     with right:
-        st.markdown("##### Demo script (Amy's story)")
+        st.markdown("##### Regional business view")
         st.markdown(
-            "1. Persona **Amy** → *New request* → Item → regulated **Yes** (licence field appears) → type "
-            "*Dengue NS1 rapid test 25T* (duplicate warning)\n"
-            "2. Persona **Wei Jie / QA / BU Head** → *Approvals* → approve in parallel\n"
-            "3. Sidebar **+3 days** on a stalled request → reminder & escalation fire\n"
-            "4. Persona **Priya** → *MDM check* → approve → download the SAP file\n"
-            "5. Persona **Priya** → *Rules* → onboard Marcus's new BU → persona **Marcus** → *New request* "
-            "picks it up and routes to its own BU Head, no IT\n"
-            "6. *Five-country growth* → *Forecasting* → *Sales actions*")
-    st.markdown("##### Prototype ↔ Microsoft 365")
+            "What clean data makes possible: growth across the five countries, a forecast that beats the 6-month "
+            "average, the customers sales should call this quarter, and the business case for the build.")
+        st.caption("Use the sidebar to switch between people (requestors, approvers, the MDM team) and to move the "
+                   "demo clock forward so reminders and escalation fire.")
+    st.markdown("##### Prototype and Microsoft 365")
     st.dataframe({
-        "This prototype": ["New request form", "Approvals (cards)", "Reminders / escalation", "Rules, roles, log",
-                           "SAP import file", "Regional business view", "Email triage AI step",
+        "This prototype": ["New request form", "Approvals", "Reminders and escalation", "Rules, roles and log",
+                           "SAP import file", "Regional business view", "Email sorting AI step",
                            "AI action brief (Phase 2)"],
-        "Production build": ["Power Apps canvas app in a Teams tab", "Power Automate approvals in Teams/Outlook",
+        "Production build": ["Power Apps canvas app in a Teams tab", "Power Automate approvals in Teams and Outlook",
                              "Scheduled Power Automate flow", "SharePoint lists (standard licence)",
-                             "Power Automate 'Create CSV table' → SAP DTW", "Power BI in a Teams tab",
+                             "Power Automate 'Create CSV table' in SAP DTW format", "Power BI in a Teams tab",
                              "Power Automate AI prompt (AI Builder)",
-                             "Monthly Power Automate flow + AI prompt → Teams sales channel"],
+                             "Monthly Power Automate flow with an AI prompt, posting to the sales channel in Teams"],
     }, hide_index=True, width="stretch")
     st.caption("All data is synthetic (no client data was provided). See data/README.md for what was planted and why.")

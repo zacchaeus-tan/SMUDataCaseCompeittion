@@ -11,7 +11,7 @@ from pathlib import Path
 
 import streamlit as st
 
-st.set_page_config(page_title="OneRecord · Lives Group", page_icon="🗂️", layout="wide")
+st.set_page_config(page_title="OneRecord", page_icon=str(Path(__file__).parent / "assets" / "icon.svg"), layout="wide")
 
 from views import analytics_pages as ap  # noqa: E402
 from views import common  # noqa: E402
@@ -21,12 +21,12 @@ from views import workflow_pages as wp  # noqa: E402
 pages = {
     "": [st.Page(home.render, title="Overview", url_path="overview", default=True)],
     "Workflow mock-up": [
-        st.Page(wp.new_request, title="New request (form)", url_path="new-request"),
+        st.Page(wp.new_request, title="New request", url_path="new-request"),
         st.Page(wp.my_requests, title="Request status", url_path="status"),
-        st.Page(wp.approvals, title="Approvals (Teams cards)", url_path="approvals"),
-        st.Page(wp.mdm_queue, title="MDM check & SAP file", url_path="mdm"),
+        st.Page(wp.approvals, title="Approvals", url_path="approvals"),
+        st.Page(wp.mdm_queue, title="MDM check", url_path="mdm"),
         st.Page(wp.audit_log, title="Audit log", url_path="audit-log"),
-        st.Page(wp.rules, title="Rules (no IT needed)", url_path="rules"),
+        st.Page(wp.rules, title="Rules", url_path="rules"),
     ],
     "Regional business view": [
         st.Page(ap.growth, title="Five-country growth", url_path="growth"),

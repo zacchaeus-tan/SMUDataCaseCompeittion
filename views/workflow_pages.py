@@ -17,11 +17,27 @@ CHOICES = {
     "UnitOfMeasure": ["Kit", "Box", "Pack", "Unit", "Set"],
     "Department": ["Sales", "Marketing", "Regulatory Affairs", "Service", "Finance", "Warehouse"],
 }
-STATUS_ICON = {"Approved": "✅", "Pending": "⏳", "Rejected": "❌", "Cancelled": "➖"}
+# Streamlit text colours for a status word: green done, orange waiting, red stopped
+STATUS_COLOR = {"Approved": "green", "Pending": "orange", "Rejected": "red", "Cancelled": "gray"}
+SECTION = "Workflow mock-up"
 
 
-def _badge(where):
-    st.caption(f"🔷 In production: **{where}**")
+def _page(title, where):
+    c.header(SECTION, title)
+    st.caption(f"In production: {where}")
+
+
+def _status(s):
+    return f":{STATUS_COLOR.get(s, 'gray')}[{s}]"
+
+
+def _fields(data):
+    """Request details as a two-column Field / Value table rather than raw JSON."""
+    if not data:
+        st.caption("Nothing to show.")
+        return
+    st.dataframe(pd.DataFrame({"Field": list(data), "Value": [str(v) for v in data.values()]}),
+                 hide_index=True, width="stretch")
 
 
 # --------------------------------------------------------------------------- 1. form
@@ -33,11 +49,11 @@ def _clear_form():
 
 
 def new_request():
-    st.title("New master-data request")
-    _badge("Power Apps canvas app in a Teams tab, saving to the SharePoint Requests list")
+    _page("New request", "Power Apps canvas app in a Teams tab, saving to the SharePoint Requests list")
     rid = st.session_state.pop("last_request", None)  # show the confirmation once, on a blank form
     if rid:
-        st.success(f"Submitted **{rid}** — approval cards are on their way in Teams. Track it under *Request status*.")
+        st.success(f"Submitted {rid}. Approval cards have been sent in Teams; you can follow it under "
+                   f"Request status.")
     con = c.con()
     d = c.raw()
 
@@ -49,13 +65,12 @@ def new_request():
     entity = top[1].selectbox("Business entity", list(bus.Title), key="req_entity",
                               format_func=lambda k: bu_name.get(k, k),
                               help="From the BusinessUnits list: the MDM team adds a new BU there, no IT change")
-    country = top[2].selectbox("Country", list(COUNTRIES), format_func=lambda k: f"{k} · {COUNTRIES[k]}",
-                               key="req_country")
+    country = top[2].selectbox("Country", list(COUNTRIES), format_func=lambda k: COUNTRIES[k], key="req_country")
 
     fields = wf.form_fields(con, rtype)
     values = {"Country": country} if rtype in ("Customer",) else {}
-    st.markdown("#### Details")
-    st.caption("Fields come from the **RequiredFields** rule table. Conditional fields appear only when they apply.")
+    st.markdown("##### Details")
+    st.caption("Fields come from the RequiredFields rule table. Conditional fields appear only when they apply.")
     cols = st.columns(2)
     shown = 0
     for _, f in fields.iterrows():
@@ -65,7 +80,7 @@ def new_request():
             continue
         col = cols[shown % 2]
         shown += 1
-        label = f"{f.DisplayLabel}{' 🔒' if f.Sensitive == 'Yes' else ''}"
+        label = f"{f.DisplayLabel}{' (restricted)' if f.Sensitive == 'Yes' else ''}"
         key = f"{rtype}_{f.FieldName}"
         help_ = (f.HelpText or None)
         if f.FieldType == "Yes/No":
@@ -75,40 +90,36 @@ def new_request():
         else:
             values[f.FieldName] = col.text_input(label, key=key, help=help_)
     if (fields.Sensitive == "Yes").any():
-        st.caption("🔒 Sensitive: saved to a separate restricted list that only Finance and MDM can open.")
+        st.caption("Restricted fields are saved to a separate list that only Finance and MDM can open.")
 
-    st.markdown("#### Checks before anything reaches an approver")
     dup = wf.duplicate_check(con, rtype, values, d["customers"], d["items"])
     missing = wf.missing_fields(con, rtype, values)
-    a, b = st.columns(2)
-    with a:
-        if missing:
-            st.warning("**Still needed:** " + ", ".join(missing))
-        else:
-            st.success("All required fields complete")
-    with b:
-        name_field = {"Customer": "CustomerName", "Item": "ItemDescription"}.get(rtype)
-        if name_field and not values.get(name_field):
-            st.info("**Duplicate check** runs as soon as you enter the name.")
-        else:
-            {"Blocked": st.error, "Possible match": st.warning, "Clear": st.success}[dup[0]](
-                f"**Duplicate check · {dup[0]}** — {dup[2]}")
-    confirm = True
-    if dup[0] == "Possible match":
-        confirm = st.checkbox(f"I checked {dup[1]} — this really is a different record", key="dup_ok")
-
     rules = pd.read_sql("SELECT * FROM RoutingRules WHERE Active='Yes'", con)
     rules = rules[rules.RequestType.isin([rtype, "Any"]) & rules.Entity.isin([entity, "Any"])]
     who = []
     for _, r in rules[rules.Stage == "1"].iterrows():
         if not r.ConditionField or str(values.get(r.ConditionField, "")) == r.ConditionValue:
             p = wf.person_for(con, r.ApproverRole, entity)
-            who.append(f"{r.ApproverRole} ({p})" if p else f"{r.ApproverRole} (⚠️ nobody set up)")
-    st.info(f"**Will be routed in parallel to:** {', '.join(dict.fromkeys(who))} → then MDM final check")
+            who.append(f"{r.ApproverRole} ({p})" if p else f"{r.ApproverRole} (:red[nobody set up])")
+
+    st.markdown("##### Checks before submitting")
+    with st.container(border=True):
+        st.markdown("**Required fields:** " + (f":orange[still needed:] {', '.join(missing)}" if missing
+                                               else ":green[complete]"))
+        name_field = {"Customer": "CustomerName", "Item": "ItemDescription"}.get(rtype)
+        if name_field and not values.get(name_field):
+            st.markdown("**Duplicate check:** runs as soon as you enter the name.")
+        else:
+            color = {"Blocked": "red", "Possible match": "orange", "Clear": "green"}[dup[0]]
+            st.markdown(f"**Duplicate check:** :{color}[{dup[0].lower()}]. {dup[2]}")
+        st.markdown(f"**Approvers:** {', '.join(dict.fromkeys(who))} at the same time, then the MDM team.")
+        confirm = True
+        if dup[0] == "Possible match":
+            confirm = st.checkbox(f"I checked {dup[1]} and this is a different record", key="dup_ok")
 
     can_submit = not missing and dup[0] != "Blocked" and confirm and c.role() == "Requestor"
     if c.role() != "Requestor":
-        st.caption("Switch the sidebar persona to a requestor (Amy or Marcus) to submit.")
+        st.caption("Switch the persona in the sidebar to a requestor (Amy or Marcus) to submit.")
     if st.button("Submit request", type="primary", disabled=not can_submit):
         rid = wf.submit(con, rtype, entity, country, c.persona(), {k: v for k, v in values.items() if v}, dup)
         _clear_form()
@@ -117,9 +128,16 @@ def new_request():
 
 
 # --------------------------------------------------------------------------- 2. status
+STATUS_COLS = {"id": st.column_config.TextColumn("Request"), "type": st.column_config.TextColumn("Type"),
+               "subject": st.column_config.TextColumn("Subject"), "entity": st.column_config.TextColumn("Entity"),
+               "status": st.column_config.TextColumn("Status"), "stage": st.column_config.TextColumn("Stage"),
+               "waiting_on": st.column_config.TextColumn("Waiting on"),
+               "age_days": st.column_config.NumberColumn("Days open", format="%.1f"),
+               "sap_code": st.column_config.TextColumn("SAP code")}
+
+
 def my_requests():
-    st.title("Request status")
-    _badge("'My requests' screen in the Power App, reading the Requests list")
+    _page("Request status", "the My requests screen in the Power App, reading the Requests list")
     con = c.con()
     df = wf.requests_view(con)
     if df.empty:
@@ -127,99 +145,114 @@ def my_requests():
         return
     if c.role() == "Requestor":
         df = df[df.requestor == c.persona()]
-        st.caption(f"Showing requests raised by **{c.persona()}**.")
-    show = df[["id", "type", "subject", "entity", "status", "stage", "waiting_on", "age_days", "sap_code"]]
-    st.dataframe(show.rename(columns={"age_days": "days open"}), hide_index=True, width="stretch")
+        st.caption(f"Showing requests raised by {c.persona()}.")
+    st.dataframe(df[list(STATUS_COLS)], hide_index=True, width="stretch", column_config=STATUS_COLS)
     if df.empty:
         return
     rid = st.selectbox("Open a request", df.id, index=len(df) - 1)
     req = df[df.id == rid].iloc[0]
     ap = wf.table(con, "approvals")
     ap = ap[ap.request_id == rid]
-    left, right = st.columns([1, 1])
+    left, right = st.columns(2)
     with left:
-        st.markdown(f"#### {rid} · {req.subject}")
-        st.markdown(f"**Status:** {req.status} — {req.stage}")
+        st.markdown(f"##### {rid}: {req.subject}")
+        st.markdown(f"**Status:** {req.status}. {req.stage}")
         for _, a in ap.iterrows():
-            extra = " · reminded" if a.reminded_at else ""
-            extra += " · escalated" if a.escalated_at else ""
-            st.markdown(f"{STATUS_ICON.get(a.status, '•')} **{a.role}** — {a.person} · {a.status}"
-                        f"{' at ' + a.decided_at if a.decided_at else ''}{extra}")
+            notes = [f"decided {a.decided_at}"] if a.decided_at else []
+            notes += ["reminder sent"] if a.reminded_at else []
+            notes += ["escalated"] if a.escalated_at else []
+            st.markdown(f"- **{a.role}**, {a.person}: {_status(a.status)}"
+                        + (f" ({', '.join(notes)})" if notes else ""))
         st.markdown("**Details**")
-        st.json(json.loads(req.data), expanded=False)
-        st.markdown("**Sensitive fields** (as seen by your role)")
-        st.json(wf.sensitive_for(con, rid, c.role()), expanded=True)
+        _fields(json.loads(req.data))
+        st.markdown("**Restricted fields** (as your role sees them)")
+        _fields(wf.sensitive_for(con, rid, c.role()))
     with right:
-        st.markdown("#### Timeline")
+        st.markdown("##### Timeline")
         log = wf.table(con, "log")
         for _, e in log[log.request_id == rid].iterrows():
-            st.markdown(f"`{e.ts}` **{e.action}** · {e.actor}  \n{e.detail}")
+            st.markdown(f"**{e.action}**, {e.actor}  \n:gray[{e.ts}] {e.detail}")
 
 
 # --------------------------------------------------------------------------- 3. approvals
 def approvals():
-    st.title("Approvals")
-    _badge("Power Automate 'Start and wait for an approval' — actionable card in Teams / Outlook")
+    _page("Approvals", "Power Automate 'Start and wait for an approval', as an actionable card in Teams or Outlook")
     con = c.con()
     if c.role() == "Requestor":
-        st.info("Requestors don't approve. Switch the sidebar persona to an approver (e.g. Wei Jie, BU Head, QA).")
+        st.info("Requestors don't approve. Switch the persona in the sidebar to an approver, such as Wei Jie, a BU "
+                "Head or QA.")
         return
     ap = wf.query(con, "SELECT a.*, r.type, r.entity, r.country, r.requestor, r.data, r.dup_check, r.possible_match "
                      "FROM approvals a JOIN requests r ON r.id=a.request_id WHERE a.status='Pending' AND a.role=?",
                      params=(c.role(),))
-    st.caption(f"Pending for **{c.role()}**: {len(ap)}")
+    st.caption(f"Waiting for {c.role()}: {len(ap)}")
     if ap.empty:
-        st.success("Nothing waiting for you. 🎉")
+        st.info("Nothing is waiting for you.")
     now = wf.now(con)
     for _, a in ap.iterrows():
         data = json.loads(a.data)
         waited = wf.business_days(pd.to_datetime(a.assigned_at).to_pydatetime(), now)
         with st.container(border=True):
             h1, h2 = st.columns([3, 1])
-            h1.markdown(f"**🟣 OneRecord · Approval requested** — {a.request_id}  \n"
-                        f"{a.type} for **{a.entity}** ({a.country}) · from {a.requestor.split(' (')[0]}")
-            h2.markdown(f"⏱️ waiting **{waited:.0f}** business day(s)" + ("  \n🔔 reminded" if a.reminded_at else "")
-                        + ("  \n⚠️ escalated" if a.escalated_at else ""))
-            st.table(pd.DataFrame({"Field": list(data), "Value": [str(v) for v in data.values()]}).set_index("Field"))
+            h1.markdown(f"**Approval requested: {a.request_id}**  \n"
+                        f"{a.type} for {a.entity} ({COUNTRIES.get(a.country, a.country)}), from "
+                        f"{a.requestor.split(' (')[0]}")
+            flags = (["reminder sent"] if a.reminded_at else []) + ([":red[escalated]"] if a.escalated_at else [])
+            h2.markdown(f"Waiting **{waited:.0f}** business day{'s' if round(waited) != 1 else ''}"
+                        + (f"  \n{', '.join(flags)}" if flags else ""))
+            _fields(data)
             sens = wf.sensitive_for(con, a.request_id, c.role())
             if sens:
-                st.markdown("**Sensitive (Finance/MDM only):** " + " · ".join(f"{k}: {v}" for k, v in sens.items()))
-            st.caption(f"Duplicate check: {a.dup_check}{' → ' + a.possible_match if a.possible_match else ''}")
+                st.markdown("**Restricted (Finance and MDM only):** "
+                            + "; ".join(f"{k}: {v}" for k, v in sens.items()))
+            st.caption(f"Duplicate check: {a.dup_check}" + (f", closest match {a.possible_match}"
+                                                             if a.possible_match else ""))
             other = pd.read_sql("SELECT role, status FROM approvals WHERE request_id=? AND id<>?", con,
                                 params=(a.request_id, int(a.id)))
-            st.caption("Other approvers (in parallel): " + " · ".join(f"{STATUS_ICON.get(s, '')} {r}" for r, s in other.values))
+            if not other.empty:
+                st.caption("Other approvers: " + ", ".join(f"{r} ({s.lower()})" for r, s in other.values))
             comment = st.text_input("Comment (optional)", key=f"cmt_{a.id}")
             b1, b2, _ = st.columns([1, 1, 4])
-            if b1.button("Approve", key=f"ok_{a.id}", type="primary"):
+            if b1.button("Approve", key=f"ok_{a.id}", type="primary", width="stretch"):
                 wf.decide(con, int(a.id), "Approved", c.persona(), comment)
                 st.rerun()
-            if b2.button("Reject", key=f"no_{a.id}"):
+            if b2.button("Reject", key=f"no_{a.id}", width="stretch"):
                 wf.decide(con, int(a.id), "Rejected", c.persona(), comment or "Rejected")
                 st.rerun()
 
 
 # --------------------------------------------------------------------------- 4. MDM
+REVIEW_PAIR_COLS = {"record_a": st.column_config.TextColumn("Record A"),
+                    "name_a": st.column_config.TextColumn("Name A"),
+                    "record_b": st.column_config.TextColumn("Record B"),
+                    "name_b": st.column_config.TextColumn("Name B"),
+                    "country": st.column_config.TextColumn("Country"),
+                    "score": st.column_config.NumberColumn("Similarity", format="%.0f"),
+                    "reason": st.column_config.TextColumn("Why it was flagged")}
+
+
 def mdm_queue():
-    st.title("MDM final check & SAP import file")
-    _badge("Stage-2 approval for the MDM team + Power Automate 'Create CSV table' → SharePoint folder")
+    _page("MDM check", "a stage-2 approval for the MDM team, then Power Automate 'Create CSV table' into a "
+                       "SharePoint folder")
     con = c.con()
     if c.role() != "MDM Analyst":
-        st.info("This is Priya's screen — switch the sidebar persona to **Priya - MDM Analyst** to act on it.")
+        st.info("This is Priya's screen. Switch the persona in the sidebar to Priya - MDM Analyst to act on it.")
     ap = wf.query(con, "SELECT a.*, r.type, r.data, r.dup_check, r.possible_match FROM approvals a "
                      "JOIN requests r ON r.id=a.request_id WHERE a.status='Pending' AND a.stage=2")
-    st.markdown(f"#### Ready for final check ({len(ap)})")
+    st.markdown(f"##### Ready for the final check ({len(ap)})")
     for _, a in ap.iterrows():
         with st.container(border=True):
-            st.markdown(f"**{a.request_id}** · {a.type} · all stage-1 checks approved · duplicate check: {a.dup_check}")
-            st.json(json.loads(a.data), expanded=False)
-            if st.button("Approve & generate SAP import row", key=f"mdm_{a.id}", type="primary",
+            st.markdown(f"**{a.request_id}**, {a.type}. All stage-1 approvers have approved; duplicate check: "
+                        f"{a.dup_check}.")
+            _fields(json.loads(a.data))
+            if st.button("Approve and create the SAP import row", key=f"mdm_{a.id}", type="primary",
                          disabled=c.role() != "MDM Analyst"):
                 wf.decide(con, int(a.id), "Approved", c.persona(), "Final check passed")
                 st.rerun()
 
-    st.markdown("#### SAP B1 import file")
-    st.caption("Rows in the shape of SAP's Data Transfer Workbench templates (simplified). Priya loads the file "
-               "into SAP B1 — no retyping. Phase 3 replaces this with a direct Service Layer integration.")
+    st.markdown("##### SAP B1 import file")
+    st.caption("Rows in the shape of SAP's Data Transfer Workbench templates (simplified). Priya loads the file into "
+               "SAP B1 instead of retyping each record. Phase 3 replaces this with a direct Service Layer connection.")
     f = wf.sap_file(con)
     if f.empty:
         st.info("No records generated yet.")
@@ -227,18 +260,20 @@ def mdm_queue():
         st.dataframe(f, hide_index=True, width="stretch")
         st.download_button("Download import file (CSV)", f.to_csv(index=False), "sap_b1_import.csv", "text/csv")
 
-    st.markdown("#### Possible duplicates for review (from the bulk matcher)")
+    st.markdown("##### Possible duplicates to review")
     q = c.data_quality()
     review = q["pairs"][q["pairs"].decision == "review"]
-    st.caption("Look-alike records the engine would not merge on its own. A person decides.")
-    st.dataframe(review[["record_a", "name_a", "record_b", "name_b", "country", "score", "reason"]],
-                 hide_index=True, width="stretch")
+    st.caption("Look-alike records the bulk matcher would not merge on its own. A person decides.")
+    st.dataframe(review[list(REVIEW_PAIR_COLS)], hide_index=True, width="stretch", column_config=REVIEW_PAIR_COLS)
 
 
 # --------------------------------------------------------------------------- 5. log
+LOG_COLS = {"request_id": "Request", "ts": "Time", "actor": "Who", "role": "Role", "action": "Action",
+            "detail": "Detail", "field": "Field", "old_value": "Old value", "new_value": "New value"}
+
+
 def audit_log():
-    st.title("Audit log")
-    _badge("SharePoint ApprovalLog list — written only by the flow; users have read access")
+    _page("Audit log", "the SharePoint ApprovalLog list, written only by the flows; users can read it")
     con = c.con()
     log = wf.table(con, "log").drop(columns=["id"])
     f1, f2 = st.columns(2)
@@ -248,26 +283,26 @@ def audit_log():
         log = log[log.request_id == rid]
     if act:
         log = log[log.action.isin(act)]
-    st.dataframe(log, hide_index=True, width="stretch")
-    st.caption("Entries are only ever added, never edited. Sensitive values are never written here — only the "
-               "fact that they were stored or changed.")
+    st.dataframe(log.rename(columns=LOG_COLS), hide_index=True, width="stretch")
+    st.caption("Entries are only ever added, never edited. Restricted values are never written here, only the fact "
+               "that they were stored or changed.")
     st.download_button("Export (CSV)", log.to_csv(index=False), "audit_log.csv", "text/csv")
 
 
 # --------------------------------------------------------------------------- 6. rules
 def rules():
-    st.title("Rules — changed by the MDM team, not IT")
-    _badge("SharePoint lists the flows read at run time: RoutingRules, RequiredFields, Roles, Aliases")
+    _page("Rules", "SharePoint lists the flows read each time they run: RoutingRules, RequiredFields, Roles, Aliases")
     con = c.con()
-    st.markdown("Adding a business unit, a required field or an approval step = **editing a row here**. "
-                "Example: add a row to *RoutingRules* for a new regulatory check, or set a field to *Conditional*.")
+    st.markdown("The MDM team changes how requests work by editing rows in these tables. Adding a business unit, a "
+                "required field or an approval step is a new row. For example, add a row to RoutingRules for a new "
+                "regulatory check, or set a field to Conditional in RequiredFields.")
     is_mdm = c.role() == "MDM Analyst"
 
     with st.container(border=True):
-        st.markdown("##### ➕ Onboard a new business unit · Marcus's team")
+        st.markdown("##### Onboard a new business unit")
         st.caption("Marcus's new BU joined and its first requests went to the wrong people for two weeks. Here Priya "
-                   "sets it up in a minute: one row each in BusinessUnits and Roles (plus an optional extra approval "
-                   "rule). The form dropdown and the routing pick it up on the next request.")
+                   "sets it up in a minute: one row each in BusinessUnits and Roles, plus an optional extra approval "
+                   "rule. The form and the routing pick it up on the next request.")
         f = st.columns([1, 2, 2])
         code = f[0].text_input("BU code", "LGD", max_chars=6).strip().upper()
         name = f[1].text_input("Business unit name", "LGD (molecular & genomics, new BU)")
@@ -283,21 +318,21 @@ def rules():
         if st.button("Add business unit", type="primary", disabled=not is_mdm or not code or exists):
             wf.add_business_unit(con, code, name, products, head, email, tz, qa)
             st.session_state["bu_added"] = (
-                f"**{code}** is live. Switch to **Marcus** → *New request* → pick {code} as the entity: the BU Head "
-                f"card goes to {head}" + (", and every item adds a Quality/Regulatory check." if qa else "."))
+                f"{code} is live. Switch to Marcus, open New request and pick {code} as the entity: the BU Head "
+                f"card goes to {head}" + (", and every item also gets a Quality/Regulatory check." if qa else "."))
             st.rerun()  # refresh the button state and the rule tables below
         if msg := st.session_state.pop("bu_added", None):
             st.success(msg)
         elif exists:
-            st.caption(f"{code} already exists. Reset demo data in the sidebar to run this again.")
+            st.caption(f"{code} already exists. Reset the demo data in the sidebar to run this again.")
         elif not is_mdm:
-            st.caption("Only the MDM team can add a business unit (switch persona to Priya).")
+            st.caption("Only the MDM team can add a business unit (switch the persona to Priya).")
 
     gaps = wf.routing_gaps(con)
     if gaps:
-        st.warning("**Rules health check:** " + " · ".join(gaps) + ". Requests would wait on nobody; fix in *Roles*.")
+        st.warning("Rules check: " + "; ".join(gaps) + ". Requests would wait on nobody until this is fixed in Roles.")
     else:
-        st.success("**Rules health check:** every active business unit has someone for every approval step.")
+        st.caption("Rules check: every active business unit has someone for every approval step.")
 
     tabs = st.tabs(wf.RULE_TABLES)
     for tab, name in zip(tabs, wf.RULE_TABLES):
@@ -307,6 +342,6 @@ def rules():
                                     hide_index=True)
             if st.button(f"Save {name}", key=f"save_{name}", disabled=c.role() != "MDM Analyst"):
                 wf.save_rules(con, name, edited)
-                st.success(f"{name} saved — the next request uses the new rule. Change is in the audit log.")
+                st.success(f"{name} saved. The next request uses the new rule, and the change is in the audit log.")
             if c.role() != "MDM Analyst":
-                st.caption("Only the MDM team can save rule changes (switch persona to Priya).")
+                st.caption("Only the MDM team can save rule changes (switch the persona to Priya).")
