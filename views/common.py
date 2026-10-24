@@ -57,9 +57,14 @@ def page_style():
 
 
 def chart(fig):
-    # backgrounds set on the figure itself: Streamlit replaces template backgrounds with the page colour
-    fig.update_layout(template=CHART_TEMPLATE, paper_bgcolor=theme.CARD, plot_bgcolor=theme.CARD)
-    st.plotly_chart(fig, theme=None, config={"displayModeBar": False})
+    # Set on the figure itself, because Streamlit and per-trace colours override the template:
+    # white backgrounds, tooltips as dark text on white (not on the cell or line colour), and no zooming or
+    # panning, so a stray drag or scroll during a demo can't throw the chart off
+    fig.update_layout(template=CHART_TEMPLATE, paper_bgcolor=theme.CARD, plot_bgcolor=theme.CARD, dragmode=False,
+                      hoverlabel=dict(bgcolor="white", bordercolor="#cbd5e1", font=dict(color=theme.NAVY, size=12.5)))
+    fig.update_xaxes(fixedrange=True)
+    fig.update_yaxes(fixedrange=True)
+    st.plotly_chart(fig, theme=None, config={"displayModeBar": False, "scrollZoom": False, "doubleClick": False})
 
 
 def select(where, *args, **kwargs):
