@@ -35,8 +35,27 @@
 [data-testid="stMainBlockContainer"]
   [data-testid="stVerticalBlock"]:not([data-testid="stVerticalBlock"] [data-testid="stVerticalBlock"]) > :nth-child(n+5) { animation-delay: 0.24s; }
 
+/* Line charts draw from left to right the first time they come on screen (assets/chart_draw.js sets the
+   classes). The lines, markers and shaded bands are revealed by a moving clip, so dashed and dotted lines keep
+   their pattern. Only line/marker layers: heatmaps, bars and the map keep the fade above.
+   - a new chart starts hidden, so it never shows fully and then restarts; if the script never takes over,
+     a 3-second safety timer shows it anyway
+   - or-wait: hidden until the chart is on screen      - or-play: drawing from left to right
+   - data-or-drawn: already drawn once, shown as is (scrolling back or a filter change doesn't replay it) */
+@keyframes or-draw {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes or-show { to { clip-path: inset(0 0 0 0); } }
+.js-plotly-plot .cartesianlayer .scatterlayer { clip-path: inset(0 100% 0 0); animation: or-show 0.01s 3s both; }
+.or-wait .cartesianlayer .scatterlayer { clip-path: inset(0 100% 0 0); animation: none; }
+.or-play .cartesianlayer .scatterlayer { animation: or-draw 1.1s cubic-bezier(0.33, 1, 0.68, 1) both; }
+[data-or-drawn]:not(.or-play) .cartesianlayer .scatterlayer { clip-path: none; animation: none; }
+.st-key-orscript { display: none; }
+
 @media (prefers-reduced-motion: reduce) {
   [data-testid="stMainBlockContainer"] * { animation: none !important; }
+  .js-plotly-plot .cartesianlayer .scatterlayer { clip-path: none !important; }
 }
 
 /* ---------------------------------------------------------------- smooth controls */
