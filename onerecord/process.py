@@ -1,5 +1,5 @@
 """
-Request cycle time: today's email process (measured from the request history) vs the OneRecord design
+Request cycle time: today's email process (measured from the request history) vs the new design
 (re-simulated from the SAME step-level history, changing only what the design changes).
 
 Design levers and their stated assumptions:

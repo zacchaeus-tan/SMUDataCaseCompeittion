@@ -254,9 +254,9 @@ def submit(con, request_type, entity, country, requestor, values: dict, dup: tup
                  json.dumps(public), dup[0], dup[1], ""))
     con.execute("INSERT INTO sensitive VALUES (?,?)", (rid, json.dumps(secret)))
     _log(con, rid, requestor, "Requestor", "Submitted", f"{request_type} request for {entity}", ts=_ts(t))
-    _log(con, rid, "OneRecord", "System", "Duplicate check", f"{dup[0]}: {dup[2]}", ts=_ts(t))
+    _log(con, rid, "MDM workflow", "System", "Duplicate check", f"{dup[0]}: {dup[2]}", ts=_ts(t))
     if secret:
-        _log(con, rid, "OneRecord", "System", "Sensitive fields stored",
+        _log(con, rid, "MDM workflow", "System", "Sensitive fields stored",
              f"{', '.join(sorted(secret))} saved to restricted list (Finance & MDM only)", ts=_ts(t))
     route(con, rid, request_type, entity, values, t)
     con.commit()
@@ -278,7 +278,7 @@ def route(con, rid, request_type, entity, values, t):
         con.execute("INSERT INTO approvals (request_id, role, person, stage, status, assigned_at) VALUES (?,?,?,?,?,?)",
                     (rid, role, person, 1, "Pending", _ts(t)))
     con.execute("UPDATE requests SET stage=? WHERE id=?", ("Stage 1: parallel checks", rid))
-    _log(con, rid, "OneRecord", "System", "Routed in parallel",
+    _log(con, rid, "MDM workflow", "System", "Routed in parallel",
          " | ".join(f"{p} ({r})" for r, p in stage1) + " - Teams approval cards sent", ts=_ts(t))
 
 
@@ -294,7 +294,7 @@ def decide(con, approval_id, decision, actor, comment="", ts=None):
     if decision == "Rejected":
         con.execute("UPDATE approvals SET status='Cancelled' WHERE request_id=? AND status='Pending'", (rid,))
         con.execute("UPDATE requests SET status='Rejected', stage='Closed', completed_at=? WHERE id=?", (_ts(t), rid))
-        _log(con, rid, "OneRecord", "System", "Requestor notified",
+        _log(con, rid, "MDM workflow", "System", "Requestor notified",
              f"Rejected by {a['role']}; other approvers' cards withdrawn", ts=_ts(t))
     else:
         pending = con.execute("SELECT COUNT(*) FROM approvals WHERE request_id=? AND status='Pending'", (rid,)).fetchone()[0]
@@ -304,7 +304,7 @@ def decide(con, approval_id, decision, actor, comment="", ts=None):
             con.execute("INSERT INTO approvals (request_id, role, person, stage, status, assigned_at) VALUES (?,?,?,?,?,?)",
                         (rid, "MDM Analyst", p.PersonName if p is not None else "MDM Analyst", 2, "Pending", _ts(t)))
             con.execute("UPDATE requests SET stage='Stage 2: MDM final check' WHERE id=?", (rid,))
-            _log(con, rid, "OneRecord", "System", "All checks approved", "Sent to MDM for final check", ts=_ts(t))
+            _log(con, rid, "MDM workflow", "System", "All checks approved", "Sent to MDM for final check", ts=_ts(t))
         elif a["stage"] == 2:
             _create_in_sap(con, rid, t)
     con.commit()
@@ -341,8 +341,8 @@ def _create_in_sap(con, rid, t):
     con.execute("INSERT INTO sap_import VALUES (?,?,?,?)", (rid, obj, json.dumps(payload), _ts(t)))
     con.execute("UPDATE requests SET status='Created in SAP', stage='Done', completed_at=?, sap_code=? WHERE id=?",
                 (_ts(t), code, rid))
-    _log(con, rid, "OneRecord", "System", "SAP import file generated", f"{obj} row for {code} (DTW template)", ts=_ts(t))
-    _log(con, rid, "OneRecord", "System", "Requestor notified", f"Record {code} is live - you can transact now", ts=_ts(t))
+    _log(con, rid, "MDM workflow", "System", "SAP import file generated", f"{obj} row for {code} (DTW template)", ts=_ts(t))
+    _log(con, rid, "MDM workflow", "System", "Requestor notified", f"Record {code} is live - you can transact now", ts=_ts(t))
 
 
 # --------------------------------------------------------------------------- scheduled flow: reminders
@@ -367,12 +367,12 @@ def run_reminders(con) -> list:
         if waited >= sla and not a["reminded_at"]:
             con.execute("UPDATE approvals SET reminded_at=? WHERE id=?", (_ts(t), a["id"]))
             msg = f"Reminder to {a['person']} in Teams at 09:00 {tz} ({waited} days waiting)"
-            _log(con, a["request_id"], "OneRecord", "System", "Reminder sent", msg)
+            _log(con, a["request_id"], "MDM workflow", "System", "Reminder sent", msg)
             events.append(msg)
         if esc and waited >= esc and not a["escalated_at"]:
             con.execute("UPDATE approvals SET escalated_at=? WHERE id=?", (_ts(t), a["id"]))
             msg = f"Escalated: {a['person']} has not responded in {waited} days - manager notified"
-            _log(con, a["request_id"], "OneRecord", "System", "Escalated", msg)
+            _log(con, a["request_id"], "MDM workflow", "System", "Escalated", msg)
             events.append(msg)
     con.commit()
     return events

@@ -1,5 +1,5 @@
 """
-OneRecord prototype for the Lives Group MDM case (SMU DSA Data Case Competition 2026).
+Lives Group master data and regional dashboard prototype (SMU DSA Data Case Competition 2026).
 
     streamlit run app.py
 
@@ -11,7 +11,7 @@ from pathlib import Path
 
 import streamlit as st
 
-st.set_page_config(page_title="OneRecord", page_icon=str(Path(__file__).parent / "assets" / "icon.svg"), layout="wide")
+st.set_page_config(page_title="Lives Group", page_icon=str(Path(__file__).parent / "assets" / "icon.svg"), layout="wide")
 
 from views import analytics_pages as ap  # noqa: E402
 from views import common  # noqa: E402

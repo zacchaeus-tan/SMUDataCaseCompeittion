@@ -17,7 +17,7 @@ ALL = "ALL"  # "All countries" option in the forecast picker
 # one fixed colour per country on every chart (Okabe-Ito, readable with colour blindness)
 COUNTRY_COLORS = {"SG": "#0072B2", "MY": "#E69F00", "TH": "#009E73", "ID": "#CC79A7", "VN": "#56B4E9"}
 LABEL_COLORS = ["#1f4e79", "#7fa7d0", "#c9a227", "#8c6bb1"]
-SCENARIO_COLORS = {"Today (email)": "#9aa3ad", "OneRecord": "#1f4e79"}
+SCENARIO_COLORS = {"Today (email)": "#9aa3ad", "New process": "#1f4e79"}
 # orange = decline, blue = growth; replaces red-green, which colour-blind readers can't separate
 DIVERGING = [[0, "#c4571b"], [0.5, "#f4f1ec"], [1, "#2166ac"]]
 
@@ -161,7 +161,7 @@ def forecasting():
     c.header("Forecasting", f"The calendar model cuts forecast error by {cut:.0%} compared with the 6-month average")
     c.kpi_row([
         c.kpi("Today: 6-month average", wape(ab, "baseline_ma6") * 100, decimals=1, suffix="% error"),
-        c.kpi("OneRecord calendar model", wape(ab, "calendar_model") * 100, decimals=1, suffix="% error",
+        c.kpi("AI calendar model", wape(ab, "calendar_model") * 100, decimals=1, suffix="% error",
               delta=f"{-cut:+.0%}", tone=c.tone(-cut, up_is_good=False)),
         c.kpi("Series improved", (acc[acc["product"] != "C"].Improvement > 0).sum(), suffix=" of 10",
               help="Products A and B"),
@@ -563,7 +563,7 @@ def business_case():
                       xaxis_title="share of elapsed time")
     c.chart(fig)
 
-    st.markdown("##### With OneRecord (simulated on the same 150 requests)")
+    st.markdown("##### With the new process (simulated on the same 150 requests)")
     sim = process.simulate(d["requests"], d["steps"], bounce_avoided=bounce / 100, notice_cut=notice / 100,
                            escalate_after_days=esc)
     now_med, fut_med = sim.cycle_days.median(), sim.future_days.median()
@@ -576,7 +576,7 @@ def business_case():
         c.kpi("Faster", (1 - fut_med / now_med) * 100, suffix="%"),
     ])
     long = pd.concat([sim.assign(scenario="Today (email)", days=sim.cycle_days),
-                      sim.assign(scenario="OneRecord", days=sim.future_days)])
+                      sim.assign(scenario="New process", days=sim.future_days)])
     fig = px.histogram(long, x="days", color="scenario", barmode="overlay", nbins=40, opacity=0.7,
                        color_discrete_map=SCENARIO_COLORS)
     fig.update_layout(height=260, margin=dict(l=0, r=0, t=10, b=0), legend_title="")

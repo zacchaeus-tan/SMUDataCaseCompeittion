@@ -1,4 +1,4 @@
-# OneRecord: clean master data for Lives Group
+# Lives Group: clean master data and a five-country regional view
 
 *SMU DSA Data Case Competition 2026 · Modernising Master Data Management at Lives Group*
 
@@ -9,9 +9,9 @@
 Bad data gets into SAP B1 when it's first entered. That one root cause makes a new record take
 **18.8 days** (median), and it scrambles the per-customer view that sales needs to grow across five countries.
 
-## What OneRecord does
+## What the solution does
 
-| | Today | OneRecord |
+| | Today | With the new process |
 |---|---|---|
 | **Capture** | Free-text email, fields guessed, 41% bounce back | Smart form: only the fields that apply, can't submit incomplete, duplicate check while typing |
 | **Approve** | Email chain, one approver after another, nobody notified | Parallel approval cards in Teams, reminders, escalation, live status |
@@ -35,7 +35,7 @@ and the working Microsoft 365 build itself (see [Microsoft 365 build](#microsoft
 
 ## Microsoft 365 build
 
-The workflow half of OneRecord also runs for real on Microsoft 365. We built it in a Teams team, using only
+The workflow half of the solution also runs for real on Microsoft 365. We built it in a Teams team, using only
 **standard connectors** (SharePoint, Approvals, Teams), so it needs no premium licence and no custom code on a server.
 The Streamlit app remains the place for the regional business view and forecasting (Power BI in production).
 

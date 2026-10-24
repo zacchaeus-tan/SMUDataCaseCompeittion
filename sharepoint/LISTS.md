@@ -1,11 +1,11 @@
-# SharePoint lists for the OneRecord prototype
+# SharePoint lists for the Lives Group prototype
 
 Each CSV in this folder becomes one SharePoint list, which Power Apps and Power Automate read and write.
 All of them use **standard connectors only** (no Premium licence needed).
 
 ## Setup
 
-1. In Teams, create a team (e.g. *OneRecord Prototype*) and add your teammates. This also creates a SharePoint site.
+1. In Teams, create a team (e.g. *Lives Group MDM Prototype*) and add your teammates. This also creates a SharePoint site.
 2. Open the site → **New → List → From CSV**, choose a file and check the column types (table below).
    Create the empty lists (`Requests`, `SensitiveDetails`, `ApprovalLog`) the same way. Their CSVs contain only headers.
 3. Replace the `<teammate-n SMU email>` placeholders in **Roles** with real teammate emails. Approval cards are

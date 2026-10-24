@@ -2,7 +2,7 @@
 Monthly demand forecasting by country x product.
 
 Baseline (today):  6-month moving average of past purchase-order units.
-OneRecord model:   "business-calendar" regression, fitted on log units across all 15 series at once:
+AI model:          "business-calendar" regression, fitted on log units across all 15 series at once:
                        log(units) = level[series] + trend[series] + known calendar events
                    Events are things a diagnostics distributor already knows: dengue season (Product A,
                    by country), the hospital year-end budget push (Nov/Dec), the January lull, and public
