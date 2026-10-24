@@ -12,18 +12,27 @@ from onerecord.config import COUNTRIES, CURRENT, PRIOR_YEAR, PRODUCTS
 from . import common as c
 
 COLORS = {"A": "#2a6fdb", "B": "#e07b39", "C": "#5b9a68"}
+# one fixed colour per country on every chart (Okabe-Ito, readable with colour blindness)
+COUNTRY_COLORS = {"SG": "#0072B2", "MY": "#E69F00", "TH": "#009E73", "ID": "#CC79A7", "VN": "#56B4E9"}
+LABEL_COLORS = ["#1f4e79", "#7fa7d0", "#c9a227", "#8c6bb1"]
+SCENARIO_COLORS = {"Today (email)": "#9aa3ad", "OneRecord": "#1f4e79"}
+# orange = decline, blue = growth; replaces red-green, which colour-blind readers can't separate
+DIVERGING = [[0, "#c4571b"], [0.5, "#f4f1ec"], [1, "#2166ac"]]
+
+COUNTRY_COL = st.column_config.TextColumn("Country")
+PRODUCT_COL = st.column_config.TextColumn("Product")
 
 
 def _definition():
-    st.info(f"**Growth measure:** year-on-year change in purchase-order **units**, "
-            f"{CURRENT[0]}–{CURRENT[1]} vs {PRIOR_YEAR[0]}–{PRIOR_YEAR[1]} (same six months, so seasonality "
-            f"cancels). **Momentum:** last 3 months vs the same 3 months a year earlier. Counts **customer orders "
-            f"only** — enquiries, follow-ups and master-data requests are excluded (see *Orders vs enquiries*).")
+    st.info(f"Growth is the year-on-year change in units ordered, {CURRENT[0]} to {CURRENT[1]} against "
+            f"{PRIOR_YEAR[0]} to {PRIOR_YEAR[1]}. Comparing the same six months removes seasonal effects. Momentum "
+            f"compares the last 3 months with the same 3 months a year earlier. Only customer orders are counted; "
+            f"enquiries, follow-ups and master-data requests are left out.")
 
 
 # --------------------------------------------------------------------------- growth
 def growth():
-    st.title("Five-country growth · Products A, B, C")
+    st.title("Five-country growth")
     _definition()
     g = c.regional()["growth"]
     g["country_name"] = g.country.map(COUNTRIES)
@@ -36,26 +45,28 @@ def growth():
     k[2].metric("Active customers", f"{c.regional()['clean'].query('month >= @CURRENT[0]').customer_id.nunique()}",
                 help="Real customers after merging duplicate records")
     best = g.loc[g[g["product"] != "C"].unit_growth.idxmax()]
-    k[3].metric("Fastest growing (A/B)", f"{best.country} · {best['product']}", c.pct(best.unit_growth))
+    k[3].metric("Fastest growing (A/B)", f"{best.country}, product {best['product']}", c.pct(best.unit_growth))
 
     left, right = st.columns([1.1, 1])
     with left:
         st.markdown("##### Year-on-year unit growth")
         m = g.pivot(index="country", columns="product", values="unit_growth").reindex(c.COUNTRY_ORDER)
-        fig = px.imshow(m, text_auto="+.0%", color_continuous_scale="RdYlGn", zmin=-0.3, zmax=0.3, aspect="auto",
-                        labels=dict(color="YoY"))
+        fig = px.imshow(m, text_auto="+.0%", color_continuous_scale=DIVERGING, zmin=-0.3, zmax=0.3, aspect="auto",
+                        labels=dict(color="YoY", x="Product", y=""))
         fig.update_layout(height=330, margin=dict(l=0, r=0, t=10, b=0), coloraxis_showscale=False)
         st.plotly_chart(fig, width="stretch")
-        st.caption("Product C (equipment) sells only ~30–50 units per country per half-year — read its growth "
-                   "as directional; value-based or rolling-12-month views are steadier.")
+        st.caption("Product C (equipment) sells only 30–50 units per country each half-year, so its growth "
+                   "figures swing a lot. Treat them as a rough guide.")
     with right:
-        st.markdown("##### Country × product table")
+        st.markdown("##### By country and product")
         t = g[["country", "product", "units_now", "unit_growth", "momentum_3m", "value_now", "customers_now"]].copy()
         st.dataframe(t, hide_index=True, width="stretch", height=330, column_config={
+            "country": COUNTRY_COL,
+            "product": PRODUCT_COL,
             "units_now": st.column_config.NumberColumn("Units", format="%d"),
             "unit_growth": st.column_config.NumberColumn("YoY", format="percent"),
-            "momentum_3m": st.column_config.NumberColumn("3-mo momentum", format="percent"),
-            "value_now": st.column_config.NumberColumn("Value SGD", format="%.0f"),
+            "momentum_3m": st.column_config.NumberColumn("3-month momentum", format="percent"),
+            "value_now": st.column_config.NumberColumn("Value (SGD)", format="%.0f"),
             "customers_now": st.column_config.NumberColumn("Customers"),
         })
 
@@ -65,22 +76,24 @@ def growth():
     prod = st.radio("Product", list(PRODUCTS), horizontal=True, format_func=lambda p: c.PRODUCT_LABEL[p])
     mm = c.regional()["monthly"].query("product == @prod")
     fig = px.line(mm, x="month", y="quantity", color="country", markers=True,
-                  category_orders={"country": c.COUNTRY_ORDER})
-    fig.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units", xaxis_title="")
+                  category_orders={"country": c.COUNTRY_ORDER}, color_discrete_map=COUNTRY_COLORS)
+    fig.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units", xaxis_title="",
+                      legend_title="")
     st.plotly_chart(fig, width="stretch")
 
-    st.markdown("##### What it means")
+    st.markdown("##### Takeaways")
     vn_b = g[(g.country == "VN") & (g["product"] == "B")].iloc[0]
     drops = c.regional()["compare"]["clean_drop"]
     vn_drop_val = drops[drops.country == "VN"].value_at_risk_per_q.sum()
     st.markdown(
-        f"- **Malaysia and Indonesia lead growth** (A and B up ~20–30% YoY) — prioritise stock cover and sales "
-        f"capacity there ahead of the Dec budget flush and ID's Jan–Apr dengue season.\n"
-        f"- **Vietnam Product B is down {abs(vn_b.unit_growth):.0%}** although the market is growing: the drop is "
-        f"concentrated in a few large labs that are ordering far less (≈ S${vn_drop_val:,.0f} per quarter at risk). "
-        f"It is a **retention** problem, not a demand problem → see *Sales actions*.\n"
-        f"- **Singapore is mature** (single-digit growth, equipment declining) — growth there comes from cross-selling "
-        f"into existing accounts rather than new ones.")
+        f"- Malaysia and Indonesia are growing fastest, with Products A and B up about 20–30% on last year. Both "
+        f"need enough stock and sales cover before the December budget flush, and Indonesia's dengue season runs "
+        f"from January to April.\n"
+        f"- Vietnam Product B is down {abs(vn_b.unit_growth):.0%} while the market is still growing. Most of the "
+        f"drop comes from a few large labs ordering much less, worth about S${vn_drop_val:,.0f} a quarter. These "
+        f"accounts need follow-up from sales (see Sales actions).\n"
+        f"- Singapore is a mature market: growth is in single digits and equipment sales are falling. Most new "
+        f"growth there will come from selling more products to existing customers.")
 
 
 ISO3 = {"SG": "SGP", "MY": "MYS", "TH": "THA", "ID": "IDN", "VN": "VNM"}
@@ -104,7 +117,7 @@ def _growth_map(g):
             "<br>Value: S$%{customdata[3]:,.0f}<extra></extra>"
     custom = m[["name", "units_now", "growth", "value_now"]].values
     fig = go.Figure()
-    fig.add_choropleth(locations=m.iso, z=m.growth, colorscale="RdYlGn", zmin=-0.3, zmax=0.3, customdata=custom,
+    fig.add_choropleth(locations=m.iso, z=m.growth, colorscale=DIVERGING, zmin=-0.3, zmax=0.3, customdata=custom,
                        hovertemplate=hover, marker_line_color="white", colorbar=dict(title="YoY", tickformat="+.0%"))
     # bubbles sized by volume; they also keep Singapore visible, which is too small to see as a filled shape
     fig.add_scattergeo(lat=m.lat, lon=m.lon, text=m.label, mode="markers+text",
@@ -118,12 +131,12 @@ def _growth_map(g):
                     showocean=True, oceancolor="#e8f0f8", showframe=False)
     fig.update_layout(height=430, margin=dict(l=0, r=0, t=10, b=0))
     st.plotly_chart(fig, width="stretch")
-    st.caption("Colour = year-on-year unit growth (same six months). Bubble size = units ordered Apr–Sep 2026.")
+    st.caption("Colour shows year-on-year growth in units. Bubble size shows units ordered in Apr–Sep 2026.")
 
 
 # --------------------------------------------------------------------------- forecasting
 def forecasting():
-    st.title("Forecasting · better than the 6-month average")
+    st.title("Forecasting")
     f = c.forecasts()
     bt, acc = f["backtest"], f["accuracy"]
     from onerecord.forecast import wape
@@ -133,25 +146,26 @@ def forecasting():
     k[1].metric("OneRecord calendar model", f"{wape(ab, 'calendar_model'):.1%} error",
                 f"{wape(ab, 'calendar_model') / wape(ab, 'baseline_ma6') - 1:+.0%}", delta_color="inverse")
     k[2].metric("Series improved", f"{(acc[acc['product'] != 'C'].Improvement > 0).sum()} of 10", help="Products A and B")
-    k[3].metric("Horizon tested", "1–3 mo", help="Rolling origins Apr–Sep 2026; error = WAPE")
-    st.caption("Error = WAPE (sum of absolute errors ÷ actual units), products A and B, forecasting 1–3 months "
-               "ahead from every month Apr–Sep 2026 using only the data available at the time.")
+    k[3].metric("Horizon tested", "1–3 months", help="Rolling origins Apr–Sep 2026; error = WAPE")
+    st.caption("Error is measured as WAPE: total absolute error divided by actual units. It covers Products A and "
+               "B, forecasting 1–3 months ahead from each month Apr–Sep 2026, using only the data available at "
+               "the time.")
 
-    with st.expander("How the model works (plain English)", expanded=False):
+    with st.expander("How the model works", expanded=False):
         st.markdown(
-            "The 6-month average treats every month the same, so it is always late for dengue season and the "
-            "December budget flush. The OneRecord model keeps each series' level and trend and adds the **business "
-            "calendar Lives Group already knows**: dengue season by country (Product A), the hospital year-end "
-            "push, the January lull and public holidays (Lunar New Year, Tet, Songkran, Hari Raya). It learns *how "
-            "big* each effect is from all five countries at once, which is why 12–18 months of history is enough. "
-            "No black box, no model to babysit: re-run monthly, check the error report.")
+            "The 6-month average gives every month the same weight, so it reacts late to dengue season and the "
+            "December budget flush. The calendar model starts from each series' level and trend, then adjusts for "
+            "events Lives Group already plans around: dengue season in each country (Product A), the hospital "
+            "year-end push, the January slowdown, and public holidays such as Lunar New Year, Tet, Songkran and "
+            "Hari Raya. It estimates the size of each effect from all five countries together, which is why 12–18 "
+            "months of history is enough. It is re-run each month alongside an error report.")
         eff = pd.DataFrame({"Calendar effect": list(f["effects"]), "Learned impact on units": list(f["effects"].values())})
         st.dataframe(eff, hide_index=True, column_config={
             "Learned impact on units": st.column_config.NumberColumn(format="percent")})
 
     s1, s2 = st.columns(2)
     country = s1.selectbox("Country", c.COUNTRY_ORDER, index=c.COUNTRY_ORDER.index("TH"),
-                           format_func=lambda k: f"{k} · {COUNTRIES[k]}")
+                           format_func=lambda k: COUNTRIES[k])
     prod = s2.selectbox("Product", list(PRODUCTS), format_func=lambda p: c.PRODUCT_LABEL[p])
     hist = f["Y"].loc[(country, prod)]
     one = bt[(bt.country == country) & (bt["product"] == prod) & (bt.horizon == 1)]
@@ -166,35 +180,40 @@ def forecasting():
                     hoverinfo="skip")
     fig.add_scatter(x=ahead.month, y=ahead.low, name="Likely range (8 in 10 months)", mode="lines",
                     line=dict(width=0), fill="tonexty", fillcolor="rgba(120,120,120,0.18)")
-    fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average · next 3 months", mode="lines",
+    fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average, next 3 months", mode="lines",
                     line=dict(color="#aaa", dash="dash"))
-    fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model · next 3 months", mode="lines+markers",
+    fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model, next 3 months", mode="lines+markers",
                     line=dict(color=COLORS[prod], dash="dash"))
     fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units",
                       legend=dict(orientation="h", y=-0.2))
     st.plotly_chart(fig, width="stretch")
     row = acc[(acc.country == country) & (acc["product"] == prod)].iloc[0]
-    st.caption(f"{country} · {prod}: 6-month average error {row['MA6 error']:.1%} → model {row['Model error']:.1%}.")
+    st.caption(f"{COUNTRIES[country]}, product {prod}: the 6-month average's error is {row['MA6 error']:.1%}, "
+               f"the model's is {row['Model error']:.1%}.")
 
     st.markdown("##### Accuracy by series")
     st.dataframe(acc, hide_index=True, width="stretch", column_config={
-        "MA6 error": st.column_config.NumberColumn(format="percent"),
+        "country": COUNTRY_COL,
+        "product": PRODUCT_COL,
+        "MA6 error": st.column_config.NumberColumn("6-month average error", format="percent"),
         "Model error": st.column_config.NumberColumn(format="percent"),
         "Improvement": st.column_config.NumberColumn(format="percent")})
     st.markdown(
-        "**Honest read-out.** The biggest gains are Product A in ID, MY and TH, where the average misses dengue "
-        "season. Singapore A gets slightly worse (its dengue effect is milder than the regional estimate — "
-        "next step: a country-specific effect once more history exists). Vietnam B is poor for both: lost "
-        "accounts are a customer problem, handled by the drop-off alerts, not by a calendar. Product C is too "
-        "lumpy to forecast monthly — plan it from the sales pipeline instead.")
+        "The largest gains are for Product A in Indonesia, Malaysia and Thailand, where the 6-month average misses "
+        "dengue season. Singapore A gets slightly worse because its dengue effect is milder than the regional "
+        "estimate; a Singapore-specific effect can be added once there is more history. Vietnam B is poor under "
+        "both methods because the drop comes from lost accounts, which the drop-off alerts on Sales actions cover. "
+        "Product C orders are too irregular to forecast monthly and are better planned from the sales pipeline.")
 
-    st.markdown("##### Next quarter · what to stock")
+    st.markdown("##### Stock plan for next quarter")
     plan = f["plan"]
-    st.caption("Forecast for Oct–Dec 2026 vs the last three months. The range comes from how far actual orders "
-               "landed from the model in the back-test (8 in 10 months fell inside it). Series the model "
-               "forecast poorly are flagged rather than acted on.")
+    st.caption("Forecast for Oct–Dec 2026 compared with the last three months. The low–high range is based on how "
+               "far actual orders landed from the model in the back-test; 8 in 10 months fell inside it. Series "
+               "the model forecast poorly are flagged instead of given an action.")
     st.dataframe(plan, hide_index=True, width="stretch", column_config={
-        "last_3_months": st.column_config.NumberColumn("Last 3 mo", format="%d"),
+        "country": COUNTRY_COL,
+        "product": PRODUCT_COL,
+        "last_3_months": st.column_config.NumberColumn("Last 3 months", format="%d"),
         "next_3_months": st.column_config.NumberColumn("Forecast", format="%d"),
         "low": st.column_config.NumberColumn("Low", format="%d"),
         "high": st.column_config.NumberColumn("High", format="%d"),
@@ -206,19 +225,18 @@ def forecasting():
 
 
 def _ai_brief(plan):
-    st.markdown("##### 🤖 AI action brief · Phase 2")
-    st.caption("**Planned for Phase 2, once the workflow is live.** A monthly Power Automate flow sends the summary "
-               "numbers on these pages (growth, the stock plan above, drop-offs, cross-sell) to an AI prompt "
-               "(AI Builder) and posts the five actions worth doing first, with the numbers behind them, to the "
-               "regional sales channel in Teams. No API key to manage and no model to train: IT enables AI Builder "
-               "once, and the MDM team edits the prompt text. This prototype runs the same prompt to preview the output.")
+    st.markdown("##### AI action brief (Phase 2)")
+    st.caption("Planned for Phase 2, after the workflow is live. Each month, a Power Automate flow would send the "
+               "summary figures from these pages (growth, the stock plan, drop-offs and cross-sell) to an AI "
+               "Builder prompt, and post the five most useful actions, with the figures behind them, to the "
+               "regional sales channel in Teams. IT enables AI Builder once and the MDM team maintains the prompt "
+               "text. This prototype runs the same prompt as a preview.")
     reg = c.regional()
     data = advisor.facts(reg["growth"], plan, reg["compare"]["clean_drop"], reg["compare"]["clean_xsell"])
     focus = st.text_input("Focus (optional)", placeholder="e.g. Vietnam, or year-end budget flush",
                           key="ai_focus")
     if not classify.ai_available():
-        st.info("Preview not configured on this machine (set ANTHROPIC_API_KEY to run it). The rule-based stock "
-                "plan above works without it.")
+        st.info("The preview needs an ANTHROPIC_API_KEY on this machine. The stock plan above works without it.")
     elif st.button("Preview the AI action brief", type="primary"):
         st.session_state["ai_brief"] = c.ai_brief(json.dumps(data), focus)
     res = st.session_state.get("ai_brief")
@@ -232,90 +250,111 @@ def _ai_brief(plan):
             for i, a in enumerate(brief["actions"], 1):
                 with st.container(border=True):
                     st.markdown(f"**{i}. {a['title']}**  \n"
-                                f"`{a['country']}` · Product `{a['product']}` · Owner: **{a['owner']}** · "
-                                f"Confidence: {a['confidence']}")
+                                f"{COUNTRIES.get(a['country'], a['country'])}, product {a['product']}. "
+                                f"Owner: {a['owner']}. Confidence: {a['confidence']}.")
                     st.markdown(f"**First step:** {a['first_step']}  \n**Evidence:** {a['evidence']}  \n"
                                 f"**Expected impact:** {a['expected_impact']}")
-            c.assumption("AI suggestions are a starting point for the monthly sales meeting, not decisions. "
-                         "Every figure it cites is in the data below, so it can be checked. Preview generated "
-                         "with Claude; production runs the same prompt in Power Automate.")
-    with st.expander("Exactly what the AI sees (no customer master data, no raw orders)"):
+            c.assumption("AI suggestions are input for the monthly sales meeting, and every figure they cite can "
+                         "be checked in the data below. The preview uses Claude; production would run the same "
+                         "prompt in Power Automate.")
+    with st.expander("Data sent to the AI (summary figures only, no customer master data or raw orders)"):
         st.json(data, expanded=False)
 
 
 # --------------------------------------------------------------------------- actions
 def actions():
-    st.title("Sales actions from clean data")
+    st.title("Sales actions")
     cmp = c.regional()["compare"]
     k = st.columns(4)
     k[0].metric("Customer records in SAP", cmp["raw_customers"])
     k[1].metric("Real customers", cmp["clean_customers"], f"{cmp['clean_customers'] - cmp['raw_customers']}",
                 delta_color="off")
     k[2].metric("Drop-off alerts", len(cmp["clean_drop"]), f"{len(cmp['clean_drop']) - len(cmp['raw_drop'])} vs raw",
-                delta_color="inverse", help="Raw records raise extra false alarms: a 'lost' customer that simply "
-                                            "started ordering under a duplicate record")
+                delta_color="inverse", help="With duplicate records, a customer whose orders moved to a new record "
+                                            "looks like they stopped ordering.")
     k[3].metric("Cross-sell leads", len(cmp["clean_xsell"]), f"{len(cmp['clean_xsell']) - len(cmp['raw_xsell'])} vs raw",
-                delta_color="inverse", help="Raw records invent false gaps: one hospital split into an 'A-only' and "
-                                            "a 'B-only' record")
+                delta_color="inverse", help="With duplicate records, one hospital can be split into an A-only and a "
+                                            "B-only record, which looks like a cross-sell gap.")
 
-    t1, t2 = st.tabs(["🚨 Customers dropping off", "➕ Cross-sell opportunities"])
+    t1, t2 = st.tabs(["Customers dropping off", "Cross-sell opportunities"])
     with t1:
         d = cmp["clean_drop"]
-        st.markdown(f"**{len(d)} established customers** ordered ≥40% less last quarter than both the same quarter "
-                    f"last year and their own recent average. Value at risk ≈ **S${d.value_at_risk_per_q.sum():,.0f} "
-                    f"per quarter**.")
+        st.markdown(f"{len(d)} established customers ordered at least 40% less last quarter than in the same "
+                    f"quarter last year, and than their own recent average. Value at risk is about "
+                    f"S${d.value_at_risk_per_q.sum():,.0f} per quarter.")
         st.dataframe(d[["name", "country", "units_last_q", "units_same_q_last_year", "change", "value_at_risk_per_q",
                         "last_order"]], hide_index=True, width="stretch", column_config={
+            "name": st.column_config.TextColumn("Customer"),
+            "country": COUNTRY_COL,
+            "units_last_q": st.column_config.NumberColumn("Units last quarter"),
+            "units_same_q_last_year": st.column_config.NumberColumn("Same quarter last year"),
             "change": st.column_config.NumberColumn("YoY", format="percent"),
-            "value_at_risk_per_q": st.column_config.NumberColumn("At risk / quarter (SGD)", format="%.0f")})
-        st.markdown("**Action:** account manager calls the top 10 by value within two weeks; log the reason "
-                    "(competitor, budget, service issue) so patterns surface by country.")
+            "value_at_risk_per_q": st.column_config.NumberColumn("At risk per quarter (SGD)", format="%.0f"),
+            "last_order": st.column_config.TextColumn("Last order")})
+        st.markdown("**Suggested next step:** account managers call the top 10 by value within two weeks and record "
+                    "the reason (competitor, budget, service issue), so patterns by country become visible.")
     with t2:
         x = cmp["clean_xsell"]
-        st.markdown(f"**{len(x)} customers** buy one of A/B but not the other, while most similar customers buy both. "
-                    f"Estimated potential ≈ **S${x.est_value_sgd_per_year.sum() / 1e6:,.1f}M a year** if all converted.")
+        st.markdown(f"{len(x)} customers buy only one of Products A and B, while most similar customers buy both. "
+                    f"If all of them bought both, that would be worth about "
+                    f"S${x.est_value_sgd_per_year.sum() / 1e6:,.1f}M a year.")
         st.dataframe(x[["name", "country", "segment", "buys", "missing", "peers_buying_both", "est_units_per_year",
                         "est_value_sgd_per_year"]], hide_index=True, width="stretch", column_config={
-            "est_value_sgd_per_year": st.column_config.NumberColumn("Potential / year (SGD)", format="%.0f")})
-        c.assumption("potential = their volume of the product they buy × the median ratio among peers who buy both. "
-                     "A ceiling, not a forecast; the business case uses 10% conversion.")
-        st.markdown("**Action:** bundle offer (reagents + consumables) for hospitals and labs on the list, starting "
-                    "with SPD/QTS joint accounts in MY and ID where growth is strongest.")
+            "name": st.column_config.TextColumn("Customer"),
+            "country": COUNTRY_COL,
+            "segment": st.column_config.TextColumn("Segment"),
+            "buys": st.column_config.TextColumn("Buys"),
+            "missing": st.column_config.TextColumn("Not buying"),
+            "peers_buying_both": st.column_config.NumberColumn("Similar customers buying both"),
+            "est_units_per_year": st.column_config.NumberColumn("Est. units per year", format="%.0f"),
+            "est_value_sgd_per_year": st.column_config.NumberColumn("Potential per year (SGD)", format="%.0f")})
+        c.assumption("potential is the customer's volume of the product they already buy, multiplied by the median "
+                     "ratio among similar customers who buy both. This is an upper limit; the business case "
+                     "assumes 10% conversion.")
+        st.markdown("**Suggested next step:** offer a reagents-and-consumables bundle to the hospitals and labs on "
+                    "this list, starting with joint SPD/QTS accounts in Malaysia and Indonesia, where growth is "
+                    "strongest.")
 
 
 # --------------------------------------------------------------------------- inbound
+REVIEW_COLS = {"message_id": "Message", "subject": "Subject", "body": "Body", "predicted": "Rules result",
+               "reason": "Reason", "true_label": "Correct label", "after_ai": "After AI step", "ai_reason": "AI reason"}
+
+
 def inbound():
-    st.title("Orders vs enquiries vs master-data requests")
-    st.caption("The regional view counts **orders only**. This is how incoming emails get separated.")
+    st.title("Orders, enquiries and requests")
+    st.caption("The regional view counts orders only. This page shows how incoming emails are sorted.")
     t = c.triage()
     main, hold = t["main"], t["holdout"]
-    st.markdown("**Design:** route by channel first (dedicated order inbox, form for setup requests) → rules the "
-                "MDM team can read → an off-the-shelf AI prompt for what's left → a person for anything unsure. "
-                "No custom model to train or maintain.")
+    st.markdown("**How emails are sorted:** first by channel (a dedicated order inbox, and the form for setup "
+                "requests), then by rules the MDM team can read, then by an AI prompt for whatever is left. "
+                "Anything uncertain goes to a person. There is no custom model to train or maintain.")
     k = st.columns(4)
     for i, lab in enumerate(["purchase_order", "enquiry", "follow_up", "mdm_request"]):
         k[i].metric(classify.LABELS[lab], int((main.predicted == lab).sum()))
     by = main[main.predicted != "review"].groupby(["country", "predicted"]).size().reset_index(name="emails")
     by["predicted"] = by.predicted.map(classify.LABELS)
-    fig = px.bar(by, x="country", y="emails", color="predicted", category_orders={"country": c.COUNTRY_ORDER},
-                 barmode="stack")
-    fig.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=0), legend_title="")
+    label_order = [classify.LABELS[lab] for lab in ["purchase_order", "enquiry", "follow_up", "mdm_request"]]
+    fig = px.bar(by, x="country", y="emails", color="predicted", barmode="stack",
+                 category_orders={"country": c.COUNTRY_ORDER, "predicted": label_order},
+                 color_discrete_sequence=LABEL_COLORS)
+    fig.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=0), legend_title="", xaxis_title="")
     st.plotly_chart(fig, width="stretch")
 
     a, b = st.columns(2)
     with a:
         st.markdown("##### Accuracy on the mailbox sample (660 emails)")
         acc = (main.predicted == main.true_label).mean()
-        st.metric("Correct", f"{acc:.0%}", help="Synthetic emails share templates with the rules — optimistic")
-        st.caption("Optimistic: the synthetic emails follow patterns the rules were written for.")
+        st.metric("Correct", f"{acc:.0%}")
+        st.caption("Likely optimistic, because the synthetic emails follow patterns the rules were written for.")
     with b:
         st.markdown("##### Stress test: 24 hand-written messy emails")
         auto = hold[hold.predicted != "review"]
         st.metric("Labelled by rules", f"{len(auto)} of {len(hold)}",
                   f"{(auto.predicted == auto.true_label).mean():.0%} of those correct" if len(auto) else None,
                   delta_color="off")
-        st.caption("Rules never guessed wrong — but most real-world mess goes to review. That gap is exactly "
-                   "what the AI step is for.")
+        st.caption("The rules made no mistakes, but sent most of the messy emails to review. The AI step is "
+                   "meant to handle these.")
     st.markdown("##### Review queue (stress test)")
     cols = ["message_id", "subject", "body", "predicted", "reason", "true_label"]
     view = hold[cols].copy()
@@ -327,16 +366,16 @@ def inbound():
         if "ai_res" in st.session_state:
             view["after_ai"], _, view["ai_reason"] = zip(*st.session_state["ai_res"])
     else:
-        st.caption("AI step not configured (set ANTHROPIC_API_KEY to try it). In production this is Power "
-                   "Automate's AI prompt action with the same plain-English instructions.")
-    st.dataframe(view, hide_index=True, width="stretch")
-    with st.expander("The AI instructions (editable by the MDM team, no retraining)"):
+        st.caption("The AI step needs an ANTHROPIC_API_KEY on this machine. In production it is Power Automate's "
+                   "AI prompt action, using the same instructions.")
+    st.dataframe(view.rename(columns=REVIEW_COLS), hide_index=True, width="stretch")
+    with st.expander("AI instructions (the MDM team can edit these without retraining)"):
         st.code(classify.AI_PROMPT, language="text")
 
 
 # --------------------------------------------------------------------------- data quality
 def quality():
-    st.title("Data quality · duplicates across SPD, QTS, QTG")
+    st.title("Data quality")
     q = c.data_quality()
     cl, pairs, s = q["clusters"], q["pairs"], q["score"]
     dups = cl[cl.cluster_size > 1]
@@ -346,29 +385,38 @@ def quality():
                 f"{(cl.record_id != cl.golden_id).mean():.0%} of records", delta_color="off")
     k[2].metric("Sent to human review", int((pairs.decision == "review").sum()))
     k[3].metric("Duplicate item codes", len(q["item_map"]))
-    st.caption(f"Validated against the synthetic answer key: precision {s['precision']:.0%}, recall {s['recall']:.0%} "
-               f"({s['found_pairs']} of {s['true_pairs']} duplicate pairs). Real SAP data will be messier — "
-               "the review band exists for that.")
-    st.markdown("**How matching works:** compare records in the same country only · same registration number → "
-                "match, different → never · otherwise cleaned-up name similarity (typos, 'Hosp.' vs 'Hospital', "
-                "missing 'Pte Ltd', upper case) backed by city and address · acronyms like *NUH*. Deterministic "
-                "rules and thresholds — nothing to retrain.")
+    st.caption(f"Checked against the synthetic answer key: precision {s['precision']:.0%}, recall {s['recall']:.0%} "
+               f"({s['found_pairs']} of {s['true_pairs']} duplicate pairs). Real SAP data will be messier, which "
+               f"is why borderline matches go to human review.")
+    st.markdown("**How matching works:** records are only compared within the same country across SPD, QTS and "
+                "QTG. The same registration number is a match, and different numbers never are. Otherwise the "
+                "matcher compares cleaned-up names (allowing for typos, 'Hosp.' vs 'Hospital', a missing 'Pte Ltd' "
+                "and capitalisation), backed up by city and address, and recognises acronyms such as NUH. The rules "
+                "and thresholds are fixed, so there is nothing to retrain.")
     st.markdown("##### Duplicate groups")
     show = dups.sort_values(["golden_id", "created_date"])[["golden_id", "record_id", "customer_name", "country",
                                                              "created_by_entity", "created_date", "registration_no"]]
-    st.dataframe(show, hide_index=True, width="stretch")
+    st.dataframe(show, hide_index=True, width="stretch", column_config={
+        "golden_id": st.column_config.TextColumn("Kept record"),
+        "record_id": st.column_config.TextColumn("Record"),
+        "customer_name": st.column_config.TextColumn("Customer"),
+        "country": COUNTRY_COL,
+        "created_by_entity": st.column_config.TextColumn("Created by"),
+        "created_date": st.column_config.TextColumn("Created"),
+        "registration_no": st.column_config.TextColumn("Registration no.")})
     if q["item_map"]:
         st.markdown("##### Duplicate items")
         items = c.raw()["items"].set_index("item_code")
         for dup, keep in q["item_map"].items():
-            st.markdown(f"- `{dup}` *{items.loc[dup, 'description']}* is a copy of `{keep}` "
-                        f"*{items.loc[keep, 'description']}* — merging them stops the dengue test looking like "
-                        f"it is declining in TH/VN.")
+            st.markdown(f"- `{dup}` ({items.loc[dup, 'description']}) duplicates `{keep}` "
+                        f"({items.loc[keep, 'description']}). Merging them stops the dengue test from looking "
+                        f"like it is declining in Thailand and Vietnam.")
     st.markdown("##### Why it matters")
-    st.markdown("Country totals don't change when duplicates merge — every order is still counted once. What changes "
-                "is **everything per customer**: the customer count, who looks 'lost' (orders moved to a new record), "
-                "and who looks like an 'A-only' buyer (the B orders sit on another entity's record). "
-                "See *Sales actions* for the raw-vs-clean difference.")
+    st.markdown("Merging duplicates doesn't change country totals, because each order is still counted once. It "
+                "changes the per-customer figures: how many customers there are, who appears to have stopped "
+                "ordering (because their orders moved to a new record), and who appears to buy only Product A "
+                "(because their B orders sit on another entity's record). Sales actions shows the before-and-after "
+                "difference.")
 
 
 # --------------------------------------------------------------------------- business case
@@ -376,18 +424,18 @@ def business_case():
     st.title("Business case")
     d = c.raw()
     bd, touch = c.process_baseline()
-    st.markdown("##### Today: where an 18.8-day request actually goes")
+    st.markdown("##### Where the time goes today")
     k = st.columns(4)
-    k[0].metric("Median request → SAP", f"{d['requests'].cycle_days.median():.1f} days")
+    k[0].metric("Median time to SAP", f"{d['requests'].cycle_days.median():.1f} days")
     k[1].metric("Slowest 10%", f"{d['requests'].cycle_days.quantile(.9):.0f}+ days")
     k[2].metric("Bounced back at least once", f"{(d['requests'].bounces > 0).mean():.0%}")
-    k[3].metric("Actual work in that time", f"{touch:.1%}", help="Everything else is waiting")
-    fig = px.bar(bd, x="share", y="stage", orientation="h", text_auto=".0%")
+    k[3].metric("Time spent on actual work", f"{touch:.1%}", help="The rest of the time is spent waiting")
+    fig = px.bar(bd, x="share", y="stage", orientation="h", text_auto=".0%", color_discrete_sequence=["#1f4e79"])
     fig.update_layout(height=220, margin=dict(l=0, r=0, t=10, b=0), xaxis_tickformat=".0%", yaxis_title="",
                       xaxis_title="share of elapsed time")
     st.plotly_chart(fig, width="stretch")
 
-    st.markdown("##### With OneRecord (re-simulated on the same 150 requests)")
+    st.markdown("##### With OneRecord (simulated on the same 150 requests)")
     s = st.columns(3)
     bounce = s[0].slider("Bounces avoided by the smart form", 0.5, 1.0, 0.9, 0.05)
     notice = s[1].slider("Approver delay removed by Teams cards", 0.0, 0.7, 0.5, 0.05,
@@ -397,17 +445,18 @@ def business_case():
                            escalate_after_days=esc)
     now_med, fut_med = sim.cycle_days.median(), sim.future_days.median()
     k = st.columns(3)
-    k[0].metric("Median request → SAP", f"{fut_med:.1f} days", f"{fut_med - now_med:+.1f} days", delta_color="inverse")
+    k[0].metric("Median time to SAP", f"{fut_med:.1f} days", f"{fut_med - now_med:+.1f} days", delta_color="inverse")
     k[1].metric("Slowest 10%", f"{sim.future_days.quantile(.9):.1f} days",
                 f"{sim.future_days.quantile(.9) - sim.cycle_days.quantile(.9):+.1f}", delta_color="inverse")
     k[2].metric("Faster", f"{1 - fut_med / now_med:.0%}")
     long = pd.concat([sim.assign(scenario="Today (email)", days=sim.cycle_days),
                       sim.assign(scenario="OneRecord", days=sim.future_days)])
-    fig = px.histogram(long, x="days", color="scenario", barmode="overlay", nbins=40, opacity=0.7)
+    fig = px.histogram(long, x="days", color="scenario", barmode="overlay", nbins=40, opacity=0.7,
+                       color_discrete_map=SCENARIO_COLORS)
     fig.update_layout(height=260, margin=dict(l=0, r=0, t=10, b=0), legend_title="")
     st.plotly_chart(fig, width="stretch")
-    c.assumption("parallel approvals use the same historical approver waits; only the levers above change. "
-                 "Simulated, not measured — validate in a 4-week pilot with one entity.")
+    c.assumption("parallel approvals use the same historical approver waiting times, and only the settings above "
+                 "change. These are simulated results; a 4-week pilot with one entity would confirm them.")
 
     st.markdown("##### Value and cost (first year)")
     cmp, q = c.regional()["compare"], c.data_quality()
@@ -428,9 +477,9 @@ def business_case():
     }
     cc = st.columns(4)
     dev_weeks = cc[0].number_input("Power Platform contractor (weeks)", 0, 20, 8)
-    dev_rate = cc[1].number_input("Contractor rate / week (SGD)", 1000, 8000, 4000, 250)
+    dev_rate = cc[1].number_input("Contractor rate per week (SGD)", 1000, 8000, 4000, 250)
     da_weeks = cc[2].number_input("Data analyst (weeks)", 0, 20, 5)
-    licence = cc[3].number_input("Licences + AI credits / year (SGD)", 0, 20000, 3000, 500)
+    licence = cc[3].number_input("Licences + AI credits per year (SGD)", 0, 20000, 3000, 500)
     costs = {"Workflow build (contractor)": dev_weeks * dev_rate, "Analytics build": da_weeks * 3000,
              "Licences & AI credits": licence, "MDM team time (rules, training) ~4 weeks": 4 * 40 * rate}
     b, co = sum(benefits.values()), sum(costs.values())
@@ -441,14 +490,15 @@ def business_case():
     k[0].metric("Annual benefit", f"S${b:,.0f}")
     k[1].metric("Year-1 cost", f"S${co:,.0f}")
     k[2].metric("Payback", f"{12 * co / b:.1f} months" if b else "—")
-    c.assumption("sales-driven lines are counted at gross margin, not order value; rates, hours, margin and "
-                 "conversion are placeholders to agree with Lives Group. Staff time alone does NOT pay back the build — "
-                 "the case rests on accounts going live faster and on sales acting on the signals clean data unlocks.")
+    c.assumption("sales-driven benefits are counted at gross margin rather than order value. Rates, hours, margin "
+                 "and conversion are placeholders to agree with Lives Group. Staff time savings alone don't cover "
+                 "the build cost; most of the benefit comes from new accounts going live sooner and from sales "
+                 "acting on the clean data.")
     _roadmap(dev_weeks, da_weeks)
 
 
 ROADMAP = [
-    ("Phase 1 · Fix the front door", "Weeks 1–10",
+    ("Phase 1: Fix the front door", "Weeks 1–10",
      ["Power Apps form with required fields and live duplicate check",
       "Parallel approvals in Teams, reminders, escalation, live status",
       "Restricted list for bank details and credit terms; audit log",
@@ -456,23 +506,23 @@ ROADMAP = [
       "SAP B1 import file, so Priya stops retyping",
       "One-off clean-up: merge the 41 duplicate customers, review queue for look-alikes",
       "4-week pilot with SPD, then QTS and QTG"],
-     "Power Platform contractor ({dev} wks) · MDM team sets up rules and runs the pilot · IT: one-off site, "
+     "Power Platform contractor ({dev} weeks); MDM team sets up rules and runs the pilot; IT does a one-off site, "
      "permissions and Teams setup",
-     "Median request → SAP ≤ 5 days in the pilot · ≥ 90% of requests via the form"),
-    ("Phase 2 · Use the clean data", "Months 3–6",
+     "Median time to SAP of 5 days or less in the pilot; at least 90% of requests through the form"),
+    ("Phase 2: Use the clean data", "Months 3–6",
      ["Regional view in Power BI inside Teams",
       "Monthly forecast and stock plan replace the 6-month average spreadsheet",
       "Drop-off and cross-sell lists to account managers each month",
       "Email sorting: rules, then an AI prompt, then a person",
       "Monthly AI action brief posted to the sales channel"],
-     "Data analyst ({da} wks) · IT enables AI Builder once · Sales ops owns the monthly review",
-     "Forecast beats the 6-month average 3 months running · top-10 drop-offs contacted within 2 weeks"),
-    ("Phase 3 · Connect and scale", "After month 6, only if Phase 1–2 targets are met",
+     "Data analyst ({da} weeks); IT enables AI Builder once; Sales ops owns the monthly review",
+     "Forecast beats the 6-month average 3 months running; top-10 drop-offs contacted within 2 weeks"),
+    ("Phase 3: Connect and scale", "After month 6, only if Phase 1–2 targets are met",
      ["Direct SAP B1 connection (Service Layer) replaces the import file",
       "Form calls the full matching engine (typo-tolerant) through one Premium connector",
       "Same duplicate clean-up for items and vendors",
       "New data domains added as rule rows, e.g. price lists"],
-     "SAP B1 partner (outside help) · Premium licence for the connector",
+     "SAP B1 partner (outside help); Premium licence for the connector",
      "Request volume and error rate justify the integration cost"),
 ]
 
@@ -496,19 +546,19 @@ NOT_IN_V1 = [
 
 
 def _roadmap(dev_weeks, da_weeks):
-    st.markdown("##### Roadmap · who builds what")
-    st.caption("Sized for a lean team: one contractor and one analyst, with the MDM team owning the rules. Each phase "
-               "starts only when the previous one hits its targets. The year-1 cost above covers Phases 1 and 2; "
-               "Phase 3 is priced with an SAP partner once Phase 1–2 results are in.")
+    st.markdown("##### Roadmap")
+    st.caption("Sized for a small team: one contractor and one analyst, with the MDM team owning the rules. Each "
+               "phase starts only when the previous one hits its targets. The year-1 cost above covers Phases 1 "
+               "and 2; Phase 3 is priced with an SAP partner once Phase 1–2 results are in.")
     for col, (title, when, items, who, gate) in zip(st.columns(3), ROADMAP):
         with col.container(border=True):
             st.markdown(f"**{title}**  \n*{when}*")
             st.markdown("\n".join(f"- {i}" for i in items))
             st.markdown(f"**Who:** {who.format(dev=dev_weeks, da=da_weeks)}")
             st.markdown(f"**Move on when:** {gate}")
-    st.markdown("**Getting people off email (Phase 1):** the MDM mailbox auto-replies with a link to the form. After "
+    st.markdown("**Moving people off email (Phase 1):** the MDM mailbox auto-replies with a link to the form. After "
                 "a cut-over date, requests sent by email are not processed. The form sits as a tab in each team's "
-                "Teams channel. Each month, the share of requests that came through the form is reported to BU heads.")
+                "Teams channel, and BU heads get a monthly report of the share of requests that came through it.")
 
-    st.markdown("##### Deliberately not in version 1")
-    st.table(pd.DataFrame(NOT_IN_V1, columns=["Not building", "Why not (yet)"]).set_index("Not building"))
+    st.markdown("##### Not in version 1")
+    st.table(pd.DataFrame(NOT_IN_V1, columns=["Not building", "Reason"]).set_index("Not building"))

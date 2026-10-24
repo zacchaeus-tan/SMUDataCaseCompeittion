@@ -6,7 +6,7 @@ from onerecord import advisor, classify, dedup, forecast, insights, process, wor
 from onerecord.config import COUNTRIES, DATA, KEY, PRODUCTS
 
 COUNTRY_ORDER = list(COUNTRIES)
-PRODUCT_LABEL = {p: f"{p} · {n}" for p, n in PRODUCTS.items()}
+PRODUCT_LABEL = {p: f"{p}: {n}" for p, n in PRODUCTS.items()}
 
 
 @st.cache_data(show_spinner=False)
