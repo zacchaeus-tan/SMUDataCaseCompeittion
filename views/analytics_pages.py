@@ -12,6 +12,7 @@ from onerecord.config import COUNTRIES, CURRENT, PRIOR_YEAR, PRODUCTS
 from . import common as c
 
 COLORS = {"A": "#2a6fdb", "B": "#e07b39", "C": "#5b9a68"}
+ALL = "ALL"  # "All countries" option in the forecast picker
 # one fixed colour per country on every chart (Okabe-Ito, readable with colour blindness)
 COUNTRY_COLORS = {"SG": "#0072B2", "MY": "#E69F00", "TH": "#009E73", "ID": "#CC79A7", "VN": "#56B4E9"}
 LABEL_COLORS = ["#1f4e79", "#7fa7d0", "#c9a227", "#8c6bb1"]
@@ -173,35 +174,15 @@ def forecasting():
             "Learned impact on units": st.column_config.NumberColumn(format="percent")})
 
     s1, s2, s3 = st.columns([2, 2, 1.3], vertical_alignment="bottom")
-    country = s1.selectbox("Country", c.COUNTRY_ORDER, index=c.COUNTRY_ORDER.index("TH"),
-                           format_func=lambda k: COUNTRIES[k])
+    country = s1.selectbox("Country", [ALL, *c.COUNTRY_ORDER], index=1 + c.COUNTRY_ORDER.index("TH"),
+                           format_func=lambda k: "All countries" if k == ALL else COUNTRIES[k])
     prod = s2.selectbox("Product", list(PRODUCTS), format_func=lambda p: c.PRODUCT_LABEL[p])
-    show_ma6 = s3.toggle("Show 6-month average")
-    hist = f["Y"].loc[(country, prod)]
-    one = bt[(bt.country == country) & (bt["product"] == prod) & (bt.horizon == 1)]
-    ahead = f["ahead"][(f["ahead"].country == country) & (f["ahead"]["product"] == prod)]
-    fig = go.Figure()
-    fig.add_scatter(x=hist.index, y=hist.values, name="Actual orders", mode="lines+markers", line=dict(color="#333"))
-    if show_ma6:
-        fig.add_scatter(x=one.month, y=one.baseline_ma6, name="6-month average (back-test)", mode="lines+markers",
-                        line=dict(color="#aaa", dash="dot"))
-    fig.add_scatter(x=one.month, y=one.calendar_model, name="Calendar model (back-test)", mode="lines+markers",
-                    line=dict(color=COLORS[prod]))
-    fig.add_scatter(x=ahead.month, y=ahead.high, mode="lines", line=dict(width=0), showlegend=False,
-                    hoverinfo="skip")
-    fig.add_scatter(x=ahead.month, y=ahead.low, name="Likely range (8 in 10 months)", mode="lines",
-                    line=dict(width=0), fill="tonexty", fillcolor="rgba(120,120,120,0.18)")
-    if show_ma6:
-        fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average, next 3 months", mode="lines",
-                        line=dict(color="#aaa", dash="dash"))
-    fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model, next 3 months", mode="lines+markers",
-                    line=dict(color=COLORS[prod], dash="dash"))
-    fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units",
-                      legend=dict(orientation="h", y=-0.2))
-    c.chart(fig)
-    row = acc[(acc.country == country) & (acc["product"] == prod)].iloc[0]
-    st.caption(f"{COUNTRIES[country]}, product {prod}: the 6-month average's error is {row['MA6 error']:.1%}, "
-               f"the model's is {row['Model error']:.1%}.")
+    show_ma6 = s3.toggle("Show 6-month average", disabled=country == ALL,
+                         help="Pick a single country to compare with the 6-month average")
+    if country == ALL:
+        _forecast_all(f, prod)
+    else:
+        _forecast_one(f, country, prod, show_ma6)
 
     st.markdown("##### Accuracy by series")
     st.dataframe(acc, hide_index=True, width="stretch", column_config={
@@ -234,6 +215,58 @@ def forecasting():
         "drivers": st.column_config.TextColumn("Calendar drivers"),
         "action": st.column_config.TextColumn("Recommended action", width="large")})
     _ai_brief(plan)
+
+
+def _forecast_one(f, country, prod, show_ma6):
+    """One country: actual orders, the back-test, and the next 3 months with a likely range."""
+    bt, acc = f["backtest"], f["accuracy"]
+    hist = f["Y"].loc[(country, prod)]
+    one = bt[(bt.country == country) & (bt["product"] == prod) & (bt.horizon == 1)]
+    ahead = f["ahead"][(f["ahead"].country == country) & (f["ahead"]["product"] == prod)]
+    fig = go.Figure()
+    fig.add_scatter(x=hist.index, y=hist.values, name="Actual orders", mode="lines+markers", line=dict(color="#333"))
+    if show_ma6:
+        fig.add_scatter(x=one.month, y=one.baseline_ma6, name="6-month average (back-test)", mode="lines+markers",
+                        line=dict(color="#aaa", dash="dot"))
+    fig.add_scatter(x=one.month, y=one.calendar_model, name="Calendar model (back-test)", mode="lines+markers",
+                    line=dict(color=COLORS[prod]))
+    fig.add_scatter(x=ahead.month, y=ahead.high, mode="lines", line=dict(width=0), showlegend=False,
+                    hoverinfo="skip")
+    fig.add_scatter(x=ahead.month, y=ahead.low, name="Likely range (8 in 10 months)", mode="lines",
+                    line=dict(width=0), fill="tonexty", fillcolor="rgba(120,120,120,0.18)")
+    if show_ma6:
+        fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average, next 3 months", mode="lines",
+                        line=dict(color="#aaa", dash="dash"))
+    fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model, next 3 months", mode="lines+markers",
+                    line=dict(color=COLORS[prod], dash="dash"))
+    fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units",
+                      legend=dict(orientation="h", y=-0.2))
+    c.chart(fig)
+    row = acc[(acc.country == country) & (acc["product"] == prod)].iloc[0]
+    st.caption(f"{COUNTRIES[country]}, product {prod}: the 6-month average's error is {row['MA6 error']:.1%}, "
+               f"the model's is {row['Model error']:.1%}.")
+
+
+def _forecast_all(f, prod):
+    """Every country on one chart: actual orders solid, the next 3 months' forecast dashed in the same colour."""
+    from onerecord.forecast import wape
+    fig = go.Figure()
+    for k in c.COUNTRY_ORDER:
+        hist = f["Y"].loc[(k, prod)]
+        ahead = f["ahead"][(f["ahead"].country == k) & (f["ahead"]["product"] == prod)]
+        fig.add_scatter(x=hist.index, y=hist.values, name=COUNTRIES[k], mode="lines+markers", legendgroup=k,
+                        line=dict(color=COUNTRY_COLORS[k]))
+        # start the dashed forecast at the last actual month so the two lines join up
+        fig.add_scatter(x=[hist.index[-1], *ahead.month], y=[hist.values[-1], *ahead.calendar_model],
+                        name=f"{COUNTRIES[k]} forecast", mode="lines", legendgroup=k, showlegend=False,
+                        line=dict(color=COUNTRY_COLORS[k], dash="dash"))
+    fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units")
+    c.chart(fig)
+    bt = f["backtest"][f["backtest"]["product"] == prod]
+    st.caption(f"Solid lines are actual orders; dashed lines are the calendar model's forecast for the next 3 months. "
+               f"Across all five countries, product {prod}: the 6-month average's error is "
+               f"{wape(bt, 'baseline_ma6'):.1%}, the model's is {wape(bt, 'calendar_model'):.1%}. Pick a single "
+               f"country to see the likely range and the back-test.")
 
 
 def _ai_brief(plan):
