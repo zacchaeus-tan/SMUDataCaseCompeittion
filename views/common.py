@@ -31,7 +31,7 @@ KPI_ROW = (ASSETS / "kpi_row.html").read_text()
 
 
 def page_style():
-    """Page-wide CSS: header band, blur-fade on load, border beam on highlighted containers."""
+    """Page-wide CSS: blur-fade on load, border beam on highlighted containers."""
     st.html(f"<style>{(ASSETS / 'app.css').read_text()}</style>")
 
 
@@ -46,9 +46,9 @@ def table_height(rows):
 
 
 def header(section, headline):
-    """Page header band: the section name small, the finding as the headline."""
-    st.html(f'<div class="or-hero"><div class="or-eyebrow">{escape(section)}</div>'
-            f'<div class="or-headline">{escape(headline)}</div></div>')
+    """Page header: the section name small, the finding as the headline."""
+    st.caption(section)
+    st.header(headline, anchor=False)
 
 
 def tone(change, up_is_good=True):
