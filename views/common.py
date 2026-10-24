@@ -135,4 +135,4 @@ def pct(x, signed=True):
 
 
 def assumption(text):
-    st.caption(f"🔖 **Assumption:** {text}")
+    st.caption(f"**Assumption:** {text}")

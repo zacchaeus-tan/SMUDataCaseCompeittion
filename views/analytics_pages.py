@@ -24,16 +24,16 @@ PRODUCT_COL = st.column_config.TextColumn("Product")
 
 
 def _definition():
-    st.info(f"Growth is the year-on-year change in units ordered, {CURRENT[0]} to {CURRENT[1]} against "
-            f"{PRIOR_YEAR[0]} to {PRIOR_YEAR[1]}. Comparing the same six months removes seasonal effects. Momentum "
-            f"compares the last 3 months with the same 3 months a year earlier. Only customer orders are counted; "
-            f"enquiries, follow-ups and master-data requests are left out.")
+    with st.expander("How growth is measured"):
+        st.markdown(f"Growth is the year-on-year change in units ordered, {CURRENT[0]} to {CURRENT[1]} against "
+                    f"{PRIOR_YEAR[0]} to {PRIOR_YEAR[1]}. Comparing the same six months removes seasonal effects. "
+                    f"Momentum compares the last 3 months with the same 3 months a year earlier. Only customer orders "
+                    f"are counted; enquiries, follow-ups and master-data requests are left out.")
 
 
 # --------------------------------------------------------------------------- growth
 def growth():
     st.title("Five-country growth")
-    _definition()
     g = c.regional()["growth"]
     g["country_name"] = g.country.map(COUNTRIES)
 
@@ -46,6 +46,9 @@ def growth():
                 help="Real customers after merging duplicate records")
     best = g.loc[g[g["product"] != "C"].unit_growth.idxmax()]
     k[3].metric("Fastest growing (A/B)", f"{best.country}, product {best['product']}", c.pct(best.unit_growth))
+    _definition()
+
+    _growth_map(g)
 
     left, right = st.columns([1.1, 1])
     with left:
@@ -69,8 +72,6 @@ def growth():
             "value_now": st.column_config.NumberColumn("Value (SGD)", format="%.0f"),
             "customers_now": st.column_config.NumberColumn("Customers"),
         })
-
-    _growth_map(g)
 
     st.markdown("##### Monthly units")
     prod = st.radio("Product", list(PRODUCTS), horizontal=True, format_func=lambda p: c.PRODUCT_LABEL[p])
@@ -104,7 +105,7 @@ LABEL_POS = {"SG": "middle right", "MY": "middle left", "TH": "middle left", "ID
 
 
 def _growth_map(g):
-    st.markdown("##### Regional map")
+    st.markdown("##### Year-on-year growth by country")
     pick = st.radio("Show", ["All products", *PRODUCTS], horizontal=True, key="map_product",
                     format_func=lambda p: p if p == "All products" else c.PRODUCT_LABEL[p])
     d = g if pick == "All products" else g[g["product"] == pick]
@@ -163,25 +164,28 @@ def forecasting():
         st.dataframe(eff, hide_index=True, column_config={
             "Learned impact on units": st.column_config.NumberColumn(format="percent")})
 
-    s1, s2 = st.columns(2)
+    s1, s2, s3 = st.columns([2, 2, 1.3], vertical_alignment="bottom")
     country = s1.selectbox("Country", c.COUNTRY_ORDER, index=c.COUNTRY_ORDER.index("TH"),
                            format_func=lambda k: COUNTRIES[k])
     prod = s2.selectbox("Product", list(PRODUCTS), format_func=lambda p: c.PRODUCT_LABEL[p])
+    show_ma6 = s3.toggle("Show 6-month average")
     hist = f["Y"].loc[(country, prod)]
     one = bt[(bt.country == country) & (bt["product"] == prod) & (bt.horizon == 1)]
     ahead = f["ahead"][(f["ahead"].country == country) & (f["ahead"]["product"] == prod)]
     fig = go.Figure()
     fig.add_scatter(x=hist.index, y=hist.values, name="Actual orders", mode="lines+markers", line=dict(color="#333"))
-    fig.add_scatter(x=one.month, y=one.baseline_ma6, name="6-month average (back-test)", mode="lines+markers",
-                    line=dict(color="#aaa", dash="dot"))
+    if show_ma6:
+        fig.add_scatter(x=one.month, y=one.baseline_ma6, name="6-month average (back-test)", mode="lines+markers",
+                        line=dict(color="#aaa", dash="dot"))
     fig.add_scatter(x=one.month, y=one.calendar_model, name="Calendar model (back-test)", mode="lines+markers",
                     line=dict(color=COLORS[prod]))
     fig.add_scatter(x=ahead.month, y=ahead.high, mode="lines", line=dict(width=0), showlegend=False,
                     hoverinfo="skip")
     fig.add_scatter(x=ahead.month, y=ahead.low, name="Likely range (8 in 10 months)", mode="lines",
                     line=dict(width=0), fill="tonexty", fillcolor="rgba(120,120,120,0.18)")
-    fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average, next 3 months", mode="lines",
-                    line=dict(color="#aaa", dash="dash"))
+    if show_ma6:
+        fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average, next 3 months", mode="lines",
+                        line=dict(color="#aaa", dash="dash"))
     fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model, next 3 months", mode="lines+markers",
                     line=dict(color=COLORS[prod], dash="dash"))
     fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units",
@@ -226,11 +230,9 @@ def forecasting():
 
 def _ai_brief(plan):
     st.markdown("##### AI action brief (Phase 2)")
-    st.caption("Planned for Phase 2, after the workflow is live. Each month, a Power Automate flow would send the "
-               "summary figures from these pages (growth, the stock plan, drop-offs and cross-sell) to an AI "
-               "Builder prompt, and post the five most useful actions, with the figures behind them, to the "
-               "regional sales channel in Teams. IT enables AI Builder once and the MDM team maintains the prompt "
-               "text. This prototype runs the same prompt as a preview.")
+    st.caption("Planned for Phase 2. Each month, a Power Automate flow would send the figures on these pages to an "
+               "AI Builder prompt and post the five most useful actions to the sales channel in Teams. This is a "
+               "preview of that prompt.")
     reg = c.regional()
     data = advisor.facts(reg["growth"], plan, reg["compare"]["clean_drop"], reg["compare"]["clean_xsell"])
     focus = st.text_input("Focus (optional)", placeholder="e.g. Vietnam, or year-end budget flush",
@@ -326,9 +328,10 @@ def inbound():
     st.caption("The regional view counts orders only. This page shows how incoming emails are sorted.")
     t = c.triage()
     main, hold = t["main"], t["holdout"]
-    st.markdown("**How emails are sorted:** first by channel (a dedicated order inbox, and the form for setup "
-                "requests), then by rules the MDM team can read, then by an AI prompt for whatever is left. "
-                "Anything uncertain goes to a person. There is no custom model to train or maintain.")
+    with st.expander("How emails are sorted"):
+        st.markdown("First by channel (a dedicated order inbox, and the form for setup requests), then by rules the "
+                    "MDM team can read, then by an AI prompt for whatever is left. Anything uncertain goes to a "
+                    "person. There is no custom model to train or maintain.")
     k = st.columns(4)
     for i, lab in enumerate(["purchase_order", "enquiry", "follow_up", "mdm_request"]):
         k[i].metric(classify.LABELS[lab], int((main.predicted == lab).sum()))
@@ -388,11 +391,12 @@ def quality():
     st.caption(f"Checked against the synthetic answer key: precision {s['precision']:.0%}, recall {s['recall']:.0%} "
                f"({s['found_pairs']} of {s['true_pairs']} duplicate pairs). Real SAP data will be messier, which "
                f"is why borderline matches go to human review.")
-    st.markdown("**How matching works:** records are only compared within the same country across SPD, QTS and "
-                "QTG. The same registration number is a match, and different numbers never are. Otherwise the "
-                "matcher compares cleaned-up names (allowing for typos, 'Hosp.' vs 'Hospital', a missing 'Pte Ltd' "
-                "and capitalisation), backed up by city and address, and recognises acronyms such as NUH. The rules "
-                "and thresholds are fixed, so there is nothing to retrain.")
+    with st.expander("How matching works"):
+        st.markdown("Records are only compared within the same country across SPD, QTS and QTG. The same "
+                    "registration number is a match, and different numbers never are. Otherwise the matcher compares "
+                    "cleaned-up names (allowing for typos, 'Hosp.' vs 'Hospital', a missing 'Pte Ltd' and "
+                    "capitalisation), backed up by city and address, and recognises acronyms such as NUH. The rules "
+                    "and thresholds are fixed, so there is nothing to retrain.")
     st.markdown("##### Duplicate groups")
     show = dups.sort_values(["golden_id", "created_date"])[["golden_id", "record_id", "customer_name", "country",
                                                              "created_by_entity", "created_date", "registration_no"]]
@@ -420,10 +424,38 @@ def quality():
 
 
 # --------------------------------------------------------------------------- business case
+def _inputs(spec):
+    """One row of four number inputs, so every assumption box lines up at the same size."""
+    return [col.number_input(label, lo, hi, val, step, help=tip)
+            for col, (label, lo, hi, val, step, tip) in zip(st.columns(4), spec)]
+
+
 def business_case():
     st.title("Business case")
     d = c.raw()
     bd, touch = c.process_baseline()
+    summary = st.container()  # filled in once the assumptions below have been read
+
+    with st.expander("Assumptions (change these to test the case)"):
+        st.markdown("**Process**")
+        bounce, notice, esc, hours = _inputs([
+            ("Bounces avoided (%)", 50, 100, 90, 5, "Share of bounce-backs the smart form prevents"),
+            ("Approver delay cut (%)", 0, 70, 50, 5, "Share of each approver's wait that was 'didn't see the email'"),
+            ("Escalate after (days)", 2, 6, 4, 1, "Business days before a stalled approval is escalated"),
+            ("Hours saved per request", 0.0, 5.0, 1.5, 0.25, "MDM and approver time saved on each request")])
+        st.markdown("**Value**")
+        rate, save_rate, conv, margin = _inputs([
+            ("Cost per hour (SGD)", 20, 150, 50, 5, "Loaded staff cost"),
+            ("Drop-offs recovered (%)", 0, 50, 20, 5, None),
+            ("Cross-sell conversion (%)", 0, 30, 10, 2, None),
+            ("Gross margin (%)", 10, 60, 30, 5, "Sales benefits count as gross profit, not order value")])
+        st.markdown("**Cost**")
+        dev_weeks, dev_rate, da_weeks, licence = _inputs([
+            ("Contractor (weeks)", 0, 20, 8, 1, "Power Platform contractor"),
+            ("Weekly rate (SGD)", 1000, 8000, 4000, 250, "Contractor rate per week"),
+            ("Data analyst (weeks)", 0, 20, 5, 1, None),
+            ("Licences per year (SGD)", 0, 20000, 3000, 500, "Licences and AI credits")])
+
     st.markdown("##### Where the time goes today")
     k = st.columns(4)
     k[0].metric("Median time to SAP", f"{d['requests'].cycle_days.median():.1f} days")
@@ -436,12 +468,7 @@ def business_case():
     st.plotly_chart(fig, width="stretch")
 
     st.markdown("##### With OneRecord (simulated on the same 150 requests)")
-    s = st.columns(3)
-    bounce = s[0].slider("Bounces avoided by the smart form", 0.5, 1.0, 0.9, 0.05)
-    notice = s[1].slider("Approver delay removed by Teams cards", 0.0, 0.7, 0.5, 0.05,
-                         help="Share of each approver's wait that was 'didn't see the email'")
-    esc = s[2].slider("Escalate after (business days)", 2, 6, 4)
-    sim = process.simulate(d["requests"], d["steps"], bounce_avoided=bounce, notice_cut=notice,
+    sim = process.simulate(d["requests"], d["steps"], bounce_avoided=bounce / 100, notice_cut=notice / 100,
                            escalate_after_days=esc)
     now_med, fut_med = sim.cycle_days.median(), sim.future_days.median()
     k = st.columns(3)
@@ -461,13 +488,7 @@ def business_case():
     st.markdown("##### Value and cost (first year)")
     cmp, q = c.regional()["compare"], c.data_quality()
     ncv = process.new_customer_value(d["requests"], c.regional()["clean"], q["clusters"], now_med - fut_med)
-    v = st.columns(5)
-    hours = v[0].number_input("MDM + approver hours saved per request", 0.0, 5.0, 1.5, 0.25)
-    rate = v[1].number_input("Loaded cost per hour (SGD)", 20, 150, 50, 5)
-    save_rate = v[2].slider("Drop-offs recovered", 0.0, 0.5, 0.2, 0.05)
-    conv = v[3].slider("Cross-sell conversion", 0.0, 0.3, 0.1, 0.02)
-    margin = v[4].slider("Gross margin on sales", 0.1, 0.6, 0.3, 0.05,
-                         help="Revenue items count as gross profit, not order value")
+    save_rate, conv, margin = save_rate / 100, conv / 100, margin / 100
     req_per_year = len(d["requests"]) / 1.5
     benefits = {
         "Staff time (requests × hours × rate)": req_per_year * hours * rate,
@@ -475,21 +496,19 @@ def business_case():
         "Gross profit kept (drop-offs recovered)": cmp["clean_drop"].value_at_risk_per_q.sum() * 4 * save_rate * margin,
         "Gross profit from cross-sell": cmp["clean_xsell"].est_value_sgd_per_year.sum() * conv * margin,
     }
-    cc = st.columns(4)
-    dev_weeks = cc[0].number_input("Power Platform contractor (weeks)", 0, 20, 8)
-    dev_rate = cc[1].number_input("Contractor rate per week (SGD)", 1000, 8000, 4000, 250)
-    da_weeks = cc[2].number_input("Data analyst (weeks)", 0, 20, 5)
-    licence = cc[3].number_input("Licences + AI credits per year (SGD)", 0, 20000, 3000, 500)
     costs = {"Workflow build (contractor)": dev_weeks * dev_rate, "Analytics build": da_weeks * 3000,
              "Licences & AI credits": licence, "MDM team time (rules, training) ~4 weeks": 4 * 40 * rate}
     b, co = sum(benefits.values()), sum(costs.values())
     left, right = st.columns(2)
     left.dataframe(pd.DataFrame({"Benefit (SGD / year)": benefits}).round(0), width="stretch")
     right.dataframe(pd.DataFrame({"Cost (SGD, year 1)": costs}).round(0), width="stretch")
-    k = st.columns(3)
-    k[0].metric("Annual benefit", f"S${b:,.0f}")
-    k[1].metric("Year-1 cost", f"S${co:,.0f}")
-    k[2].metric("Payback", f"{12 * co / b:.1f} months" if b else "—")
+    with summary:
+        k = st.columns(4)
+        k[0].metric("Payback", f"{12 * co / b:.1f} months" if b else "—")
+        k[1].metric("Annual benefit", f"S${b:,.0f}")
+        k[2].metric("Year-1 cost", f"S${co:,.0f}")
+        k[3].metric("Median time to SAP", f"{fut_med:.1f} days", f"{fut_med - now_med:+.1f} days",
+                    delta_color="inverse")
     c.assumption("sales-driven benefits are counted at gross margin rather than order value. Rates, hours, margin "
                  "and conversion are placeholders to agree with Lives Group. Staff time savings alone don't cover "
                  "the build cost; most of the benefit comes from new accounts going live sooner and from sales "
@@ -546,19 +565,20 @@ NOT_IN_V1 = [
 
 
 def _roadmap(dev_weeks, da_weeks):
-    st.markdown("##### Roadmap")
-    st.caption("Sized for a small team: one contractor and one analyst, with the MDM team owning the rules. Each "
-               "phase starts only when the previous one hits its targets. The year-1 cost above covers Phases 1 "
-               "and 2; Phase 3 is priced with an SAP partner once Phase 1–2 results are in.")
-    for col, (title, when, items, who, gate) in zip(st.columns(3), ROADMAP):
-        with col.container(border=True):
-            st.markdown(f"**{title}**  \n*{when}*")
-            st.markdown("\n".join(f"- {i}" for i in items))
-            st.markdown(f"**Who:** {who.format(dev=dev_weeks, da=da_weeks)}")
-            st.markdown(f"**Move on when:** {gate}")
-    st.markdown("**Moving people off email (Phase 1):** the MDM mailbox auto-replies with a link to the form. After "
-                "a cut-over date, requests sent by email are not processed. The form sits as a tab in each team's "
-                "Teams channel, and BU heads get a monthly report of the share of requests that came through it.")
-
-    st.markdown("##### Not in version 1")
-    st.table(pd.DataFrame(NOT_IN_V1, columns=["Not building", "Reason"]).set_index("Not building"))
+    st.markdown("##### Roadmap and scope")
+    with st.expander("Roadmap"):
+        st.caption("Sized for a small team: one contractor and one analyst, with the MDM team owning the rules. Each "
+                   "phase starts only when the previous one hits its targets. The year-1 cost above covers Phases 1 "
+                   "and 2; Phase 3 is priced with an SAP partner once Phase 1–2 results are in.")
+        for col, (title, when, items, who, gate) in zip(st.columns(3), ROADMAP):
+            with col.container(border=True):
+                st.markdown(f"**{title}**  \n*{when}*")
+                st.markdown("\n".join(f"- {i}" for i in items))
+                st.markdown(f"**Who:** {who.format(dev=dev_weeks, da=da_weeks)}")
+                st.markdown(f"**Move on when:** {gate}")
+        st.markdown("**Moving people off email (Phase 1):** the MDM mailbox auto-replies with a link to the form. "
+                    "After a cut-over date, requests sent by email are not processed. The form sits as a tab in each "
+                    "team's Teams channel, and BU heads get a monthly report of the share of requests that came "
+                    "through it.")
+    with st.expander("Not in version 1"):
+        st.table(pd.DataFrame(NOT_IN_V1, columns=["Not building", "Reason"]).set_index("Not building"))
