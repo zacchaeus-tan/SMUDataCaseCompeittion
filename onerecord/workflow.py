@@ -346,15 +346,9 @@ def _create_in_sap(con, rid, t):
 
 
 # --------------------------------------------------------------------------- scheduled flow: reminders
-def business_days(start: datetime, end: datetime) -> float:
-    if end <= start:
-        return 0.0
-    days, d = 0.0, start
-    while d + timedelta(days=1) <= end:
-        d += timedelta(days=1)
-        if d.weekday() < 5:
-            days += 1
-    return days
+def days_waiting(start: datetime, end: datetime) -> int:
+    """Whole calendar days, the same count the Power Automate reminders flow uses."""
+    return max(0, (end - start).days)
 
 
 def run_reminders(con) -> list:
@@ -367,17 +361,17 @@ def run_reminders(con) -> list:
         rule = rules[(rules.ApproverRole == a["role"]) & rules.RequestType.isin([a["type"], "Any"])]
         sla = float(rule.SLADays.iloc[0] or 2) if len(rule) else 2
         esc = float(rule.EscalateAfterDays.iloc[0] or 0) if len(rule) and rule.EscalateAfterDays.iloc[0] else None
-        waited = business_days(datetime.strptime(a["assigned_at"], "%Y-%m-%d %H:%M"), t)
+        waited = days_waiting(datetime.strptime(a["assigned_at"], "%Y-%m-%d %H:%M"), t)
         person = roles[(roles.Role == a["role"]) & roles.Entity.isin([a["entity"], "Any"])]
         tz = person.TimeZone.iloc[0] if len(person) else "Asia/Singapore"
         if waited >= sla and not a["reminded_at"]:
             con.execute("UPDATE approvals SET reminded_at=? WHERE id=?", (_ts(t), a["id"]))
-            msg = f"Reminder to {a['person']} in Teams at 09:00 {tz} ({waited:.0f} business days waiting)"
+            msg = f"Reminder to {a['person']} in Teams at 09:00 {tz} ({waited} days waiting)"
             _log(con, a["request_id"], "OneRecord", "System", "Reminder sent", msg)
             events.append(msg)
         if esc and waited >= esc and not a["escalated_at"]:
             con.execute("UPDATE approvals SET escalated_at=? WHERE id=?", (_ts(t), a["id"]))
-            msg = f"Escalated: {a['person']} has not responded in {waited:.0f} business days - manager notified"
+            msg = f"Escalated: {a['person']} has not responded in {waited} days - manager notified"
             _log(con, a["request_id"], "OneRecord", "System", "Escalated", msg)
             events.append(msg)
     con.commit()

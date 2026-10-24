@@ -51,7 +51,8 @@
                   LayoutMinHeight: =16
                   LayoutMinWidth: =16
                   Size: =18
-                  Text: ="OneRecord - New master data request"
+                  Text: ="OneRecord | New request"
+                  Wrap: =false
             - lblRequestor:
                 Control: Label@2.5.1
                 Properties:
@@ -90,7 +91,7 @@
                   HoverFill: =RGBA(16, 110, 190, 1)
                   LayoutMinHeight: =16
                   LayoutMinWidth: =16
-                  OnSelect: =Navigate(Screen1, ScreenTransition.None)
+                  OnSelect: =Navigate(NewRequestScreen, ScreenTransition.None)
                   PressedBorderColor: =RGBA(0, 69, 120, 1)
                   PressedColor: =RGBA(255, 255, 255, 1)
                   PressedFill: =RGBA(16, 110, 190, 1)
@@ -100,6 +101,7 @@
                   RadiusTopRight: =4
                   Size: =11
                   Text: ="New request"
+                  Visible: =true
                   Width: =140
             - btnGoMine_1:
                 Control: Classic/Button@2.2.0
@@ -130,6 +132,38 @@
                   RadiusTopRight: =4
                   Size: =11
                   Text: ="My requests"
+                  Visible: =true
+                  Width: =140
+            - btnGoRules_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(0, 120, 212, 1)
+                  BorderStyle: =BorderStyle.Solid
+                  BorderThickness: =1
+                  Color: =RGBA(0, 120, 212, 1)
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  DisabledFill: =RGBA(237, 235, 233, 1)
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  Font: =Font.'Segoe UI'
+                  Height: =36
+                  HoverBorderColor: =RGBA(0, 0, 0, 0)
+                  HoverColor: =RGBA(0, 120, 212, 1)
+                  HoverFill: =RGBA(243, 242, 241, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  OnSelect: =Navigate(AdminScreen, ScreenTransition.None)
+                  PressedBorderColor: =RGBA(0, 69, 120, 1)
+                  PressedColor: =RGBA(255, 255, 255, 1)
+                  PressedFill: =RGBA(16, 110, 190, 1)
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Size: =11
+                  Text: ="Rules (MDM)"
+                  Visible: =IsMDM
                   Width: =140
       - DupBanner:
           Control: GroupContainer@1.5.0
@@ -2719,6 +2753,65 @@
                         PaddingLeft: =0
                         Size: =10
                         Text: =LookUp(VisibleFields, FieldName = "BudgetYear").HelpText
+      - ApproverCard:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            Fill: =If(ApproverGap, RGBA(255, 244, 206, 1), RGBA(239, 246, 252, 1))
+            FillPortions: =0
+            Height: =84
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =2
+            LayoutMinHeight: =16
+            LayoutMinWidth: =16
+            PaddingBottom: =8
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =8
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+          Children:
+            - lblApproverHead:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =RGBA(50, 49, 48, 1)
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  FillPortions: =0
+                  FocusedBorderThickness: =4
+                  Font: =Font.'Segoe UI'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingLeft: =0
+                  Size: =11
+                  Text: ="Who will approve"
+            - lblApproverText:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =RGBA(50, 49, 48, 1)
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  FillPortions: =1
+                  FocusedBorderThickness: =4
+                  Font: =Font.'Segoe UI'
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingLeft: =0
+                  Size: =11
+                  Text: =ApproverText
+                  VerticalAlign: =VerticalAlign.Top
+                  Wrap: =true
       - FooterContainer1:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout

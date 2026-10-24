@@ -65,7 +65,8 @@ Screens:
                         LayoutMinHeight: =16
                         LayoutMinWidth: =16
                         Size: =18
-                        Text: ="OneRecord - My requests"
+                        Text: ="OneRecord | My requests"
+                        Wrap: =false
                   - lblRequestor2:
                       Control: Label@2.5.1
                       Properties:
@@ -105,7 +106,7 @@ Screens:
                         HoverFill: =RGBA(243, 242, 241, 1)
                         LayoutMinHeight: =16
                         LayoutMinWidth: =16
-                        OnSelect: =Navigate(Screen1, ScreenTransition.None)
+                        OnSelect: =Navigate(NewRequestScreen, ScreenTransition.None)
                         PressedBorderColor: =RGBA(0, 69, 120, 1)
                         PressedColor: =RGBA(255, 255, 255, 1)
                         PressedFill: =RGBA(16, 110, 190, 1)
@@ -115,6 +116,7 @@ Screens:
                         RadiusTopRight: =4
                         Size: =11
                         Text: ="New request"
+                        Visible: =true
                         Width: =140
                   - btnGoMine_2:
                       Control: Classic/Button@2.2.0
@@ -144,6 +146,38 @@ Screens:
                         RadiusTopRight: =4
                         Size: =11
                         Text: ="My requests"
+                        Visible: =true
+                        Width: =140
+                  - btnGoRules_2:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(0, 120, 212, 1)
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =1
+                        Color: =RGBA(0, 120, 212, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        DisabledFill: =RGBA(237, 235, 233, 1)
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Font: =Font.'Segoe UI'
+                        Height: =36
+                        HoverBorderColor: =RGBA(0, 0, 0, 0)
+                        HoverColor: =RGBA(0, 120, 212, 1)
+                        HoverFill: =RGBA(243, 242, 241, 1)
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        OnSelect: =Navigate(AdminScreen, ScreenTransition.None)
+                        PressedBorderColor: =RGBA(0, 69, 120, 1)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(16, 110, 190, 1)
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Size: =11
+                        Text: ="Rules (MDM)"
+                        Visible: =IsMDM
                         Width: =140
             - BodyContainer2:
                 Control: GroupContainer@1.5.0
@@ -239,8 +273,8 @@ Screens:
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     FalseFill: =RGBA(96, 94, 92, 1)
                                     FalseHoverFill: =RGBA(50, 49, 48, 1)
-                                    FalseText: ="Showing my requests"
-                                    FillPortions: =0
+                                    FalseText: ="Only mine"
+                                    FillPortions: =1
                                     FocusedBorderThickness: =4
                                     Font: =Font.'Segoe UI'
                                     Height: =36
@@ -251,9 +285,41 @@ Screens:
                                     Size: =11
                                     TrueFill: =RGBA(0, 120, 212, 1)
                                     TrueHoverFill: =RGBA(16, 110, 190, 1)
-                                    TrueText: ="Showing all requests (MDM)"
+                                    TrueText: ="All requests"
                                     Visible: =IsMDM
-                                    Width: =260
+                              - btnRefresh:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderColor: =RGBA(0, 120, 212, 1)
+                                    BorderStyle: =BorderStyle.Solid
+                                    BorderThickness: =1
+                                    Color: =RGBA(0, 120, 212, 1)
+                                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                    DisabledColor: =RGBA(161, 159, 157, 1)
+                                    DisabledFill: =RGBA(237, 235, 233, 1)
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    FillPortions: =0
+                                    Font: =Font.'Segoe UI'
+                                    Height: =36
+                                    HoverBorderColor: =RGBA(0, 0, 0, 0)
+                                    HoverColor: =RGBA(0, 120, 212, 1)
+                                    HoverFill: =RGBA(243, 242, 241, 1)
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    OnSelect: |-
+                                      =Refresh(Requests);
+                                      Refresh(ApprovalLog);
+                                      Refresh(SensitiveDetails)
+                                    PressedBorderColor: =RGBA(0, 69, 120, 1)
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    PressedFill: =RGBA(16, 110, 190, 1)
+                                    RadiusBottomLeft: =4
+                                    RadiusBottomRight: =4
+                                    RadiusTopLeft: =4
+                                    RadiusTopRight: =4
+                                    Size: =11
+                                    Text: ="Refresh"
+                                    Width: =100
                         - lblListEmpty:
                             Control: Label@2.5.1
                             Properties:
@@ -282,10 +348,13 @@ Screens:
                               Items: =MyRequestList
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
+                              OnSelect: |-
+                                =Refresh(ApprovalLog);
+                                Refresh(SensitiveDetails)
                               ShowScrollbar: =true
                               TemplateFill: =If(ThisItem.IsSelected, RGBA(222, 236, 249, 1), RGBA(255, 255, 255, 1))
                               TemplatePadding: =0
-                              TemplateSize: =76
+                              TemplateSize: =104
                             Children:
                               - lblRowTitle:
                                   Control: Label@2.5.1
@@ -299,15 +368,37 @@ Screens:
                                     FocusedBorderThickness: =4
                                     Font: =Font.'Segoe UI'
                                     FontWeight: =FontWeight.Semibold
-                                    Height: =24
+                                    Height: =26
                                     LayoutMinHeight: =16
                                     LayoutMinWidth: =16
                                     OnSelect: =Select(Parent)
                                     Size: =12
-                                    Text: =ThisItem.Title & " | " & ThisItem.RequestType & " | " & Coalesce(ThisItem.CustomerName, ThisItem.ItemDescription, ThisItem.VendorName, ThisItem.CostCenterName)
-                                    Width: =Parent.TemplateWidth - 120
+                                    Text: =ThisItem.Title & " | " & ThisItem.RequestType
+                                    Width: =Parent.TemplateWidth - 130
+                                    Wrap: =false
                                     X: =12
                                     Y: =8
+                              - lblRowName:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =2
+                                    Color: =RGBA(50, 49, 48, 1)
+                                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                    DisabledColor: =RGBA(161, 159, 157, 1)
+                                    FocusedBorderThickness: =4
+                                    Font: =Font.'Segoe UI'
+                                    Height: =24
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    OnSelect: =Select(Parent)
+                                    Size: =11
+                                    Text: =Coalesce(ThisItem.CustomerName, ThisItem.ItemDescription, ThisItem.VendorName, ThisItem.CostCenterName)
+                                    Width: =Parent.TemplateWidth - 24
+                                    Wrap: =false
+                                    X: =12
+                                    Y: =34
                               - lblRowStatus:
                                   Control: Label@2.5.1
                                   Properties:
@@ -319,7 +410,7 @@ Screens:
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     FocusedBorderThickness: =4
                                     Font: =Font.'Segoe UI'
-                                    Height: =36
+                                    Height: =40
                                     LayoutMinHeight: =16
                                     LayoutMinWidth: =16
                                     OnSelect: =Select(Parent)
@@ -329,7 +420,7 @@ Screens:
                                     Width: =Parent.TemplateWidth - 24
                                     Wrap: =true
                                     X: =12
-                                    Y: =34
+                                    Y: =60
                               - lblRowDays:
                                   Control: Label@2.5.1
                                   Properties:
@@ -342,14 +433,15 @@ Screens:
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     FocusedBorderThickness: =4
                                     Font: =Font.'Segoe UI'
-                                    Height: =24
+                                    Height: =26
                                     LayoutMinHeight: =16
                                     LayoutMinWidth: =16
                                     OnSelect: =Select(Parent)
                                     Size: =10
                                     Text: =DateDiff(Coalesce(ThisItem.SubmittedAt, ThisItem.Created), Coalesce(ThisItem.CompletedAt, Now()), TimeUnit.Days) & " days open"
-                                    Width: =100
-                                    X: =Parent.TemplateWidth - 112
+                                    Width: =110
+                                    Wrap: =false
+                                    X: =Parent.TemplateWidth - 122
                                     Y: =8
                               - rectRowLine:
                                   Control: Rectangle@2.3.0
@@ -501,6 +593,48 @@ Screens:
                               PaddingLeft: =0
                               Size: =11
                               Text: =WaitingText
+                              VerticalAlign: =VerticalAlign.Top
+                              Wrap: =true
+                        - lblHeadTimeline:
+                            Control: Label@2.5.1
+                            Properties:
+                              Visible: =!IsBlank(galRequests.Selected)
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =28
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: ="Timeline"
+                        - lblBodyTimeline:
+                            Control: Label@2.5.1
+                            Properties:
+                              Visible: =!IsBlank(galRequests.Selected)
+                              AutoHeight: =true
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =40
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =11
+                              Text: =TimelineText
                               VerticalAlign: =VerticalAlign.Top
                               Wrap: =true
                         - lblHeadSubmitted:

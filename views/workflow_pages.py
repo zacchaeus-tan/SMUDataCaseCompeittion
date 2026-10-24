@@ -191,14 +191,14 @@ def approvals():
     now = wf.now(con)
     for _, a in ap.iterrows():
         data = json.loads(a.data)
-        waited = wf.business_days(pd.to_datetime(a.assigned_at).to_pydatetime(), now)
+        waited = wf.days_waiting(pd.to_datetime(a.assigned_at).to_pydatetime(), now)
         with st.container(border=True):
             h1, h2 = st.columns([3, 1])
             h1.markdown(f"**Approval requested: {a.request_id}**  \n"
                         f"{a.type} for {a.entity} ({COUNTRIES.get(a.country, a.country)}), from "
                         f"{a.requestor.split(' (')[0]}")
             flags = (["reminder sent"] if a.reminded_at else []) + ([":red[escalated]"] if a.escalated_at else [])
-            h2.markdown(f"Waiting **{waited:.0f}** business day{'s' if round(waited) != 1 else ''}"
+            h2.markdown(f"Waiting **{waited}** day{'s' if waited != 1 else ''}"
                         + (f"  \n{', '.join(flags)}" if flags else ""))
             _fields(data)
             sens = wf.sensitive_for(con, a.request_id, c.role())

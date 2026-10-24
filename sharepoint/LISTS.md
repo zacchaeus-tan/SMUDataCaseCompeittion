@@ -55,6 +55,6 @@ entities. **Pitch line:** *"In production, the form calls the same matching engi
 2. **Reminders & escalation**, a scheduled daily flow:
    - Find Requests still Pending beyond `SLADays`.
    - Remind the approver in Teams; after `EscalateAfterDays`, message the `EscalateTo` person.
-   - Count business days and send reminders at about 9 AM in the approver's own `TimeZone`, using the
+   - Count calendar days and send reminders at about 9 AM in the approver's own `TimeZone`, using the
      *Convert time zone* action. Approvers sit in UTC+7 (TH/VN/western ID) and UTC+8 (SG/MY).
 3. **Status updates**: update `CurrentStage` at every step so the requestor's "My requests" screen is always current.

@@ -1,4 +1,5 @@
-"""Generate Src/App.pa.yaml and Src/Screen1.pa.yaml for the OneRecord NewRequestForm canvas app.
+"""Generate the OneRecord NewRequestForm canvas app source: App formulas, NewRequestScreen,
+MyRequestsScreen and AdminScreen (rules, MDM only).
 
 Usage: python3 powerapps/gen_form.py powerapps/NewRequestForm/Src
 Then paste powerapps/paste/* into Studio (App > Formulas, and each screen > Paste code).
@@ -148,12 +149,14 @@ FORMULAS = f"""RequestTypes = {fx_list(TYPES)};
 SelectedType = ddRequestType.Selected.Value;
 SelectedEntity = ddEntity.Selected.Code;
 
-// Field rules for the chosen request type, copied locally so the conditional checks below run in the app.
-TypeRules = ForAll(
-    Filter(RequiredFields, RequestType = SelectedType),
-    {{FieldName: FieldName, DisplayLabel: DisplayLabel, Required: Required, ConditionField: ConditionField,
-      ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText}}
+// All field rules, loaded once (about 30 rows) and filtered in the app. Filtering in the SharePoint query
+// left the form empty on first load: the query ran before the Request type dropdown had its default.
+FieldRules = ForAll(
+    RequiredFields,
+    {{RequestType: RequestType, FieldName: FieldName, DisplayLabel: DisplayLabel, Required: Required,
+      ConditionField: ConditionField, ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText}}
 );
+TypeRules = Filter(FieldRules, RequestType = SelectedType);
 
 // What the requestor has entered so far, keyed by the FieldName used in the RequiredFields list.
 FieldValues = Table(
@@ -297,7 +300,7 @@ SelectedLog = With(
     {{id: SelectedRequestID}},
     ForAll(
         Filter(ApprovalLog, RequestID = id),
-        {{Role: ActorRole, Action: Action, Actor: Lower(Actor), At: Timestamp}}
+        {{Role: ActorRole, Action: Action, Actor: Lower(Actor), Who: Actor, Detail: Detail, At: Timestamp}}
     )
 );
 // Still waiting: an Assigned row with no Approve/Reject from the same role yet
@@ -316,6 +319,22 @@ WaitingText = If(
             LookUp(RolesRows, Email = w.Actor).Name,
             w.Actor
         ) & " (waiting " & DateDiff(w.At, Now(), TimeUnit.Days) & " days)",
+        Char(10)
+    )
+);
+// Everything logged for the request, oldest first. The log never holds sensitive values.
+TimelineText = If(
+    CountRows(SelectedLog) = 0, "Nothing logged yet.",
+    Concat(
+        Sort(SelectedLog, At, SortOrder.Ascending) As e,
+        Text(e.At, "dd mmm yyyy hh:mm") & "  |  " & e.Action & "  |  " &
+        If(IsBlank(e.Role) || e.Role = "System", "", e.Role & " - ") &
+        Coalesce(
+            LookUp(RolesRows, Email = e.Actor && Role = e.Role).Name,
+            LookUp(RolesRows, Email = e.Actor).Name,
+            e.Who
+        ) &
+        If(IsBlank(e.Detail), "", "  |  " & e.Detail),
         Char(10)
     )
 );
@@ -370,6 +389,62 @@ SensitiveText = If(
             !IsBlank(V)
         ),
         L & ": " & V, Char(10)
+    )
+);"""
+
+TIME_ZONES = ["Asia/Singapore", "Asia/Kuala_Lumpur", "Asia/Bangkok", "Asia/Jakarta", "Asia/Ho_Chi_Minh"]
+CONDITIONS = ["IsRegulated", "SuppliesRegulatedGoods"]  # the conditions the Route and approve flow understands
+
+# Plain string (not an f-string), so Power Fx braces stay single.
+FORMULAS += """
+
+// ---- Who will approve: the same rules the Route and approve flow reads (RoutingRules + Roles)
+RuleRows = ForAll(
+    RoutingRules,
+    {RequestType: RequestType, Entity: Entity, ConditionField: ConditionField, Role: ApproverRole,
+     Stage: Stage, Active: Active}
+);
+// Like the flow: the first Roles row for the role and entity (or Any); no "@" in its email = nobody set up.
+ApproverPreview = ForAll(
+    Filter(RuleRows As x,
+        x.Active && (x.RequestType = SelectedType || x.RequestType = "Any") &&
+        (x.Entity = SelectedEntity || x.Entity = "Any") &&
+        (IsBlank(x.ConditionField) ||
+         (x.ConditionField = "IsRegulated" && SelectedType = "Item" && tglIsRegulated.Value) ||
+         (x.ConditionField = "SuppliesRegulatedGoods" && SelectedType = "Vendor" && tglSuppliesRegulatedGoods.Value))
+    ) As r,
+    With(
+        {p:LookUp(RolesRows, Role = r.Role && (Entity = SelectedEntity || Entity = "Any"))},
+        {Stage: r.Stage, Role: r.Role, Person: Coalesce(p.Name, p.Email), Ok: "@" in p.Email}
+    )
+);
+ApproverGap = CountRows(Filter(ApproverPreview, !Ok)) > 0;
+ApproverText = If(
+    IsBlank(SelectedEntity), "Choose a business entity to see who will approve.",
+    CountRows(ApproverPreview) = 0, "No approval steps are set up for this request type.",
+    With(
+        {s1: Filter(ApproverPreview, Stage < 1.5), s2: Filter(ApproverPreview, Stage >= 1.5),
+         gaps: Filter(ApproverPreview, !Ok)},
+        Concat(s1, Role & " (" & If(Ok, Person, "nobody set up") & ")", ", ") &
+        If(CountRows(s1) > 1, ", all at the same time", "") &
+        If(CountRows(s1) > 0 && CountRows(s2) > 0, "; then ", "") &
+        Concat(s2, Role & " (" & If(Ok, Person, "nobody set up") & ")", ", ") & "." &
+        If(CountRows(gaps) > 0,
+            " No " & Concat(gaps, Role, " or ") & " is set up for " & SelectedEntity &
+            ", so the MDM team approves in their place.",
+            "")
+    )
+);
+
+// ---- Rules screen (MDM): approval steps that some active business unit has nobody for
+RuleGapText = Concat(
+    Filter(BusinessUnits, Active = true) As b,
+    Concat(
+        Filter(
+            Distinct(Filter(RuleRows As x, x.Active && (x.Entity = b.Title || x.Entity = "Any")), Role) As r,
+            !("@" in LookUp(RolesRows, Role = r.Value && (Entity = b.Title || Entity = "Any")).Email)
+        ) As g,
+        b.Title & ": nobody set up as " & g.Value & Char(10)
     )
 );"""
 
@@ -536,13 +611,25 @@ SUBMIT = f"""With(
     )
 )"""
 
+def outline(style):
+    """White button with a blue outline (secondary action)."""
+    style.update(Fill="RGBA(255, 255, 255, 1)", Color="RGBA(0, 120, 212, 1)", HoverFill="RGBA(243, 242, 241, 1)",
+                 HoverColor="RGBA(0, 120, 212, 1)", BorderColor="RGBA(0, 120, 212, 1)",
+                 BorderStyle="BorderStyle.Solid", BorderThickness="1")
+    return style
+
+
+NAV = (("New", "New request", "NewRequestScreen", "true"), ("Mine", "My requests", "MyRequestsScreen", "true"),
+       ("Rules", "Rules (MDM)", "AdminScreen", "IsMDM"))
+
+
 def nav_buttons(n, active):
-    """'New request' / 'My requests' header buttons; the current screen's button is filled."""
+    """Header buttons for each screen ('Rules' only for the MDM team); the current screen's button is filled."""
     out = []
-    for key, text, target in (("New", "New request", "Screen1"), ("Mine", "My requests", "MyRequestsScreen")):
+    for key, text, target, visible in NAV:
         on = key == active
         style = dict(BUTTON, Text=f'"{text}"', FillPortions="0", Width="140", Height="36", Size="11",
-                     OnSelect=f"Navigate({target}, ScreenTransition.None)")
+                     OnSelect=f"Navigate({target}, ScreenTransition.None)", Visible=visible)
         if not on:
             style.update(Fill="RGBA(255, 255, 255, 1)", Color="RGBA(0, 120, 212, 1)", HoverFill="RGBA(243, 242, 241, 1)",
                          HoverColor="RGBA(0, 120, 212, 1)", BorderColor="RGBA(0, 120, 212, 1)",
@@ -551,20 +638,20 @@ def nav_buttons(n, active):
     return out
 
 
-def header(n, title):
+def header(n, title, active):
     return ctl(f"HeaderContainer{n}", "GroupContainer@1.5.0", dict(
         CARD, FillPortions="0", Height="75", LayoutAlignItems="LayoutAlignItems.Center",
         LayoutDirection="LayoutDirection.Horizontal", PaddingLeft="16", PaddingRight="16", LayoutGap="12"),
         [
-            label(f"lblAppTitle{'' if n == 1 else n}", f'"{title}"', Size="18",
+            label(f"lblAppTitle{'' if n == 1 else n}", f'"{title}"', Size="18", Wrap="false",
                   FontWeight="FontWeight.Semibold", FillPortions="1", Height="40"),
             label(f"lblRequestor{'' if n == 1 else n}", '"Signed in: " & User().FullName', Size="11",
                   Color="RGBA(96, 94, 92, 1)", Align="Align.Right", FillPortions="0", Width="260", Height="40"),
-        ] + nav_buttons(n, "New" if n == 1 else "Mine"), variant="AutoLayout")
+        ] + nav_buttons(n, active), variant="AutoLayout")
 
 
 screen_children = [
-    header(1, "OneRecord - New master data request"),
+    header(1, "OneRecord | New request", "New"),
     ctl("DupBanner", "GroupContainer@1.5.0", dict(
         CARD, FillPortions="0", Height="96", Visible='DupStatus <> "Clear"',
         Fill='If(DupStatus = "Blocked", RGBA(253, 231, 233, 1), RGBA(255, 244, 206, 1))',
@@ -585,6 +672,16 @@ screen_children = [
         LayoutOverflowY="LayoutOverflow.Scroll", LayoutGap="16", PaddingLeft="16", PaddingRight="16",
         PaddingTop="16", PaddingBottom="16"),
         top_blocks + [field_block(f) for f in FIELDS], variant="AutoLayout"),
+    ctl("ApproverCard", "GroupContainer@1.5.0", dict(
+        CARD, FillPortions="0", Height="84", LayoutDirection="LayoutDirection.Vertical",
+        LayoutAlignItems="LayoutAlignItems.Stretch", LayoutGap="2", PaddingLeft="16", PaddingRight="16",
+        Fill="If(ApproverGap, RGBA(255, 244, 206, 1), RGBA(239, 246, 252, 1))"),
+        [
+            label("lblApproverHead", '"Who will approve"', Size="11", FontWeight="FontWeight.Semibold",
+                  FillPortions="0", Height="24", PaddingLeft="0"),
+            label("lblApproverText", "ApproverText", Size="11", Wrap="true", FillPortions="1", PaddingLeft="0",
+                  VerticalAlign="VerticalAlign.Top"),
+        ], variant="AutoLayout"),
     ctl("FooterContainer1", "GroupContainer@1.5.0", dict(
         CARD, FillPortions="0", Height="75", LayoutAlignItems="LayoutAlignItems.Center",
         LayoutDirection="LayoutDirection.Horizontal", PaddingLeft="16", PaddingRight="16", LayoutGap="12"),
@@ -612,7 +709,7 @@ screen = ctl("ScreenContainer1", "GroupContainer@1.5.0", {
 }, screen_children, variant="AutoLayout")
 
 screen_yaml = HEADER + "\n".join([
-    "Screens:", "  Screen1:", "    Properties:",
+    "Screens:", "  NewRequestScreen:", "    Properties:",
     "      Fill: =RGBA(245, 245, 245, 1)", "      LoadingSpinnerColor: =RGBA(0, 120, 212, 1)",
     "    Children:",
 ] + screen(6)) + "\n"
@@ -625,23 +722,28 @@ STATUS_COLOR = ('Switch({s}, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP",
                 'RGBA(0, 90, 158, 1))')
 row_name = ("Coalesce(ThisItem.CustomerName, ThisItem.ItemDescription, ThisItem.VendorName, "
             "ThisItem.CostCenterName)")
+# Three fixed lines per row (ID and type, name, entity and status): wrapped text in one short label got clipped.
+# Selecting a request re-reads the log, so the timeline isn't a cached, empty answer from an earlier look.
 gallery = ctl("galRequests", "Gallery@2.15.0", {
-    "Items": "MyRequestList", "TemplateSize": "76", "TemplatePadding": "0", "FillPortions": "1",
+    "Items": "MyRequestList", "TemplateSize": "104", "TemplatePadding": "0", "FillPortions": "1",
     "BorderColor": "RGBA(237, 235, 233, 1)", "BorderThickness": "1", "ShowScrollbar": "true",
     "TemplateFill": "If(ThisItem.IsSelected, RGBA(222, 236, 249, 1), RGBA(255, 255, 255, 1))",
-    "LayoutMinHeight": "16", "LayoutMinWidth": "16",
+    "LayoutMinHeight": "16", "LayoutMinWidth": "16", "OnSelect": "Refresh(ApprovalLog);\nRefresh(SensitiveDetails)",
 }, [
-    label("lblRowTitle", f'ThisItem.Title & " | " & ThisItem.RequestType & " | " & {row_name}',
-          X="12", Y="8", Width="Parent.TemplateWidth - 120", Height="24", Size="12",
+    label("lblRowTitle", 'ThisItem.Title & " | " & ThisItem.RequestType',
+          X="12", Y="8", Width="Parent.TemplateWidth - 130", Height="26", Size="12", Wrap="false",
           FontWeight="FontWeight.Semibold", OnSelect="Select(Parent)"),
+    label("lblRowName", row_name,
+          X="12", Y="34", Width="Parent.TemplateWidth - 24", Height="24", Size="11", Wrap="false",
+          OnSelect="Select(Parent)"),
     label("lblRowStatus", 'ThisItem.Entity & "  |  " & ThisItem.Status & " - " & ThisItem.CurrentStage',
-          X="12", Y="34", Width="Parent.TemplateWidth - 24", Height="36", Size="10", Wrap="true",
+          X="12", Y="60", Width="Parent.TemplateWidth - 24", Height="40", Size="10", Wrap="true",
           VerticalAlign="VerticalAlign.Top", Color=STATUS_COLOR.format(s="ThisItem.Status"),
           OnSelect="Select(Parent)"),
     label("lblRowDays", 'DateDiff(Coalesce(ThisItem.SubmittedAt, ThisItem.Created), '
                         'Coalesce(ThisItem.CompletedAt, Now()), TimeUnit.Days) & " days open"',
-          X="Parent.TemplateWidth - 112", Y="8", Width="100", Height="24", Size="10", Align="Align.Right",
-          Color="RGBA(96, 94, 92, 1)", OnSelect="Select(Parent)"),
+          X="Parent.TemplateWidth - 122", Y="8", Width="110", Height="26", Size="10", Align="Align.Right",
+          Wrap="false", Color="RGBA(96, 94, 92, 1)", OnSelect="Select(Parent)"),
     ctl("rectRowLine", "Rectangle@2.3.0", {"Fill": "RGBA(237, 235, 233, 1)", "BorderColor": "RGBA(0, 0, 0, 0)",
                                            "X": "0", "Y": "Parent.TemplateHeight - 1",
                                            "Width": "Parent.TemplateWidth", "Height": "1"}),
@@ -680,8 +782,11 @@ list_panel = ctl("ListPanel", "GroupContainer@1.5.0", dict(
             DROPDOWN, Items=fx_list(["All", "Pending approval", "Rejected", "Created in SAP"]), Default='"All"',
             FillPortions="0", Width="220", Height="36", Size="11")),
         ctl("tglShowAll", "Classic/Toggle@2.1.0", dict(
-            TOGGLE, Default="false", Visible="IsMDM", FillPortions="0", Width="260", Height="36", Size="11",
-            TrueText='"Showing all requests (MDM)"', FalseText='"Showing my requests"')),
+            TOGGLE, Default="false", Visible="IsMDM", FillPortions="1", Height="36", Size="11",
+            TrueText='"All requests"', FalseText='"Only mine"')),
+        ctl("btnRefresh", "Classic/Button@2.2.0", outline(dict(
+            BUTTON, Text='"Refresh"', FillPortions="0", Width="100", Height="36", Size="11",
+            OnSelect="Refresh(Requests);\nRefresh(ApprovalLog);\nRefresh(SensitiveDetails)"))),
     ], variant="AutoLayout"),
     label("lblListEmpty", '"No requests to show."', Visible="CountRows(galRequests.AllItems) = 0", FillPortions="0",
           Height="32", Size="11", Color="RGBA(96, 94, 92, 1)"),
@@ -706,6 +811,7 @@ detail_panel = ctl("DetailPanel", "GroupContainer@1.5.0", dict(
               FontWeight="FontWeight.Semibold", Wrap="true", AutoHeight="true", FillPortions="0", Height="30",
               PaddingLeft="0", Color=STATUS_COLOR.format(s="SelectedRequest.Status")),
     ] + section("Waiting", "Waiting on", "WaitingText")
+      + section("Timeline", "Timeline", "TimelineText")
       + section("Submitted", "Submitted details", "SubmittedText")
       + section("Sensitive", "Sensitive details (only shown to you if SharePoint allows it)", "SensitiveText")], variant="AutoLayout")
 
@@ -714,7 +820,7 @@ mine_screen = ctl("ScreenContainer2", "GroupContainer@1.5.0", {
     "LayoutAlignItems": "LayoutAlignItems.Stretch", "LayoutDirection": "LayoutDirection.Vertical",
     "LayoutGap": "16", "PaddingBottom": "16", "PaddingLeft": "16", "PaddingRight": "16", "PaddingTop": "16",
 }, [
-    header(2, "OneRecord - My requests"),
+    header(2, "OneRecord | My requests", "Mine"),
     ctl("BodyContainer2", "GroupContainer@1.5.0", {
         "Fill": "RGBA(245, 245, 245, 1)", "LayoutMinHeight": "16", "LayoutMinWidth": "16",
         "LayoutDirection": "LayoutDirection.Horizontal", "LayoutAlignItems": "LayoutAlignItems.Stretch",
@@ -727,10 +833,263 @@ mine_yaml = HEADER + "\n".join([
     "    Children:",
 ] + mine_screen(6)) + "\n"
 
-(SRC / "Screen1.pa.yaml").write_text(screen_yaml)
+# ---------------------------------------------------------------------------- Rules screen (MDM only)
+GREY = "RGBA(96, 94, 92, 1)"
+
+
+def row(name, children, height, gap="12", align="LayoutAlignItems.Stretch", pad_left="0"):
+    """A fixed-height horizontal strip (no wrapping: wrapped containers ignored child heights)."""
+    return ctl(name, "GroupContainer@1.5.0", {
+        "Fill": "RGBA(255, 255, 255, 1)", "FillPortions": "0", "Height": str(height), "LayoutMinHeight": "16",
+        "LayoutMinWidth": "16", "LayoutDirection": "LayoutDirection.Horizontal", "LayoutAlignItems": align,
+        "LayoutGap": gap, "PaddingLeft": pad_left, "DropShadow": "DropShadow.None"}, children, variant="AutoLayout")
+
+
+def small_block(name, title, input_ctl):
+    return ctl(name, "GroupContainer@1.5.0", {
+        "Fill": "RGBA(255, 255, 255, 1)", "FillPortions": "1", "LayoutMinHeight": "16", "LayoutMinWidth": "16",
+        "LayoutDirection": "LayoutDirection.Vertical", "LayoutAlignItems": "LayoutAlignItems.Stretch",
+        "LayoutGap": "4", "DropShadow": "DropShadow.None"}, [
+        label(name.replace("blk", "lbl"), f'"{title}"', FillPortions="0", Height="22", Size="11",
+              FontWeight="FontWeight.Semibold", PaddingLeft="0"),
+        input_ctl], variant="AutoLayout")
+
+
+def text_in(name, hint=""):
+    return ctl(name, "Classic/TextInput@2.3.2", dict(TEXTINPUT, FillPortions="0", Height="36", Size="11",
+                                                     Default='""', HintText=f'"{hint}"'))
+
+
+NEW_BU_INPUTS = ["txtNewBUCode", "txtNewBUName", "txtNewBUProducts", "txtNewBUHeadName", "txtNewBUHeadEmail",
+                 "txtNewBUEscalate", "ddNewBUTimeZone"]
+ADD_BU = """With(
+    {code: Upper(Trim(txtNewBUCode.Text)), email: Lower(Trim(txtNewBUHeadEmail.Text)),
+     esc: Lower(Trim(txtNewBUEscalate.Text)), head: Trim(txtNewBUHeadName.Text)},
+    If(
+        IsBlank(code) || IsBlank(Trim(txtNewBUName.Text)) || IsBlank(head),
+            Notify("Fill in the code, the name and the BU Head.", NotificationType.Warning),
+        !IsMatch(email, Match.Email) || (!IsBlank(esc) && !IsMatch(esc, Match.Email)),
+            Notify("Check the email addresses.", NotificationType.Warning),
+        !IsBlank(LookUp(BusinessUnits, Title = code)),
+            Notify(code & " already exists. Change it under Business units below.", NotificationType.Warning),
+        IfError(
+            Patch(BusinessUnits, Defaults(BusinessUnits),
+                {Title: code, BusinessUnitName: Trim(txtNewBUName.Text), Products: Trim(txtNewBUProducts.Text),
+                 Active: true});
+            Patch(Roles, Defaults(Roles),
+                {Title: "BU Head - " & code, Role: "BU Head", Entity: code, PersonName: head, PersonEmail: email,
+                 EscalateTo: esc, TimeZone: ddNewBUTimeZone.Selected.Value});
+            Notify(code & " added. It is on the request form now, and its BU Head approvals go to " & head & ".",
+                   NotificationType.Success);
+""" + ";\n".join(f"            Reset({c})" for c in NEW_BU_INPUTS) + """,
+            Notify("Couldn't add the business unit: " & FirstError.Message, NotificationType.Error)
+        )
+    )
+)"""
+
+# One list + edit panel per rule list. A wide table didn't fit: the Teams tab gives the app ~700 px, and
+# Power Apps pushes controls that overflow a gallery row back inside it, so they piled on top of each other.
+# (key, menu name, list, gallery items, help text, row summary ({r} = the row), fields, extra Patch fields,
+#  new-row record); field = (column, label, kind); kind: text | lower | num | bool | choice
+GRIDS = [
+    ("BU", "Business units", "BusinessUnits", "BusinessUnits",
+     "The Business entity list on the request form. Switch Active off to retire a business unit.",
+     '{r}.Title & "  |  " & {r}.BusinessUnitName & "  |  products " & {r}.Products & If({r}.Active, "", "  |  OFF")',
+     [("Title", "Code", "text"), ("Products", "Products", "text"), ("BusinessUnitName", "Name", "text"),
+      ("Active", "Active", "bool")],
+     [], '{Title: "NEW", BusinessUnitName: "New business unit", Active: false}'),
+    ("RR", "Approval steps", "RoutingRules", "Sort(RoutingRules, Title)",
+     "Who approves what. Stage 1 steps run at the same time, then stage 2 (the MDM final check). "
+     "'Only if' limits a step to regulated items or vendors. New steps start switched off.",
+     '{r}.Title & "  |  " & {r}.RequestType & "  |  " & {r}.Entity & "  |  " & {r}.ApproverRole & '
+     'If(IsBlank({r}.ConditionField), "", "  |  only if " & {r}.ConditionField) & "  |  stage " & {r}.Stage & '
+     'If({r}.Active, "", "  |  OFF")',
+     [("Title", "Rule", "text"), ("Active", "Active", "bool"), ("RequestType", "Request type", "choice"),
+      ("Entity", "Entity (code or Any)", "text"), ("ApproverRole", "Approver role", "text"),
+      ("ConditionField", "Only if", "choice"), ("Stage", "Stage (1 or 2)", "num"),
+      ("SLADays", "Remind after (days)", "num"), ("EscalateAfterDays", "Escalate after (days)", "num")],
+     [], '{Title: "R" & Text(Coalesce(First(Sort(RoutingRules, ID, SortOrder.Descending)).ID, 0) + 1, "00"), '
+         'RequestType: "Any", Entity: "Any", Stage: 1, SLADays: 2, EscalateAfterDays: 4, Active: false}'),
+    ("RF", "Form fields", "RequiredFields", "Sort(RequiredFields, RequestType)",
+     "Labels, help text and when a field is required. Field name must be one the form already has. "
+     "A new row does nothing until its request type is set.",
+     '{r}.RequestType & "  |  " & {r}.DisplayLabel & "  (" & {r}.FieldName & ")  |  " & {r}.Required & '
+     'If({r}.Required = "Conditional", " when " & {r}.ConditionField & " = " & {r}.ConditionValue, "")',
+     [("RequestType", "Request type", "choice"), ("FieldName", "Field name", "text"),
+      ("DisplayLabel", "Label", "text"), ("Required", "Required", "choice"),
+      ("ConditionField", "Only when field", "text"), ("ConditionValue", "equals", "text"),
+      ("Sensitive", "Sensitive", "choice"), ("VisibleToRoles", "Sensitive values visible to", "text"),
+      ("HelpText", "Help text", "text")],
+     ['Title: ddRF_RequestType.Selected.Value & "." & Trim(txtRF_FieldName.Text)'],
+     '{Title: "New field", Required: "Always", Sensitive: "No", VisibleToRoles: "All"}'),
+    ("RO", "People", "Roles", "Sort(Roles, Role)",
+     "Who holds each approver role, per business unit (or Any). Reminders go out at 9 AM in their time zone; "
+     "escalations go to Escalate to.",
+     '{r}.Role & "  |  " & {r}.Entity & "  |  " & {r}.PersonName & "  |  " & {r}.PersonEmail',
+     [("Role", "Role", "text"), ("Entity", "Entity (code or Any)", "text"), ("PersonName", "Name", "text"),
+      ("PersonEmail", "Email", "lower"), ("EscalateTo", "Escalate to (email)", "lower"),
+      ("TimeZone", "Time zone", "choice")],
+     ['Title: Trim(txtRO_Role.Text) & " - " & Trim(txtRO_Entity.Text)'],
+     '{Title: "New person", Entity: "Any", TimeZone: "Asia/Singapore"}'),
+    ("AL", "Known names", "Aliases", "Sort(Aliases, CanonicalName)",
+     "Short or old names that mean an existing customer. Typing one on the form blocks a duplicate.",
+     '{r}.Title & "  ->  " & {r}.CanonicalName & "  (" & {r}.RecordID & ")"',
+     [("Title", "Name people type (lower case)", "lower"), ("RecordID", "SAP record", "text"),
+      ("CanonicalName", "Official name", "text")],
+     [], '{Title: "(new)"}'),
+]
+CHOICE_ITEMS = {("RR", "RequestType"): TYPES + ["Any"], ("RR", "ConditionField"): CONDITIONS,
+                ("RF", "RequestType"): TYPES, ("RF", "Required"): ["Always", "Conditional"],
+                ("RF", "Sensitive"): ["Yes", "No"], ("RO", "TimeZone"): TIME_ZONES}
+GAL_H, ROW_H = 240, 66
+
+
+def cell_name(key, field, kind):
+    return {"bool": "tgl", "choice": "dd"}.get(kind, "txt") + f"{key}_{field}"
+
+
+def edit_input(key, field, kind):
+    """Input for one column of the selected row; classic inputs follow their Default when the selection changes."""
+    n, cur = cell_name(key, field, kind), f"gal{key}.Selected.{field}"
+    base = {"FillPortions": "0", "Height": "36", "Size": "11"}
+    if kind == "bool":
+        return ctl(n, "Classic/Toggle@2.1.0", dict(TOGGLE, **base, Width="160", Default=cur,
+                                                   AlignInContainer="AlignInContainer.Start",
+                                                   TrueText='"On"', FalseText='"Off"'))
+    if kind == "choice":
+        return ctl(n, "Classic/DropDown@2.3.1", dict(DROPDOWN, **base, Items=fx_list(CHOICE_ITEMS[key, field]),
+                                                     AllowEmptySelection="true", Default=cur))
+    return ctl(n, "Classic/TextInput@2.3.2", dict(TEXTINPUT, **base,
+                                                  Default=f"Text({cur})" if kind == "num" else cur))
+
+
+def cell_value(key, field, kind):
+    n = cell_name(key, field, kind)
+    return {"bool": f"{n}.Value", "choice": f"{n}.Selected.Value",
+            "num": f"If(IsBlank(Trim({n}.Text)), Blank(), Value({n}.Text))",
+            "lower": f"Lower(Trim({n}.Text))"}.get(kind, f"Trim({n}.Text)")
+
+
+def grid(key, menu, lst, items, help_text, summary, cols, extra, new_row):
+    gal = f"gal{key}"
+    fields = extra + [f"{f}: {cell_value(key, f, k)}" for f, _, k in cols]
+    save = (f"IfError(\n    Patch({lst}, {gal}.Selected, {{\n        " + ",\n        ".join(fields) + "\n    });\n"
+            f'    Notify("Saved.", NotificationType.Success),\n'
+            f'    Notify("Couldn\'t save: " & FirstError.Message, NotificationType.Error)\n)')
+    add = (f"IfError(\n    Set(gNewRow{key}, Patch({lst}, Defaults({lst}), {new_row}));\n"
+           f'    Notify("New row added and selected. Fill it in below and press Save.", NotificationType.Success),\n'
+           f'    Notify("Couldn\'t add a row: " & FirstError.Message, NotificationType.Error)\n)')
+    rows = [row(f"rowEdit{key}{i // 2 + 1}",
+                [small_block(f"blk{key}_{f}", h, edit_input(key, f, k)) for f, h, k in cols[i:i + 2]], ROW_H)
+            for i in range(0, len(cols), 2)]
+    gallery = ctl(gal, "Gallery@2.15.0", {
+        "Items": items, "Default": f"gNewRow{key}", "TemplateSize": "40", "TemplatePadding": "0",
+        "FillPortions": "0", "Height": str(GAL_H), "BorderColor": "RGBA(237, 235, 233, 1)", "BorderThickness": "1",
+        "ShowScrollbar": "true", "LayoutMinHeight": "16", "LayoutMinWidth": "16",
+        "TemplateFill": "If(ThisItem.IsSelected, RGBA(222, 236, 249, 1), RGBA(255, 255, 255, 1))"}, [
+        label(f"lblRow{key}", summary.format(r="ThisItem"), X="10", Y="0", Width="Parent.TemplateWidth - 20",
+              Height="Parent.TemplateHeight", Size="11", Wrap="false", OnSelect="Select(Parent)"),
+        ctl(f"rectLine{key}", "Rectangle@2.3.0", {
+            "Fill": "RGBA(237, 235, 233, 1)", "BorderColor": "RGBA(0, 0, 0, 0)", "X": "0",
+            "Y": "Parent.TemplateHeight - 1", "Width": "Parent.TemplateWidth", "Height": "1"}),
+    ], variant="BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0")
+    height = 44 + GAL_H + 28 + len(rows) * ROW_H + 44 + 6 * (len(rows) + 3)
+    return ctl(f"Grid{key}", "GroupContainer@1.5.0", {
+        "Fill": "RGBA(255, 255, 255, 1)", "FillPortions": "0", "Height": str(height), "LayoutMinHeight": "16",
+        "LayoutMinWidth": "16", "LayoutDirection": "LayoutDirection.Vertical",
+        "LayoutAlignItems": "LayoutAlignItems.Stretch", "LayoutGap": "6", "DropShadow": "DropShadow.None",
+        "Visible": f'ddRuleList.Selected.Value = "{menu}"'}, [
+        row(f"rowHelp{key}", [
+            label(f"lblHelp{key}", f'"{help_text}"', FillPortions="1", Size="10", Wrap="true", Color=GREY,
+                  PaddingLeft="0"),
+            ctl(f"btnNewRow{key}", "Classic/Button@2.2.0", outline(dict(
+                BUTTON, Text='"Add a row"', FillPortions="0", Width="120", Height="34", Size="11", OnSelect=add))),
+        ], 44, align="LayoutAlignItems.Center"),
+        gallery,
+        label(f"lblEdit{key}", f'If(IsBlank({gal}.Selected), "Select a row to change it.", '
+                               f'"Selected: " & {summary.format(r=gal + ".Selected")})',
+              Size="11", FontWeight="FontWeight.Semibold", FillPortions="0", Height="28", PaddingLeft="0",
+              Wrap="false"),
+    ] + rows + [
+        ctl(f"btnSave{key}", "Classic/Button@2.2.0", dict(
+            BUTTON, Text='"Save changes"', FillPortions="0", Width="160", Height="40", Size="12",
+            AlignInContainer="AlignInContainer.Start", OnSelect=save,
+            DisplayMode=f"If(IsBlank({gal}.Selected), DisplayMode.Disabled, DisplayMode.Edit)")),
+    ], variant="AutoLayout")
+
+
+admin_body = ctl("AdminBody", "GroupContainer@1.5.0", dict(
+    CARD, FillPortions="1", Visible="IsMDM", LayoutDirection="LayoutDirection.Vertical",
+    LayoutAlignItems="LayoutAlignItems.Stretch", LayoutOverflowY="LayoutOverflow.Scroll", LayoutGap="10",
+    PaddingLeft="20", PaddingRight="20", PaddingTop="16", PaddingBottom="16"), [
+    label("lblCheckHead", '"Rules check"', Size="14", FontWeight="FontWeight.Semibold", FillPortions="0",
+          Height="30", PaddingLeft="0"),
+    label("lblCheckBody",
+          'If(IsBlank(RuleGapText), "Every active business unit has someone set up for every approval step.", '
+          'RuleGapText & "Until this is fixed, those steps go to the MDM team. Add the person under People, '
+          'or use Add a business unit.")',
+          Size="11", Wrap="true", AutoHeight="true", FillPortions="0", Height="30", PaddingLeft="0",
+          VerticalAlign="VerticalAlign.Top",
+          Color="If(IsBlank(RuleGapText), RGBA(16, 124, 16, 1), RGBA(164, 38, 44, 1))"),
+    label("lblAddHead", '"Add a business unit"', Size="14", FontWeight="FontWeight.Semibold", FillPortions="0",
+          Height="30", PaddingLeft="0"),
+    label("lblAddHelp", '"Creates the business unit and its BU Head in one step. The request form and the approval '
+                        'flow use them on the next request. The rules check above shows anything else it needs."',
+          Size="10", Wrap="true", FillPortions="0", Height="36", PaddingLeft="0", Color=GREY),
+    row("rowNewBU1", [
+        small_block("blkNewBUCode", "Code", text_in("txtNewBUCode", "e.g. LGD")),
+        small_block("blkNewBUProducts", "Products", text_in("txtNewBUProducts", "e.g. A")),
+    ], ROW_H),
+    row("rowNewBU2", [
+        small_block("blkNewBUName", "Name", text_in("txtNewBUName", "e.g. LGD (molecular diagnostics)")),
+    ], ROW_H),
+    row("rowNewBU3", [
+        small_block("blkNewBUHeadName", "BU Head name", text_in("txtNewBUHeadName")),
+        small_block("blkNewBUTimeZone", "BU Head time zone", ctl("ddNewBUTimeZone", "Classic/DropDown@2.3.1", dict(
+            DROPDOWN, Items=fx_list(TIME_ZONES), Default='"Asia/Singapore"', FillPortions="0", Height="36",
+            Size="11"))),
+    ], ROW_H),
+    row("rowNewBU4", [
+        small_block("blkNewBUHeadEmail", "BU Head email", text_in("txtNewBUHeadEmail", "name@company.com")),
+        small_block("blkNewBUEscalate", "Escalate to (optional)", text_in("txtNewBUEscalate", "email")),
+    ], ROW_H),
+    ctl("btnAddBU", "Classic/Button@2.2.0", dict(
+        BUTTON, Text='"Add business unit"', FillPortions="0", Width="200", Height="40", Size="12",
+        AlignInContainer="AlignInContainer.Start", OnSelect=ADD_BU)),
+    label("lblListsHead", '"Rule lists"', Size="14", FontWeight="FontWeight.Semibold", FillPortions="0",
+          Height="30", PaddingLeft="0"),
+    row("rowPickList", [
+        label("lblPickList", '"Show"', FillPortions="0", Width="50", Height="36", Size="11", PaddingLeft="0"),
+        ctl("ddRuleList", "Classic/DropDown@2.3.1", dict(
+            DROPDOWN, Items=fx_list([g[1] for g in GRIDS]), Default=f'"{GRIDS[0][1]}"', FillPortions="0",
+            Width="260", Height="36", Size="11")),
+        label("lblPickNote", '"Changes apply to the next request. SharePoint keeps every earlier version of '
+                             'each row."', FillPortions="1", Height="36", Size="10", Color=GREY, Wrap="true"),
+    ], 44, align="LayoutAlignItems.Center"),
+] + [grid(*g) for g in GRIDS], variant="AutoLayout")
+
+admin_screen = ctl("ScreenContainer3", "GroupContainer@1.5.0", {
+    "Fill": "RGBA(245, 245, 245, 1)", "Height": "Parent.Height", "Width": "Parent.Width",
+    "LayoutAlignItems": "LayoutAlignItems.Stretch", "LayoutDirection": "LayoutDirection.Vertical",
+    "LayoutGap": "16", "PaddingBottom": "16", "PaddingLeft": "16", "PaddingRight": "16", "PaddingTop": "16",
+}, [
+    header(3, "OneRecord | Rules", "Rules"),
+    label("lblNotMDM", '"Only the MDM team can change the rules."', Visible="!IsMDM", FillPortions="0", Height="40",
+          Size="12", Color=GREY),
+    admin_body,
+], variant="AutoLayout")
+
+admin_yaml = HEADER + "\n".join([
+    "Screens:", "  AdminScreen:", "    Properties:",
+    "      Fill: =RGBA(245, 245, 245, 1)", "      LoadingSpinnerColor: =RGBA(0, 120, 212, 1)",
+    "    Children:",
+] + admin_screen(6)) + "\n"
+
+(SRC / "NewRequestScreen.pa.yaml").write_text(screen_yaml)
 (SRC / "MyRequestsScreen.pa.yaml").write_text(mine_yaml)
+(SRC / "AdminScreen.pa.yaml").write_text(admin_yaml)
 (SRC / "App.pa.yaml").write_text(app_yaml)
-(SRC / "_EditorState.pa.yaml").write_text(HEADER + "EditorState:\n  ScreensOrder:\n    - Screen1\n    - MyRequestsScreen\n")
+(SRC / "_EditorState.pa.yaml").write_text(HEADER + "EditorState:\n  ScreensOrder:\n    - NewRequestScreen\n    - MyRequestsScreen\n    - AdminScreen\n")
 
 # Paste-ready pieces for Studio: App > Formulas, and each screen's top container (Paste code)
 PASTE = SRC.parent.parent / "paste"
@@ -738,4 +1097,6 @@ PASTE.mkdir(exist_ok=True)
 (PASTE / "1-App-Formulas.txt").write_text(FORMULAS + "\n")
 (PASTE / "2-ScreenContainer1.yaml").write_text("\n".join(screen(0)) + "\n")
 (PASTE / "3-MyRequestsScreen-ScreenContainer2.yaml").write_text("\n".join(mine_screen(0)) + "\n")
-print("Screen1 controls:", screen_yaml.count("Control:"), "| MyRequestsScreen controls:", mine_yaml.count("Control:"))
+(PASTE / "4-AdminScreen-ScreenContainer3.yaml").write_text("\n".join(admin_screen(0)) + "\n")
+print("NewRequestScreen controls:", screen_yaml.count("Control:"), "| MyRequestsScreen controls:", mine_yaml.count("Control:"),
+      "| AdminScreen controls:", admin_yaml.count("Control:"))

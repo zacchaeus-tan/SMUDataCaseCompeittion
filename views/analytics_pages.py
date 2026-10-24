@@ -534,7 +534,7 @@ def business_case():
         bounce, notice, esc, hours = _inputs([
             ("Bounces avoided (%)", 50, 100, 90, 5, "Share of bounce-backs the smart form prevents"),
             ("Approver delay cut (%)", 0, 70, 50, 5, "Share of each approver's wait that was 'didn't see the email'"),
-            ("Escalate after (days)", 2, 6, 4, 1, "Business days before a stalled approval is escalated"),
+            ("Escalate after (days)", 2, 6, 4, 1, "Calendar days before a stalled approval is escalated"),
             ("Hours saved per request", 0.0, 5.0, 1.5, 0.25, "MDM and approver time saved on each request")])
         st.markdown("**Value**")
         rate, save_rate, conv, margin = _inputs([

@@ -2,12 +2,14 @@ RequestTypes = ["Customer", "Item", "Vendor", "Cost Center"];
 SelectedType = ddRequestType.Selected.Value;
 SelectedEntity = ddEntity.Selected.Code;
 
-// Field rules for the chosen request type, copied locally so the conditional checks below run in the app.
-TypeRules = ForAll(
-    Filter(RequiredFields, RequestType = SelectedType),
-    {FieldName: FieldName, DisplayLabel: DisplayLabel, Required: Required, ConditionField: ConditionField,
-      ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText}
+// All field rules, loaded once (about 30 rows) and filtered in the app. Filtering in the SharePoint query
+// left the form empty on first load: the query ran before the Request type dropdown had its default.
+FieldRules = ForAll(
+    RequiredFields,
+    {RequestType: RequestType, FieldName: FieldName, DisplayLabel: DisplayLabel, Required: Required,
+      ConditionField: ConditionField, ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText}
 );
+TypeRules = Filter(FieldRules, RequestType = SelectedType);
 
 // What the requestor has entered so far, keyed by the FieldName used in the RequiredFields list.
 FieldValues = Table(
@@ -176,7 +178,7 @@ SelectedLog = With(
     {id: SelectedRequestID},
     ForAll(
         Filter(ApprovalLog, RequestID = id),
-        {Role: ActorRole, Action: Action, Actor: Lower(Actor), At: Timestamp}
+        {Role: ActorRole, Action: Action, Actor: Lower(Actor), Who: Actor, Detail: Detail, At: Timestamp}
     )
 );
 // Still waiting: an Assigned row with no Approve/Reject from the same role yet
@@ -195,6 +197,22 @@ WaitingText = If(
             LookUp(RolesRows, Email = w.Actor).Name,
             w.Actor
         ) & " (waiting " & DateDiff(w.At, Now(), TimeUnit.Days) & " days)",
+        Char(10)
+    )
+);
+// Everything logged for the request, oldest first. The log never holds sensitive values.
+TimelineText = If(
+    CountRows(SelectedLog) = 0, "Nothing logged yet.",
+    Concat(
+        Sort(SelectedLog, At, SortOrder.Ascending) As e,
+        Text(e.At, "dd mmm yyyy hh:mm") & "  |  " & e.Action & "  |  " &
+        If(IsBlank(e.Role) || e.Role = "System", "", e.Role & " - ") &
+        Coalesce(
+            LookUp(RolesRows, Email = e.Actor && Role = e.Role).Name,
+            LookUp(RolesRows, Email = e.Actor).Name,
+            e.Who
+        ) &
+        If(IsBlank(e.Detail), "", "  |  " & e.Detail),
         Char(10)
     )
 );
@@ -249,5 +267,55 @@ SensitiveText = If(
             !IsBlank(V)
         ),
         L & ": " & V, Char(10)
+    )
+);
+
+// ---- Who will approve: the same rules the Route and approve flow reads (RoutingRules + Roles)
+RuleRows = ForAll(
+    RoutingRules,
+    {RequestType: RequestType, Entity: Entity, ConditionField: ConditionField, Role: ApproverRole,
+     Stage: Stage, Active: Active}
+);
+// Like the flow: the first Roles row for the role and entity (or Any); no "@" in its email = nobody set up.
+ApproverPreview = ForAll(
+    Filter(RuleRows As x,
+        x.Active && (x.RequestType = SelectedType || x.RequestType = "Any") &&
+        (x.Entity = SelectedEntity || x.Entity = "Any") &&
+        (IsBlank(x.ConditionField) ||
+         (x.ConditionField = "IsRegulated" && SelectedType = "Item" && tglIsRegulated.Value) ||
+         (x.ConditionField = "SuppliesRegulatedGoods" && SelectedType = "Vendor" && tglSuppliesRegulatedGoods.Value))
+    ) As r,
+    With(
+        {p:LookUp(RolesRows, Role = r.Role && (Entity = SelectedEntity || Entity = "Any"))},
+        {Stage: r.Stage, Role: r.Role, Person: Coalesce(p.Name, p.Email), Ok: "@" in p.Email}
+    )
+);
+ApproverGap = CountRows(Filter(ApproverPreview, !Ok)) > 0;
+ApproverText = If(
+    IsBlank(SelectedEntity), "Choose a business entity to see who will approve.",
+    CountRows(ApproverPreview) = 0, "No approval steps are set up for this request type.",
+    With(
+        {s1: Filter(ApproverPreview, Stage < 1.5), s2: Filter(ApproverPreview, Stage >= 1.5),
+         gaps: Filter(ApproverPreview, !Ok)},
+        Concat(s1, Role & " (" & If(Ok, Person, "nobody set up") & ")", ", ") &
+        If(CountRows(s1) > 1, ", all at the same time", "") &
+        If(CountRows(s1) > 0 && CountRows(s2) > 0, "; then ", "") &
+        Concat(s2, Role & " (" & If(Ok, Person, "nobody set up") & ")", ", ") & "." &
+        If(CountRows(gaps) > 0,
+            " No " & Concat(gaps, Role, " or ") & " is set up for " & SelectedEntity &
+            ", so the MDM team approves in their place.",
+            "")
+    )
+);
+
+// ---- Rules screen (MDM): approval steps that some active business unit has nobody for
+RuleGapText = Concat(
+    Filter(BusinessUnits, Active = true) As b,
+    Concat(
+        Filter(
+            Distinct(Filter(RuleRows As x, x.Active && (x.Entity = b.Title || x.Entity = "Any")), Role) As r,
+            !("@" in LookUp(RolesRows, Role = r.Value && (Entity = b.Title || Entity = "Any")).Email)
+        ) As g,
+        b.Title & ": nobody set up as " & g.Value & Char(10)
     )
 );

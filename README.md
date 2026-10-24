@@ -43,13 +43,13 @@ The Streamlit app remains the place for the regional business view and forecasti
 
 | Brief asks for | How the M365 build does it |
 |---|---|
-| A standard intake for Customer, Item, Vendor and Cost Center requests | **Power App "NewRequestForm"**, *New request* screen. It shows only the fields that apply. Labels, help text and required/conditional rules come from the **RequiredFields** list (e.g. *Regulatory licence no.* appears when an item is regulated). **Submit** stays disabled until the request is complete. |
+| A standard intake for Customer, Item, Vendor and Cost Center requests | **Power App "NewRequestForm"**, *New request* screen. It shows only the fields that apply. Labels, help text and required/conditional rules come from the **RequiredFields** list (e.g. *Regulatory licence no.* appears when an item is regulated). **Submit** stays disabled until the request is complete. A *Who will approve* card shows the approvers by name before submitting, read from the same **RoutingRules** and **Roles** the flow uses, and says when a step has nobody set up. |
 | No duplicates reaching an approver | Live checks while typing. **Customer:** same registration no. or a known alias blocks; all main words of the name in the same country warns. **Item:** same manufacturer part no. blocks; similar description (any entity) warns. **Vendor:** same tax ID blocks. **Cost Center:** an existing cost centre for that entity + department blocks. A warning can be overridden with an explicit "this is a different …" switch. |
 | Faster approvals | **Flow "OneRecord - Route and approve"**. It reads **RoutingRules** and **Roles** and sends every stage-1 check **in parallel** as an approval card in Teams/Outlook. Conditional rules (e.g. Quality/Regulatory only for regulated items) come from the list. The MDM Analyst approves last. |
-| Requestors and approvers know where a request stands | Approvers get cards plus **"OneRecord - Reminders and escalation"**: a reminder at 9 AM in the approver's own time zone once `SLADays` pass, escalation to `EscalateTo` after `EscalateAfterDays`. Requestors get Teams messages on rejection or completion. The app's **My requests** screen shows status, stage, days open, **who it is still waiting on**, the submitted details and (permissions allowing) the sensitive details. The MDM team can switch to all requests. |
+| Requestors and approvers know where a request stands | Approvers get cards plus **"OneRecord - Reminders and escalation"**: a reminder at 9 AM in the approver's own time zone once `SLADays` pass, escalation to `EscalateTo` after `EscalateAfterDays`. Requestors get Teams messages on rejection or completion. The app's **My requests** screen shows status, stage, days open, **who it is still waiting on**, a **timeline** of everything logged for the request, the submitted details and (permissions allowing) the sensitive details. The MDM team can switch to all requests. |
 | A trustworthy record of who approved what | **ApprovalLog** list: every assignment, decision, reminder, escalation, routing gap and SAP file is a row. Team members have **read-only** access; only the flows (running as the owner) write to it. Sensitive values are never logged. |
 | Protecting sensitive fields | Bank details and credit terms are saved to **SensitiveDetails**, separate from the request. Item-level permissions let requestors read only their own rows; Finance and MDM have Design access to read all. Approval cards for roles allowed to see them (from **RequiredFields → VisibleToRoles**) carry a **link** to the row, never the values, so nothing sensitive goes into Teams or email. |
-| Changing rules, fields and approvers without IT | Edit list rows. A new business unit is a **BusinessUnits** row plus its people in **Roles**. A new approval step is a **RoutingRules** row. Making a field required or conditional is a **RequiredFields** row. If a business unit has no approver for a step yet (Marcus's story), the request goes to the MDM Analyst instead of stalling. MDM is told in Teams, and the gap is logged and shown on the request. |
+| Changing rules, fields and approvers without IT | The app's **Rules** screen (MDM only) puts every rule in one place: a *rules check* that lists any business unit with nobody set up for an approval step, an **Add a business unit** form (creates the BU and its BU Head in one step), and editable tables for business units, approval steps, form fields, people and known names. New rows start switched off or blank, so a half-finished row can't change routing. Under the hood these are list rows: A new business unit is a **BusinessUnits** row plus its people in **Roles**. A new approval step is a **RoutingRules** row. Making a field required or conditional is a **RequiredFields** row. If a business unit has no approver for a step yet (Marcus's story), the request goes to the MDM Analyst instead of stalling. MDM is told in Teams, and the gap is logged and shown on the request. |
 | Getting the record into SAP B1 | After MDM approval, the flow writes a **SAP Data Transfer Workbench** file (tab-delimited `.txt` with DTW's two header rows) to `SAP_Imports`, which only Owners can open. The file is one per request and per object: BusinessPartners, Items or ProfitCenters. The flow proposes the SAP code (e.g. `C20007`), writes it to the request, and tells the requestor. |
 
 ### Tested end to end (synthetic data, on our tenant)
@@ -72,7 +72,8 @@ Power App (New request)  ──writes──▶  Requests + SensitiveDetails (Sha
         ├── CustomerMaster, Aliases            ├─ reads RoutingRules, Roles, RequiredFields
         ├── ItemMaster, VendorMaster           ├─ stage 1: parallel approvals (Teams/Outlook) ─┐
         ├── CostCentres                        ├─ stage 2: MDM Analyst                         ├─▶ ApprovalLog
-        └── (My requests) Roles, ApprovalLog   └─ SAP DTW file → SAP_Imports, status, Teams    ┘
+        ├── (My requests) Roles, ApprovalLog   └─ SAP DTW file → SAP_Imports, status, Teams    ┘
+        └── (Rules, MDM) edits RoutingRules, Roles, RequiredFields, BusinessUnits, Aliases
                                             Flow: Reminders and escalation (hourly, 9 AM local) ─▶ ApprovalLog
 ```
 
@@ -99,11 +100,12 @@ The app and flows are generated from code in this repo. Rebuilding takes about a
    - Create a `SAP_Imports` folder in Documents, stop inheriting permissions, and remove Members and Visitors.
 3. **Power App.**
    1. Create a blank tablet canvas app and add these SharePoint lists as data: Requests, SensitiveDetails,
-      RequiredFields, BusinessUnits, CustomerMaster, ItemMaster, Aliases, VendorMaster, CostCentres, Roles and ApprovalLog.
-   2. Add a blank screen named `MyRequestsScreen`.
-   3. Run `python3 powerapps/gen_form.py powerapps/NewRequestForm/Src`, then paste the three files in `powerapps/paste/`:
-      `1-App-Formulas.txt` into **App → Formulas**, `2-ScreenContainer1.yaml` onto **Screen1 → Paste code**, and
-      `3-MyRequestsScreen-ScreenContainer2.yaml` onto **MyRequestsScreen → Paste code**.
+      RequiredFields, BusinessUnits, CustomerMaster, ItemMaster, Aliases, VendorMaster, CostCentres, Roles, RoutingRules and ApprovalLog.
+   2. Add two blank screens named `MyRequestsScreen` and `AdminScreen`.
+   3. Run `python3 powerapps/gen_form.py powerapps/NewRequestForm/Src`, then paste the four files in `powerapps/paste/`:
+      `1-App-Formulas.txt` into **App → Formulas**, `2-ScreenContainer1.yaml` onto **NewRequestScreen → Paste code**,
+      `3-MyRequestsScreen-ScreenContainer2.yaml` onto **MyRequestsScreen → Paste code**, and
+      `4-AdminScreen-ScreenContainer3.yaml` onto **AdminScreen → Paste code**.
    4. Save and publish.
 4. **Flows.**
    1. In `powerautomate/pkg.py`, set `SITE` to your site URL and `LISTS` to your list IDs. The ID is the `List=` value in each list's settings URL.
@@ -116,6 +118,7 @@ The app and flows are generated from code in this repo. Rebuilding takes about a
 
 - A rejection reaches the requestor only after **all** stage-1 approvers have answered, because the flow waits for the whole parallel step.
 - Conditional routing understands two conditions (`IsRegulated`, `SuppliesRegulatedGoods`). A new kind of condition needs a flow change.
+- The Rules screen is hidden from everyone but the MDM Analyst in **Roles**, but that is display only. To stop others editing the rule lists directly in SharePoint, give Members **Read** on them.
 - RequiredFields can show, hide or require fields the app already has. A brand-new field needs an app change (one line in `gen_form.py`).
 - The SAP file carries segment and payment terms as text ("Clinic", "45 days"). Real SAP uses numeric codes, so MDM would map them once.
 - Duplicate checks are rule-based, so a misspelt name only gets a warning if all its main words still match. The bulk matcher
