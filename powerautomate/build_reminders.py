@@ -4,8 +4,11 @@ Usage: python3 powerautomate/build_reminders.py
   -> OneRecord-Reminders.zip         hourly; messages each approver at 9 AM in their own time zone (Roles.TimeZone)
   -> OneRecord-Reminders-SendNow.zip  run by hand (for demos); skips the 9 AM check
 
-An approval is open when ApprovalLog has an "Assigned" row (written by the Route and approve flow) and no
-Approve/Reject row for the same request and role. Days are calendar days since the Assigned row.
+An approval is open when ApprovalLog has an "Assigned" row (written by the Route and approve flow) that has no
+decision yet. An approver can be asked again after "Request changes", so each Assigned row says its round
+("Stage 1, round 2"): round N is open while the role has N - 1 decisions (Approve / Reject / Request changes) on
+that request. An approver who asked for changes is therefore not chased while the requestor edits.
+Days are calendar days since the Assigned row.
   * days >= EscalateAfterDays (and the role has an EscalateTo): message EscalateTo, log "Escalated"
   * otherwise days >= SLADays: remind the approver, log "Reminder sent"
 SLADays / EscalateAfterDays come from the matching RoutingRules row; a blank EscalateAfterDays never escalates.
@@ -40,22 +43,26 @@ def build(at_9am_only):
     actions["Get_assigned"] = sp("GetItems", "ApprovalLog",
                                  **{"$filter": f"{LOG['Action']} eq 'Assigned'", "$top": 5000})
     actions["Get_decisions"] = after(sp("GetItems", "ApprovalLog", **{
-        "$filter": f"{LOG['Action']} eq 'Approve' or {LOG['Action']} eq 'Reject'", "$top": 5000}), "Get_assigned")
+        "$filter": f"{LOG['Action']} eq 'Approve' or {LOG['Action']} eq 'Reject' or {LOG['Action']} eq 'Request changes'",
+        "$top": 5000}), "Get_assigned")
     actions["Get_requests"] = after(sp("GetItems", "Requests", **{"$top": 5000}), "Get_decisions")
     actions["Get_routing_rules"] = after(sp("GetItems", "RoutingRules"), "Get_requests")
     actions["Get_roles"] = after(sp("GetItems", "Roles"), "Get_routing_rules")
     actions["Time_zone_map"] = after({"type": "Compose", "inputs": TIME_ZONES}, "Get_roles")
-    # "|REQ-0004|Finance|" for every approval that already has a decision
+    # "|REQ-0004|Finance|" once per decision, so counting a key gives that role's number of decisions
     actions["Decided_keys_list"] = after({"type": "Select", "inputs": {
         "from": "@outputs('Get_decisions')?['body/value']",
         "select": f"@concat('|', item()?['{LOG['RequestID']}'], '|', item()?['{LOG['ActorRole']}'], '|')"}},
         "Time_zone_map")
     actions["Decided_keys"] = after({"type": "Compose", "inputs": "@join(body('Decided_keys_list'), '')"},
                                     "Decided_keys_list")
+    key = f"concat('|', item()?['{LOG['RequestID']}'], '|', item()?['{LOG['ActorRole']}'], '|')"
+    decisions = f"sub(length(split(outputs('Decided_keys'), {key})), 1)"
+    detail = f"coalesce(item()?['{LOG['Detail']}'], '')"
+    round_no = f"if(contains({detail}, 'round '), int(last(split({detail}, 'round '))), 1)"
     actions["Open_approvals"] = after({"type": "Query", "inputs": {
         "from": "@outputs('Get_assigned')?['body/value']",
-        "where": f"@not(contains(outputs('Decided_keys'), concat('|', item()?['{LOG['RequestID']}'], '|', "
-                 f"item()?['{LOG['ActorRole']}'], '|')))"}}, "Decided_keys")
+        "where": f"@equals({decisions}, sub({round_no}, 1))"}}, "Decided_keys")
 
     inner = {}
     inner["Find_request"] = {"type": "Query", "runAfter": {}, "inputs": {

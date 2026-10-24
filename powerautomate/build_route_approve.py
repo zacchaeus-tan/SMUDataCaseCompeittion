@@ -31,10 +31,28 @@ def teams_to_requestor(message, *prev):
 NAME_EXPR = f"coalesce({t('CustomerName')}, {t('ItemDescription')}, {t('VendorName')}, {t('CostCenterName')})"
 
 
+QA_ROLE = "Quality/Regulatory"
+RESPONSES = ["Approve", "Request changes", "Reject"]
+WAIT_FOR_EDIT = "P14D"  # how long a sent-back request waits for the requestor before it is closed
+
+
+def short(expr, n=240):
+    """Text cut to fit a single-line SharePoint column (255 characters)."""
+    text = f"string(coalesce({expr}, ''))"
+    return f"substring({text}, 0, min({n}, length({text})))"
+
+
 def stage_loop(stage):
-    """Filter the active rules for this stage, then one parallel approval per rule."""
+    """Filter the active rules for this stage, then one parallel approval per rule.
+
+    Each approval runs in rounds: an approver can Approve, Reject or Request changes. Request changes sends the
+    request back to the requestor (status "Changes requested"), waits until they resubmit it from the app, then asks
+    the same approver again. The other approvers carry on meanwhile; the MDM card shows what changed.
+    """
     loop = f"Stage_{stage}_approvals"
     approval = f"Stage_{stage}_approval"
+    rnd = f"Review_round_{stage}"
+    latest = f"Get_latest_{stage}"
     stage_test = (f"less(item()?['{RULE['Stage']}'], 1.5)" if stage == 1
                   else f"greater(item()?['{RULE['Stage']}'], 1.5)")
     where = (
@@ -47,6 +65,15 @@ def stage_loop(stage):
     )
     role = f"items('{loop}')?['{RULE['ApproverRole']}']"
     first_resp = f"first(outputs('{approval}')?['body/responses'])"
+    comments = f"{first_resp}?['comments']"
+    outcome = f"outputs('{approval}')?['body/outcome']"
+    round_no = f"add(iterationIndexes('{rnd}'), 1)"
+
+    def cur(col):
+        """The request as it is now (it may have been edited since it was submitted)."""
+        return f"outputs('{latest}')?['body/{REQ[col]}']"
+
+    name_now = f"coalesce({cur('CustomerName')}, {cur('ItemDescription')}, {cur('VendorName')}, {cur('CostCenterName')})"
     # Routing gap: no Roles row, a blank email or a placeholder (no "@") -> the MDM Analyst approves on the
     # missing role's behalf, gets a Teams nudge to fix Roles, and the gap is logged and shown on the request.
     routing = f"Stage_{stage}_routing"
@@ -56,6 +83,127 @@ def stage_loop(stage):
     approver_email = f"@{{outputs('{routing}')?['email']}}"
     gap = f"outputs('{routing}')?['gap']"
     entity = t('Entity')
+    status_now = lambda action: f"outputs('{action}')?['body/{REQ['Status']}']"
+
+    poll = f"Poll_request_{stage}"
+    sent_back = {
+        f"Mark_changes_requested_{stage}": update_request(
+            [], Status="Changes requested",
+            CurrentStage=f"@{{{short(f'concat({role}, {chr(39)} asked for changes: {chr(39)}, coalesce({comments}, {chr(39)}(no comment){chr(39)}))')}}}"),
+        f"Tell_requestor_changes_{stage}": teams_to_requestor(
+            f"@{{{role}}} asked for changes on your request @{{triggerBody()?['Title']}}: "
+            f"@{{coalesce({comments}, '(no comment)')}}. Open OneRecord, go to My requests, select the request and "
+            f"press Edit and resubmit.", f"Mark_changes_requested_{stage}"),
+        # Poll every 5 minutes until the requestor resubmits (the app sets Status = "Resubmitted")
+        f"Wait_for_resubmit_{stage}": after({
+            "type": "Until", "expression": f"@not(equals({status_now(poll)}, 'Changes requested'))",
+            "limit": {"count": 5000, "timeout": WAIT_FOR_EDIT},
+            "actions": {
+                f"Wait_5_minutes_{stage}": {"type": "Wait", "runAfter": {},
+                                            "inputs": {"interval": {"count": 5, "unit": "Minute"}}},
+                poll: after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"), f"Wait_5_minutes_{stage}"),
+            }}, f"Tell_requestor_changes_{stage}"),
+    }
+    last_change = f"last(split(coalesce(outputs('{poll}')?['body/{REQ['ChangeNote']}'], ''), decodeUriComponent('%0A')))"
+    no_reply = {
+        f"Close_no_response_{stage}": update_request(
+            [], Status="Rejected",
+            CurrentStage=f"Closed: no changes within 14 days of the @{{{role}}} request"),
+        f"Log_no_response_{stage}": after(log_row(
+            "@triggerBody()?['Title']", "OneRecord", "System", "Closed",
+            f"No resubmit within 14 days of the @{{{role}}} request for changes"), f"Close_no_response_{stage}"),
+        f"Tell_requestor_closed_{stage}": teams_to_requestor(
+            f"Your request @{{triggerBody()?['Title']}} was closed because it wasn't resubmitted within 14 days of "
+            f"the @{{{role}}} request for changes. Submit a new request when you have the details.",
+            f"Log_no_response_{stage}"),
+    }
+    sent_back[f"After_wait_{stage}"] = {
+        **condition(f"equals({status_now(poll)}, 'Resubmitted')", {
+            f"Log_resubmitted_{stage}": log_row(
+                "@triggerBody()?['Title']", "@{triggerBody()?['Author']?['Email']}", "Requestor", "Resubmitted",
+                f"@{{{short(last_change)}}}"),
+            f"Back_to_pending_{stage}": update_request(
+                [f"Log_resubmitted_{stage}"], Status="Pending approval",
+                CurrentStage=f"Resubmitted; back with @{{{role}}}"),
+        }, {f"If_no_response_{stage}": condition(f"equals({status_now(poll)}, 'Changes requested')", no_reply)}),
+        "runAfter": {f"Wait_for_resubmit_{stage}": ["Succeeded", "Failed", "TimedOut"]},
+    }
+
+    round_actions = {
+        latest: sp("GetItem", "Requests", id="@triggerBody()?['ID']"),
+        f"Log_stage_{stage}_assigned": after(log_row(
+            "@triggerBody()?['Title']", approver_email, f"@{{{role}}}", "Assigned",
+            f"Stage {stage}, round @{{{round_no}}}"), latest),
+        approval: after({"type": "OpenApiConnectionWebhook", "inputs": {
+            "parameters": {
+                "approvalType": "CustomResponse",  # exact value from Peek code in the tenant
+                "WebhookApprovalCreationInput/responseOptions": RESPONSES,
+                "WebhookApprovalCreationInput/title":
+                    f"@{{triggerBody()?['Title']}}: @{{{t('RequestType')}}} request for @{{{t('Entity')}}} "
+                    f"(@{{{role}}} check)@{{if(greater({round_no}, 1), concat(' - round ', string({round_no})), '')}}",
+                "WebhookApprovalCreationInput/assignedTo": approver_email,
+                "WebhookApprovalCreationInput/details": (
+                    f"**Requested by:** @{{{t('Requestor')}}}\n\n"
+                    f"**Name:** @{{{name_now}}}\n\n"
+                    f"**Country:** @{{{cur('Country')}}}\n\n"
+                    f"**Duplicate check:** @{{{cur('DuplicateCheck')}}} @{{{cur('PossibleMatchID')}}}\n\n"
+                    f"**Your check:** @{{{role}}} (stage {stage})\n\n"
+                    f"@{{if(equals({t('RequestType')}, 'Item'), concat('**Regulated (requestor answer):** ', "
+                    f"coalesce({cur('RegulatedAnswer')}, if(equals({cur('IsRegulated')}, true), 'Yes', 'No'))), '')}}\n\n"
+                    f"@{{if(and(equals({role}, '{QA_ROLE}'), equals({cur('RegulatedAnswer')}, 'Not sure')), "
+                    f"'**The requestor was not sure whether this item is regulated, so you decide.** Approve = not "
+                    f"regulated (it is recorded as No). If it is regulated, choose Request changes and ask for the "
+                    f"licence no.', '')}}\n\n"
+                    f"@{{if(empty({cur('ChangeNote')}), '', concat('**Changed after an approver asked:** ', "
+                    f"{cur('ChangeNote')}))}}\n\n"
+                    f"If something is missing or wrong, choose **Request changes** and say what: it goes back to the "
+                    f"requestor and returns to you when fixed.\n\n"
+                    f"@{{if({gap}, concat('**Note:** No ', {role}, ' is set up for ', {entity}, "
+                    f"' in Roles, so this came to MDM. Your decision counts for the ', {role}, ' step.'), '')}}\n\n"
+                    f"@{{if(and(contains(outputs('Sensitive_roles'), concat(';', {role}, ';')), "
+                    f"not(empty(outputs('Sensitive_link')))), concat('**Payment & bank details:** "
+                    f"[View in the restricted SensitiveDetails list](', outputs('Sensitive_link'), ')'), '')}}"),
+                "WebhookApprovalCreationInput/itemLink": "@{triggerBody()?['{Link}']}",
+                "WebhookApprovalCreationInput/itemLinkDescription": "Open the request in SharePoint",
+                "WebhookApprovalCreationInput/enableNotifications": True,
+                "WebhookApprovalCreationInput/enableReassignment": True,
+            },
+            "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                     "connectionName": "shared_approvals", "operationId": "StartAndWaitForAnApproval"},
+            "authentication": "@parameters('$authentication')"}}, f"Log_stage_{stage}_assigned"),
+        f"Log_stage_{stage}_decision": after(sp("PostItem", "ApprovalLog", **{
+            "item/Title": "@triggerBody()?['Title']",
+            f"item/{LOG['RequestID']}": "@triggerBody()?['Title']",
+            f"item/{LOG['Timestamp']}": "@utcNow()",
+            f"item/{LOG['Actor']}": f"@{{{first_resp}?['responder/displayName']}}",
+            f"item/{LOG['ActorRole']}": f"@{{{role}}}",
+            f"item/{LOG['Action']}": f"@{{{outcome}}}",
+            f"item/{LOG['Detail']}": f"@{{{short(f'concat({chr(39)}Stage {stage}, round {chr(39)}, string({round_no}), {chr(39)}. {chr(39)}, coalesce({comments}, {chr(39)}{chr(39)}))')}}}",
+        }), approval),
+        # A rejection reaches the requestor straight away, not after every parallel approver has answered
+        f"If_stage_{stage}_rejected": after(condition(f"equals({outcome}, 'Reject')", {
+            f"Mark_rejected_stage_{stage}": update_request(
+                [], Status="Rejected", CurrentStage=f"Rejected at @{{{role}}} check (stage {stage})"),
+            f"Tell_requestor_rejected_{stage}": teams_to_requestor(
+                f"Your request @{{triggerBody()?['Title']}} was rejected by @{{{role}}}: "
+                f"@{{coalesce({comments}, '(no comment)')}}", f"Mark_rejected_stage_{stage}"),
+        }), f"Log_stage_{stage}_decision"),
+        # "Not sure" items: Quality/Regulatory approving means "not regulated", so record that
+        f"If_stage_{stage}_regulated_decided": after(condition(
+            f"and(equals({outcome}, 'Approve'), equals({role}, '{QA_ROLE}'), equals({cur('RegulatedAnswer')}, 'Not sure'))", {
+                f"Record_not_regulated_{stage}": update_request(
+                    [], IsRegulated=False, RegulatedAnswer="No (decided by Quality/Regulatory)"),
+                f"Log_not_regulated_{stage}": after(log_row(
+                    "@triggerBody()?['Title']", "OneRecord", "System", "Regulated decided",
+                    f"Requestor was not sure; @{{{first_resp}?['responder/displayName']}} ({QA_ROLE}) approved, "
+                    f"so it is recorded as not regulated"), f"Record_not_regulated_{stage}"),
+            }), f"If_stage_{stage}_rejected"),
+        f"If_stage_{stage}_changes_requested": after(condition(f"equals({outcome}, 'Request changes')", sent_back),
+                                                     f"If_stage_{stage}_regulated_decided"),
+        f"Round_end_{stage}": after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"),
+                                    f"If_stage_{stage}_changes_requested"),
+    }
+
     inner = {
         f"Find_stage_{stage}_approver": {"type": "Query", "runAfter": {}, "inputs": {
             "from": "@outputs('Get_roles')?['body/value']",
@@ -80,50 +228,12 @@ def stage_loop(stage):
                 [f"Log_routing_gap_{stage}"],
                 CurrentStage=f"@{{{role}}} missing for @{{{entity}}} in Roles; sent to MDM"),
         }), routing),
-        f"Log_stage_{stage}_assigned": after(log_row(
-            "@triggerBody()?['Title']", approver_email, f"@{{{role}}}", "Assigned", f"Stage {stage}"),
-            f"If_stage_{stage}_routing_gap"),
-        approval: after({"type": "OpenApiConnectionWebhook", "inputs": {
-            "parameters": {
-                "approvalType": "Basic",
-                "WebhookApprovalCreationInput/title":
-                    f"@{{triggerBody()?['Title']}}: @{{{t('RequestType')}}} request for @{{{t('Entity')}}} (@{{{role}}} check)",
-                "WebhookApprovalCreationInput/assignedTo": approver_email,
-                "WebhookApprovalCreationInput/details": (
-                    f"**Requested by:** @{{{t('Requestor')}}}\n\n"
-                    f"**Name:** @{{{NAME_EXPR}}}\n\n"
-                    f"**Country:** @{{{t('Country')}}}\n\n"
-                    f"**Duplicate check:** @{{{t('DuplicateCheck')}}} @{{{t('PossibleMatchID')}}}\n\n"
-                    f"**Your check:** @{{{role}}} (stage {stage})\n\n"
-                    f"@{{if({gap}, concat('**Note:** No ', {role}, ' is set up for ', {entity}, "
-                    f"' in Roles, so this came to MDM. Your decision counts for the ', {role}, ' step.'), '')}}\n\n"
-                    f"@{{if(and(contains(outputs('Sensitive_roles'), concat(';', {role}, ';')), "
-                    f"not(empty(outputs('Sensitive_link')))), concat('**Payment & bank details:** "
-                    f"[View in the restricted SensitiveDetails list](', outputs('Sensitive_link'), ')'), '')}}"),
-                "WebhookApprovalCreationInput/itemLink": "@{triggerBody()?['{Link}']}",
-                "WebhookApprovalCreationInput/itemLinkDescription": "Open the request in SharePoint",
-                "WebhookApprovalCreationInput/enableNotifications": True,
-                "WebhookApprovalCreationInput/enableReassignment": True,
-            },
-            "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
-                     "connectionName": "shared_approvals", "operationId": "StartAndWaitForAnApproval"},
-            "authentication": "@parameters('$authentication')"}}, f"Log_stage_{stage}_assigned"),
-        f"Log_stage_{stage}_decision": after(sp("PostItem", "ApprovalLog", **{
-            "item/Title": "@triggerBody()?['Title']",
-            f"item/{LOG['RequestID']}": "@triggerBody()?['Title']",
-            f"item/{LOG['Timestamp']}": "@utcNow()",
-            f"item/{LOG['Actor']}": f"@{{{first_resp}?['responder/displayName']}}",
-            f"item/{LOG['ActorRole']}": f"@{{{role}}}",
-            f"item/{LOG['Action']}": f"@{{outputs('{approval}')?['body/outcome']}}",
-            f"item/{LOG['Detail']}": f"Stage {stage}. @{{{first_resp}?['comments']}}",
-        }), approval),
-        f"If_stage_{stage}_rejected": after({
-            "type": "If",
-            "expression": {"and": [{"equals": [f"@outputs('{approval}')?['body/outcome']", "Reject"]}]},
-            "actions": {f"Mark_rejected_stage_{stage}": update_request(
-                [], Status="Rejected", CurrentStage=f"Rejected at @{{{role}}} check (stage {stage})")},
-            "else": {"actions": {}},
-        }, f"Log_stage_{stage}_decision"),
+        # Ask again after each resubmit; stop on Approve / Reject, or when the request has been closed
+        rnd: after({"type": "Until",
+                    "expression": f"@or(not(equals({outcome}, 'Request changes')), "
+                                  f"equals({status_now(f'Round_end_{stage}')}, 'Rejected'))",
+                    "limit": {"count": 10, "timeout": "P30D"}, "actions": round_actions},
+                   f"If_stage_{stage}_routing_gap"),
     }
     return {
         f"Filter_stage_{stage}_rules": {"type": "Query", "runAfter": {}, "inputs": {
@@ -134,19 +244,15 @@ def stage_loop(stage):
 
 
 def rejected_gate(stage, prev):
-    """After a stage: re-read the request; if any approver rejected, tell the requestor and stop."""
+    """After a stage: re-read the request; if it was rejected or closed, stop (the requestor was already told)."""
     check = f"Check_after_stage_{stage}"
     return {
         check: after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"), prev),
         f"If_rejected_after_stage_{stage}": after({
             "type": "If",
             "expression": {"and": [{"equals": [f"@outputs('{check}')?['body/{REQ['Status']}']", "Rejected"]}]},
-            "actions": {
-                f"Tell_requestor_rejected_{stage}": teams_to_requestor(
-                    "Your request @{triggerBody()?['Title']} was rejected. Open the Approvals app in Teams to see who rejected it and why."),
-                f"Stop_after_stage_{stage}": after({"type": "Terminate", "inputs": {"runStatus": "Succeeded"}},
-                                                   f"Tell_requestor_rejected_{stage}"),
-            },
+            "actions": {f"Stop_after_stage_{stage}": {"type": "Terminate", "runAfter": {},
+                                                      "inputs": {"runStatus": "Succeeded"}}},
             "else": {"actions": {}},
         }, check),
     }
@@ -193,6 +299,13 @@ actions.update(rejected_gate(2, "Stage_2_approvals"))
 # row. The flow proposes the SAP code from the request number, so it is unique and never clashes with existing
 # codes (C1..., V2..., A-1...). Segment / payment terms go in as text; real SAP uses numeric codes (MDM maps them).
 TAB, CRLF = "decodeUriComponent('%09')", "decodeUriComponent('%0D%0A')"
+
+
+def t(col):  # noqa: F811 - from here on, values come from the request as approved
+    """The approved request (re-read after stage 2), so edits made after a Request changes are included."""
+    return f"outputs('Check_after_stage_2')?['body/{REQ[col]}']"
+
+
 sens = "first(outputs('Get_sensitive_item')?['body/value'])"
 rid = "triggerBody()?['Title']"
 req_no = "triggerBody()?['ID']"
@@ -240,7 +353,7 @@ DTW = {
         ("ItemName", "ItemName", txt(t("ItemDescription"))),
         ("ItemsGroupCode", "ItmsGrpCod", txt(t("ProductFamily"))),
         ("InventoryUOM", "InvntryUom", txt(t("UnitOfMeasure"))),
-        ("SupplierCatalogNo", "SuppCatNum", txt("triggerBody()?['ManufacturerPartNo']")),
+        ("SupplierCatalogNo", "SuppCatNum", txt(t("ManufacturerPartNo"))),
         ("U_HSCode", "U_HSCode", txt(t("HSCode"))), ("U_Regulated", "U_Regulated", yes_no(t("IsRegulated"))),
         ("U_LicenceNo", "U_LicenceNo", txt(t("RegulatoryLicenceNo"))),
         ("U_ShelfLifeMonths", "U_ShelfLifeMonths", txt(t("ShelfLifeMonths"))),

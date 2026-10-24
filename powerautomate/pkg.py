@@ -17,6 +17,13 @@ LISTS = {  # list GUIDs on the team site
     "ApprovalLog": "0420543c-3d28-47c5-9218-2e31486b0932",
     "RequiredFields": "6d7f2d26-8be0-409f-8a85-fbc141d462b1",
 }
+# The request form's web link (Power Apps > the app > ... > Details > Web link). The email auto-reply sends it.
+APP_URL = ("https://apps.powerapps.com/play/e/default-c98a79ca-5a9a-4791-a243-f06afd67464d/a/"
+           "967cb70c-0e04-409d-8b53-60f87ab250ea?tenantId=c98a79ca-5a9a-4791-a243-f06afd67464d")
+# Only staff get the auto-reply (a customer emailing a new billing address must not be sent an internal form).
+# Lives Group would use its own domain; the demo tenant's teammates are on SMU addresses.
+INTERNAL_DOMAIN = "smu.edu.sg"
+
 # SharePoint internal column names (lists were created from CSV, so columns are field_1..n in CSV order)
 REQ = {"RequestType": "field_1", "Entity": "field_2", "Country": "field_3", "Requestor": "field_4",
        "Status": "field_5", "CurrentStage": "field_6", "CompletedAt": "field_8", "CustomerName": "field_9",
@@ -26,7 +33,9 @@ REQ = {"RequestType": "field_1", "Entity": "field_2", "Country": "field_3", "Req
        "RegulatoryLicenceNo": "field_19", "ShelfLifeMonths": "field_20", "VendorName": "field_21",
        "TaxID": "field_22", "SuppliesRegulatedGoods": "field_23", "ISO13485CertNo": "field_24",
        "CostCenterName": "field_25", "Department": "field_26", "Owner": "field_27", "BudgetYear": "field_28",
-       "DuplicateCheck": "field_29", "PossibleMatchID": "field_30", "SAPCode": "field_31"}
+       "DuplicateCheck": "field_29", "PossibleMatchID": "field_30", "SAPCode": "field_31",
+       # added by hand after the CSV import, so their internal names are their display names
+       "RegulatedAnswer": "RegulatedAnswer", "ChangeNote": "ChangeNote", "ManufacturerPartNo": "ManufacturerPartNo"}
 RULE = {"RequestType": "field_1", "Entity": "field_2", "ConditionField": "field_3", "ConditionValue": "field_4",
         "ApproverRole": "field_5", "Stage": "field_6", "SLADays": "field_7", "EscalateAfterDays": "field_8",
         "Active": "field_9"}
@@ -42,6 +51,8 @@ APIS = {
         "https://static.powerapps.com/resource/ppcr/releases/v1.0.1827/1.0.1827.4913/sharepointonline/icon.png"),
     "shared_approvals": ("Approvals",
         "https://static.powerapps.com/resource/ppcr/releases/v1.0.1826/1.0.1826.4893/approvals/icon.png"),
+    "shared_office365": ("Office 365 Outlook",
+        "https://static.powerapps.com/resource/ppcr/releases/v1.0.1827/1.0.1827.4913/office365/icon.png"),
     "shared_teams": ("Microsoft Teams",
         "https://static.powerapps.com/resource/ppcr/releases/v1.0.1834/1.0.1834.5088/teams/icon.png"),
 }

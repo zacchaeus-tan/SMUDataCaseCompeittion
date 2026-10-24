@@ -1,29 +1,29 @@
-Title,RequestType,FieldName,DisplayLabel,FieldType,Required,ConditionField,ConditionValue,Sensitive,VisibleToRoles,HelpText
-Customer.CustomerName,Customer,CustomerName,Customer legal name,Text,Always,,,No,All,Exact legal name as on registration
-Customer.Country,Customer,Country,Country,Choice,Always,,,No,All,SG / MY / TH / ID / VN
-Customer.RegistrationNo,Customer,RegistrationNo,Company registration no.,Text,Always,,,No,All,UEN / SSM / tax ID
-Customer.BillingAddress,Customer,BillingAddress,Billing address,Text,Always,,,No,All,
-Customer.ContactEmail,Customer,ContactEmail,Purchasing contact email,Text,Always,,,No,All,
-Customer.Segment,Customer,Segment,Customer segment,Choice,Always,,,No,All,Hospital / Laboratory / Clinic
-Customer.PaymentTerms,Customer,PaymentTerms,Payment terms,Choice,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails
-Customer.CreditLimit,Customer,CreditLimit,Credit limit (SGD),Number,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails
-Item.ItemDescription,Item,ItemDescription,Item description,Text,Always,,,No,All,
-Item.ProductFamily,Item,ProductFamily,Product family,Choice,Always,,,No,All,A / B / C
-Item.UnitOfMeasure,Item,UnitOfMeasure,Unit of measure,Choice,Always,,,No,All,Kit / Box / Pack / Unit / Set
-Item.HSCode,Item,HSCode,HS code,Text,Always,,,No,All,Needed for import
-Item.IsRegulated,Item,IsRegulated,Is this a regulated medical device / IVD?,Yes/No,Always,,,No,All,Adds Quality/Regulatory approval if Yes
-Item.RegulatoryLicenceNo,Item,RegulatoryLicenceNo,Regulatory licence no.,Text,Conditional,IsRegulated,Yes,No,All,HSA / MDA / Thai FDA / BPOM / DAV
-Item.ShelfLifeMonths,Item,ShelfLifeMonths,Shelf life (months),Number,Conditional,ProductFamily,A,No,All,Reagents only
-Item.ManufacturerPartNo,Item,ManufacturerPartNo,Manufacturer part no.,Text,Always,,,No,All,From the supplier's catalogue or label; used to catch duplicate items
-Vendor.VendorName,Vendor,VendorName,Vendor legal name,Text,Always,,,No,All,
-Vendor.Country,Vendor,Country,Vendor country,Text,Always,,,No,All,
-Vendor.TaxID,Vendor,TaxID,Tax ID,Text,Always,,,No,All,
-Vendor.SuppliesRegulatedGoods,Vendor,SuppliesRegulatedGoods,Supplies regulated goods?,Yes/No,Always,,,No,All,Adds Quality/Regulatory approval if Yes
-Vendor.ISO13485CertNo,Vendor,ISO13485CertNo,ISO 13485 certificate no.,Text,Conditional,SuppliesRegulatedGoods,Yes,No,All,
-Vendor.BankName,Vendor,BankName,Bank name,Text,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails
-Vendor.BankAccount,Vendor,BankAccount,Bank account no.,Text,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails
-Vendor.PaymentTerms,Vendor,PaymentTerms,Payment terms,Choice,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails
-Cost Center.CostCenterName,Cost Center,CostCenterName,Cost centre name,Text,Always,,,No,All,
-Cost Center.Department,Cost Center,Department,Department,Choice,Always,,,No,All,
-Cost Center.Owner,Cost Center,Owner,Cost centre owner,Person,Always,,,No,All,
-Cost Center.BudgetYear,Cost Center,BudgetYear,Budget year,Number,Always,,,No,All,
+Title,RequestType,FieldName,DisplayLabel,FieldType,Required,ConditionField,ConditionValue,Sensitive,VisibleToRoles,HelpText,Check
+Customer.CustomerName,Customer,CustomerName,Customer legal name,Text,Always,,,No,All,Exact legal name as on registration,Text
+Customer.Country,Customer,Country,Country,Choice,Always,,,No,All,SG / MY / TH / ID / VN,
+Customer.RegistrationNo,Customer,RegistrationNo,Company registration no.,Text,Always,,,No,All,SG UEN / MY SSM / TH tax ID / ID NPWP / VN MST; checked against the country's format,RegNo
+Customer.BillingAddress,Customer,BillingAddress,Billing address,Text,Always,,,No,All,,Text
+Customer.ContactEmail,Customer,ContactEmail,Purchasing contact email,Text,Always,,,No,All,,Email
+Customer.Segment,Customer,Segment,Customer segment,Choice,Always,,,No,All,Hospital / Laboratory / Clinic,
+Customer.PaymentTerms,Customer,PaymentTerms,Payment terms,Choice,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails,
+Customer.CreditLimit,Customer,CreditLimit,Credit limit (SGD),Number,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails,
+Item.ItemDescription,Item,ItemDescription,Item description,Text,Always,,,No,All,,Text
+Item.ProductFamily,Item,ProductFamily,Product family,Choice,Always,,,No,All,A / B / C,
+Item.UnitOfMeasure,Item,UnitOfMeasure,Unit of measure,Choice,Always,,,No,All,Kit / Box / Pack / Unit / Set,
+Item.HSCode,Item,HSCode,HS code,Text,Always,,,No,All,"Needed for import; 6 to 10 digits, e.g. 3822.19.00",HSCode
+Item.IsRegulated,Item,IsRegulated,Is this a regulated medical device / IVD?,Choice,Always,,,No,All,Yes / No / Not sure. Not sure sends it to Quality/Regulatory to decide,
+Item.RegulatoryLicenceNo,Item,RegulatoryLicenceNo,Regulatory licence no.,Text,Conditional,IsRegulated,Yes,No,All,HSA / MDA / Thai FDA / BPOM / DAV,LicenceNo
+Item.ShelfLifeMonths,Item,ShelfLifeMonths,Shelf life (months),Number,Conditional,ProductFamily,A,No,All,Reagents only,Months
+Item.ManufacturerPartNo,Item,ManufacturerPartNo,Manufacturer part no.,Text,Always,,,No,All,From the supplier's catalogue or label; used to catch duplicate items,PartNo
+Vendor.VendorName,Vendor,VendorName,Vendor legal name,Text,Always,,,No,All,,Text
+Vendor.Country,Vendor,Country,Vendor country,Text,Always,,,No,All,,
+Vendor.TaxID,Vendor,TaxID,Tax ID,Text,Always,,,No,All,,TaxID
+Vendor.SuppliesRegulatedGoods,Vendor,SuppliesRegulatedGoods,Supplies regulated goods?,Yes/No,Always,,,No,All,Adds Quality/Regulatory approval if Yes,
+Vendor.ISO13485CertNo,Vendor,ISO13485CertNo,ISO 13485 certificate no.,Text,Conditional,SuppliesRegulatedGoods,Yes,No,All,,LicenceNo
+Vendor.BankName,Vendor,BankName,Bank name,Text,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails,Text
+Vendor.BankAccount,Vendor,BankAccount,Bank account no.,Text,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails,BankAccount
+Vendor.PaymentTerms,Vendor,PaymentTerms,Payment terms,Choice,Always,,,Yes,Finance;MDM Analyst,Stored in SensitiveDetails,
+Cost Center.CostCenterName,Cost Center,CostCenterName,Cost centre name,Text,Always,,,No,All,,Text
+Cost Center.Department,Cost Center,Department,Department,Choice,Always,,,No,All,,
+Cost Center.Owner,Cost Center,Owner,Cost centre owner,Person,Always,,,No,All,,Text
+Cost Center.BudgetYear,Cost Center,BudgetYear,Budget year,Number,Always,,,No,All,,Year

@@ -80,13 +80,14 @@ Screens:
                         FillPortions: =0
                         FocusedBorderThickness: =4
                         Font: =Font.'Segoe UI'
-                        Height: =40
+                        Height: =48
                         LayoutMinHeight: =16
                         LayoutMinWidth: =16
                         Size: =11
                         Text: |-
-                          ="Signed in: " & User().FullName
+                          ="Lives Group" & Char(10) & "Signed in: " & User().FullName
                         Width: =260
+                        Wrap: =true
                   - btnGoNew_1:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -179,6 +180,142 @@ Screens:
                         Text: ="Rules (MDM)"
                         Visible: =IsMDM
                         Width: =140
+            - EditBanner:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(255, 244, 206, 1)
+                  FillPortions: =0
+                  Height: =150
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingBottom: =8
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  Visible: =Editing
+                Children:
+                  - lblEditMessage:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =44
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                        Size: =12
+                        Text: |-
+                          ="Editing " & EditID & ". " & Coalesce(EditAsk.ActorRole, "An approver") & " asked for changes: " & Coalesce(EditAsk.Detail, "(no comment)")
+                        Wrap: =true
+                  - txtReplyNote:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        BorderColor: =RGBA(200, 198, 196, 1)
+                        Color: =RGBA(50, 49, 48, 1)
+                        Default: =""
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        DisabledFill: =RGBA(242, 242, 241, 0)
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Font: =Font.'Segoe UI'
+                        Height: =38
+                        HintText: ="Reply to the approver (optional), e.g. Licence no. added from the HSA certificate"
+                        HoverBorderColor: =RGBA(16, 110, 190, 1)
+                        HoverColor: =RGBA(50, 49, 48, 1)
+                        HoverFill: =RGBA(255, 255, 255, 1)
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PressedBorderColor: =RGBA(0, 120, 212, 1)
+                        PressedColor: =RGBA(50, 49, 48, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Size: =11
+                  - rowEditButtons:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =40
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                      Children:
+                        - lblEditHelp:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(96, 94, 92, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =1
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =10
+                              Text: ="Change the fields below, then press Resubmit. Only the approver who asked sees it again; the MDM final check sees what changed."
+                              Wrap: =true
+                        - btnCancelEdit:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =RGBA(0, 120, 212, 1)
+                              BorderStyle: =BorderStyle.Solid
+                              BorderThickness: =1
+                              Color: =RGBA(0, 120, 212, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(237, 235, 233, 1)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =34
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(0, 120, 212, 1)
+                              HoverFill: =RGBA(243, 242, 241, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              OnSelect: |-
+                                =Set(gEditID, "");
+                                Reset(txtReplyNote);
+                                Navigate(MyRequestsScreen, ScreenTransition.None)
+                              PressedBorderColor: =RGBA(0, 69, 120, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(16, 110, 190, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =11
+                              Text: ="Cancel edit"
+                              Width: =120
             - DupBanner:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -314,10 +451,11 @@ Screens:
                               ChevronHoverBackground: =RGBA(245, 245, 245, 1)
                               ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: ="Customer"
+                              Default: =If(Editing, EditRec.RequestType, "Customer")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
+                              DisplayMode: =If(Editing, DisplayMode.Disabled, DisplayMode.Edit)
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -404,10 +542,11 @@ Screens:
                               ChevronHoverBackground: =RGBA(245, 245, 245, 1)
                               ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, LookUp(BusinessUnits, Title = EditRec.Entity).BusinessUnitName, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
+                              DisplayMode: =If(Editing, DisplayMode.Disabled, DisplayMode.Edit)
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -489,7 +628,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.CustomerName, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -516,7 +655,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "CustomerName").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -527,7 +666,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "CustomerName").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "CustomerName").Problem), LookUp(VisibleFields, FieldName = "CustomerName").HelpText, LookUp(VisibleFields, FieldName = "CustomerName").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "CustomerName").Problem)
                   - blkCustomerCountry:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -576,7 +715,7 @@ Screens:
                               ChevronHoverBackground: =RGBA(245, 245, 245, 1)
                               ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.Country, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -607,7 +746,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "Country").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -618,7 +757,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "Country").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "Country").Problem), LookUp(VisibleFields, FieldName = "Country").HelpText, LookUp(VisibleFields, FieldName = "Country").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "Country").Problem)
                   - blkRegistrationNo:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -660,7 +799,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.RegistrationNo, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -687,7 +826,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "RegistrationNo").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -698,7 +837,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "RegistrationNo").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "RegistrationNo").Problem), LookUp(VisibleFields, FieldName = "RegistrationNo").HelpText, LookUp(VisibleFields, FieldName = "RegistrationNo").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "RegistrationNo").Problem)
                   - blkBillingAddress:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -740,7 +879,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.BillingAddress, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -767,7 +906,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "BillingAddress").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -778,7 +917,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "BillingAddress").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "BillingAddress").Problem), LookUp(VisibleFields, FieldName = "BillingAddress").HelpText, LookUp(VisibleFields, FieldName = "BillingAddress").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "BillingAddress").Problem)
                   - blkContactEmail:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -820,7 +959,7 @@ Screens:
                             Properties:
                               BorderColor: =If(EmailInvalid, RGBA(209, 52, 56, 1), RGBA(200, 198, 196, 1))
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.ContactEmail, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -848,7 +987,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "ContactEmail").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -859,7 +998,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "ContactEmail").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "ContactEmail").Problem), LookUp(VisibleFields, FieldName = "ContactEmail").HelpText, LookUp(VisibleFields, FieldName = "ContactEmail").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "ContactEmail").Problem)
                   - blkSegment:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -908,7 +1047,7 @@ Screens:
                               ChevronHoverBackground: =RGBA(245, 245, 245, 1)
                               ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.Segment, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -939,7 +1078,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "Segment").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -950,7 +1089,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "Segment").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "Segment").Problem), LookUp(VisibleFields, FieldName = "Segment").HelpText, LookUp(VisibleFields, FieldName = "Segment").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "Segment").Problem)
                   - blkCustomerPaymentTerms:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -999,7 +1138,7 @@ Screens:
                               ChevronHoverBackground: =RGBA(245, 245, 245, 1)
                               ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditSens.PaymentTerms, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1030,7 +1169,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "PaymentTerms").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1041,7 +1180,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "PaymentTerms").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "PaymentTerms").Problem), LookUp(VisibleFields, FieldName = "PaymentTerms").HelpText, LookUp(VisibleFields, FieldName = "PaymentTerms").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "PaymentTerms").Problem)
                   - blkCreditLimit:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1083,7 +1222,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, Text(EditSens.CreditLimit), "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1111,7 +1250,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "CreditLimit").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1122,7 +1261,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "CreditLimit").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "CreditLimit").Problem), LookUp(VisibleFields, FieldName = "CreditLimit").HelpText, LookUp(VisibleFields, FieldName = "CreditLimit").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "CreditLimit").Problem)
                   - blkItemDescription:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1164,7 +1303,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.ItemDescription, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1191,7 +1330,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "ItemDescription").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1202,7 +1341,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "ItemDescription").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "ItemDescription").Problem), LookUp(VisibleFields, FieldName = "ItemDescription").HelpText, LookUp(VisibleFields, FieldName = "ItemDescription").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "ItemDescription").Problem)
                   - blkManufacturerPartNo:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1244,7 +1383,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.ManufacturerPartNo, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1271,7 +1410,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "ManufacturerPartNo").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1282,7 +1421,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "ManufacturerPartNo").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "ManufacturerPartNo").Problem), LookUp(VisibleFields, FieldName = "ManufacturerPartNo").HelpText, LookUp(VisibleFields, FieldName = "ManufacturerPartNo").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "ManufacturerPartNo").Problem)
                   - blkProductFamily:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1331,7 +1470,7 @@ Screens:
                               ChevronHoverBackground: =RGBA(245, 245, 245, 1)
                               ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.ProductFamily, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1362,7 +1501,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "ProductFamily").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1373,7 +1512,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "ProductFamily").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "ProductFamily").Problem), LookUp(VisibleFields, FieldName = "ProductFamily").HelpText, LookUp(VisibleFields, FieldName = "ProductFamily").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "ProductFamily").Problem)
                   - blkUnitOfMeasure:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1422,7 +1561,7 @@ Screens:
                               ChevronHoverBackground: =RGBA(245, 245, 245, 1)
                               ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.UnitOfMeasure, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1453,7 +1592,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "UnitOfMeasure").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1464,7 +1603,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "UnitOfMeasure").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "UnitOfMeasure").Problem), LookUp(VisibleFields, FieldName = "UnitOfMeasure").HelpText, LookUp(VisibleFields, FieldName = "UnitOfMeasure").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "UnitOfMeasure").Problem)
                   - blkHSCode:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1506,7 +1645,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.HSCode, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1533,7 +1672,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "HSCode").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1544,7 +1683,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "HSCode").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "HSCode").Problem), LookUp(VisibleFields, FieldName = "HSCode").HelpText, LookUp(VisibleFields, FieldName = "HSCode").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "HSCode").Problem)
                   - blkIsRegulated:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1581,38 +1720,50 @@ Screens:
                               Size: =12
                               Text: |-
                                 =With({r: LookUp(VisibleFields, FieldName = "IsRegulated")}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")
-                        - tglIsRegulated:
-                            Control: Classic/Toggle@2.1.0
+                        - ddIsRegulated:
+                            Control: Classic/DropDown@2.3.1
                             Properties:
-                              AlignInContainer: =AlignInContainer.Start
-                              BorderColor: =RGBA(0, 0, 0, 0)
-                              BorderStyle: =BorderStyle.None
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(200, 198, 196, 1)
+                              ChevronBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                              ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                              ChevronFill: =RGBA(50, 49, 48, 1)
+                              ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                              ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =false
+                              Default: =If(Editing, Coalesce(EditRec.RegulatedAnswer, If(EditRec.IsRegulated, "Yes", "No")), "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                              FalseFill: =RGBA(96, 94, 92, 1)
-                              FalseHoverFill: =RGBA(50, 49, 48, 1)
-                              FalseText: ="No"
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(242, 242, 241, 0)
+                              Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
-                              FocusedBorderThickness: =4
                               Font: =Font.'Segoe UI'
                               Height: =38
-                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverBorderColor: =RGBA(16, 110, 190, 1)
+                              HoverColor: =RGBA(50, 49, 48, 1)
+                              HoverFill: =RGBA(245, 245, 245, 1)
+                              Items: =["Yes", "No", "Not sure"]
+                              Items.Value: =Value
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
-                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              PressedBorderColor: =RGBA(16, 110, 190, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(0, 120, 212, 1)
+                              SelectionColor: =RGBA(50, 49, 48, 1)
+                              SelectionFill: =RGBA(0, 120, 212, 1)
                               Size: =12
-                              TrueFill: =RGBA(0, 120, 212, 1)
-                              TrueHoverFill: =RGBA(16, 110, 190, 1)
-                              TrueText: ="Yes"
-                              Width: =160
                         - hlpIsRegulated:
                             Control: Label@2.5.1
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "IsRegulated").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1623,7 +1774,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "IsRegulated").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "IsRegulated").Problem), RegulatedHint, LookUp(VisibleFields, FieldName = "IsRegulated").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "IsRegulated").Problem)
                   - blkRegulatoryLicenceNo:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1665,7 +1816,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.RegulatoryLicenceNo, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1692,7 +1843,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "RegulatoryLicenceNo").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1703,7 +1854,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "RegulatoryLicenceNo").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "RegulatoryLicenceNo").Problem), LookUp(VisibleFields, FieldName = "RegulatoryLicenceNo").HelpText, LookUp(VisibleFields, FieldName = "RegulatoryLicenceNo").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "RegulatoryLicenceNo").Problem)
                   - blkShelfLifeMonths:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1745,7 +1896,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, Text(EditRec.ShelfLifeMonths), "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1773,7 +1924,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "ShelfLifeMonths").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1784,7 +1935,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "ShelfLifeMonths").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "ShelfLifeMonths").Problem), LookUp(VisibleFields, FieldName = "ShelfLifeMonths").HelpText, LookUp(VisibleFields, FieldName = "ShelfLifeMonths").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "ShelfLifeMonths").Problem)
                   - blkVendorName:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1826,7 +1977,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.VendorName, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1853,7 +2004,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "VendorName").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1864,7 +2015,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "VendorName").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "VendorName").Problem), LookUp(VisibleFields, FieldName = "VendorName").HelpText, LookUp(VisibleFields, FieldName = "VendorName").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "VendorName").Problem)
                   - blkVendorCountry:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1906,7 +2057,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.Country, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -1933,7 +2084,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "Country").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -1944,7 +2095,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "Country").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "Country").Problem), LookUp(VisibleFields, FieldName = "Country").HelpText, LookUp(VisibleFields, FieldName = "Country").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "Country").Problem)
                   - blkTaxID:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -1986,7 +2137,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.TaxID, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -2013,7 +2164,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "TaxID").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2024,7 +2175,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "TaxID").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "TaxID").Problem), LookUp(VisibleFields, FieldName = "TaxID").HelpText, LookUp(VisibleFields, FieldName = "TaxID").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "TaxID").Problem)
                   - blkSuppliesRegulatedGoods:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2068,7 +2219,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =false
+                              Default: =If(Editing, EditRec.SuppliesRegulatedGoods, false)
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               FalseFill: =RGBA(96, 94, 92, 1)
                               FalseHoverFill: =RGBA(50, 49, 48, 1)
@@ -2092,7 +2243,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "SuppliesRegulatedGoods").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2103,7 +2254,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "SuppliesRegulatedGoods").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "SuppliesRegulatedGoods").Problem), LookUp(VisibleFields, FieldName = "SuppliesRegulatedGoods").HelpText, LookUp(VisibleFields, FieldName = "SuppliesRegulatedGoods").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "SuppliesRegulatedGoods").Problem)
                   - blkISO13485CertNo:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2145,7 +2296,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.ISO13485CertNo, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -2172,7 +2323,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "ISO13485CertNo").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2183,7 +2334,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "ISO13485CertNo").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "ISO13485CertNo").Problem), LookUp(VisibleFields, FieldName = "ISO13485CertNo").HelpText, LookUp(VisibleFields, FieldName = "ISO13485CertNo").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "ISO13485CertNo").Problem)
                   - blkBankName:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2225,7 +2376,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditSens.BankName, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -2252,7 +2403,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "BankName").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2263,7 +2414,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "BankName").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "BankName").Problem), LookUp(VisibleFields, FieldName = "BankName").HelpText, LookUp(VisibleFields, FieldName = "BankName").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "BankName").Problem)
                   - blkBankAccount:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2305,7 +2456,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditSens.BankAccount, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -2332,7 +2483,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "BankAccount").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2343,7 +2494,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "BankAccount").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "BankAccount").Problem), LookUp(VisibleFields, FieldName = "BankAccount").HelpText, LookUp(VisibleFields, FieldName = "BankAccount").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "BankAccount").Problem)
                   - blkVendorPaymentTerms:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2392,7 +2543,7 @@ Screens:
                               ChevronHoverBackground: =RGBA(245, 245, 245, 1)
                               ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditSens.PaymentTerms, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -2423,7 +2574,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "PaymentTerms").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2434,7 +2585,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "PaymentTerms").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "PaymentTerms").Problem), LookUp(VisibleFields, FieldName = "PaymentTerms").HelpText, LookUp(VisibleFields, FieldName = "PaymentTerms").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "PaymentTerms").Problem)
                   - blkCostCenterName:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2476,7 +2627,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.CostCenterName, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -2503,7 +2654,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "CostCenterName").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2514,7 +2665,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "CostCenterName").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "CostCenterName").Problem), LookUp(VisibleFields, FieldName = "CostCenterName").HelpText, LookUp(VisibleFields, FieldName = "CostCenterName").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "CostCenterName").Problem)
                   - blkDepartment:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2563,7 +2714,7 @@ Screens:
                               ChevronHoverBackground: =RGBA(245, 245, 245, 1)
                               ChevronHoverFill: =RGBA(50, 49, 48, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.Department, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -2594,7 +2745,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "Department").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2605,7 +2756,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "Department").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "Department").Problem), LookUp(VisibleFields, FieldName = "Department").HelpText, LookUp(VisibleFields, FieldName = "Department").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "Department").Problem)
                   - blkOwner:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2647,7 +2798,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, EditRec.Owner, "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -2674,7 +2825,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "Owner").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2685,7 +2836,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "Owner").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "Owner").Problem), LookUp(VisibleFields, FieldName = "Owner").HelpText, LookUp(VisibleFields, FieldName = "Owner").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "Owner").Problem)
                   - blkBudgetYear:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -2727,7 +2878,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(200, 198, 196, 1)
                               Color: =RGBA(50, 49, 48, 1)
-                              Default: =""
+                              Default: =If(Editing, Text(EditRec.BudgetYear), "")
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(242, 242, 241, 0)
@@ -2755,7 +2906,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(96, 94, 92, 1)
+                              Color: =If(IsBlank(LookUp(FieldProblems, FieldName = "BudgetYear").Problem), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -2766,7 +2917,7 @@ Screens:
                               LayoutMinWidth: =16
                               PaddingLeft: =0
                               Size: =10
-                              Text: =LookUp(VisibleFields, FieldName = "BudgetYear").HelpText
+                              Text: =If(IsBlank(LookUp(FieldProblems, FieldName = "BudgetYear").Problem), LookUp(VisibleFields, FieldName = "BudgetYear").HelpText, LookUp(VisibleFields, FieldName = "BudgetYear").DisplayLabel & " " & LookUp(FieldProblems, FieldName = "BudgetYear").Problem)
             - ApproverCard:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -2847,6 +2998,24 @@ Screens:
                   RadiusTopLeft: =8
                   RadiusTopRight: =8
                 Children:
+                  - lblEditID:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(50, 49, 48, 1)
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledColor: =RGBA(161, 159, 157, 1)
+                        FillPortions: =0
+                        FocusedBorderThickness: =4
+                        Font: =Font.'Segoe UI'
+                        Height: =10
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        Text: =Coalesce(gEditID, "")
+                        Visible: =false
+                        Width: =10
                   - lblStatus:
                       Control: Label@2.5.1
                       Properties:
@@ -2888,6 +3057,7 @@ Screens:
                         OnSelect: |-
                           =Reset(ddEntity);
                           Reset(tglNotDuplicate);
+                          Reset(txtReplyNote);
                           Reset(txtCustomerName);
                           Reset(ddCustomerCountry);
                           Reset(txtRegistrationNo);
@@ -2901,7 +3071,7 @@ Screens:
                           Reset(ddProductFamily);
                           Reset(ddUnitOfMeasure);
                           Reset(txtHSCode);
-                          Reset(tglIsRegulated);
+                          Reset(ddIsRegulated);
                           Reset(txtRegulatoryLicenceNo);
                           Reset(txtShelfLifeMonths);
                           Reset(txtVendorName);
@@ -2946,18 +3116,11 @@ Screens:
                         LayoutMinHeight: =16
                         LayoutMinWidth: =16
                         OnSelect: |-
-                          =With(
-                              {rid: "REQ-" & Text(Coalesce(First(Sort(Requests, ID, SortOrder.Descending)).ID, 0) + 1, "0000")},
+                          =If(
+                              Editing,
                               IfError(
-                                  Patch(Requests, Defaults(Requests), {
-                                      Title: rid,
-                                      RequestType: SelectedType,
-                                      Entity: SelectedEntity,
+                                  Patch(Requests, EditRec, {
                                       Country: Switch(SelectedType, "Customer", ddCustomerCountry.Selected.Value, "Vendor", txtVendorCountry.Text),
-                                      Requestor: User().FullName,
-                                      Status: "Pending approval",
-                                      CurrentStage: "Submitted, waiting for approvers",
-                                      SubmittedAt: Now(),
                                       CustomerName: If(SelectedType = "Customer", txtCustomerName.Text),
                                       RegistrationNo: If(SelectedType = "Customer", txtRegistrationNo.Text),
                                       BillingAddress: If(SelectedType = "Customer", txtBillingAddress.Text),
@@ -2968,8 +3131,9 @@ Screens:
                                       UnitOfMeasure: If(SelectedType = "Item", ddUnitOfMeasure.Selected.Value),
                                       ManufacturerPartNo: If(SelectedType = "Item", txtManufacturerPartNo.Text),
                                       HSCode: If(SelectedType = "Item", txtHSCode.Text),
-                                      IsRegulated: If(SelectedType = "Item", tglIsRegulated.Value),
-                                      RegulatoryLicenceNo: If(SelectedType = "Item" && tglIsRegulated.Value, txtRegulatoryLicenceNo.Text),
+                                      IsRegulated: If(SelectedType = "Item", ddIsRegulated.Selected.Value in ["Yes", "Not sure"]),
+                                      RegulatedAnswer: If(SelectedType = "Item", ddIsRegulated.Selected.Value),
+                                      RegulatoryLicenceNo: If(SelectedType = "Item" && ddIsRegulated.Selected.Value = "Yes", txtRegulatoryLicenceNo.Text),
                                       ShelfLifeMonths: If(SelectedType = "Item" && "ShelfLifeMonths" in VisibleFields.FieldName, Value(txtShelfLifeMonths.Text)),
                                       VendorName: If(SelectedType = "Vendor", txtVendorName.Text),
                                       TaxID: If(SelectedType = "Vendor", txtTaxID.Text),
@@ -2980,22 +3144,25 @@ Screens:
                                       Owner: If(SelectedType = "Cost Center", txtOwner.Text),
                                       BudgetYear: If(SelectedType = "Cost Center", Value(txtBudgetYear.Text)),
                                       DuplicateCheck: DupStatus,
-                                      PossibleMatchID: DupRecordID
+                                      PossibleMatchID: DupRecordID,
+                                      Status: "Resubmitted",
+                                      CurrentStage: "Resubmitted; back with the approver who asked for changes",
+                                      ChangeNote: If(IsBlank(EditRec.ChangeNote), "", EditRec.ChangeNote & Char(10)) & Text(Now(), "dd mmm yyyy hh:mm") & " " & User().FullName & ": " & ChangesText & If(IsBlank(Trim(txtReplyNote.Text)), "", " Reply: " & Trim(txtReplyNote.Text))
                                   });
-                                  If(SelectedType in ["Customer", "Vendor"],
-                                      Patch(SensitiveDetails, Defaults(SensitiveDetails), {
-                                          Title: rid,
-                                          RequestID: rid,
+                                  If(!IsBlank(EditSens),
+                                      Patch(SensitiveDetails, EditSens, {
                                           PaymentTerms: If(SelectedType = "Customer", ddCustomerPaymentTerms.Selected.Value, ddVendorPaymentTerms.Selected.Value),
                                           CreditLimit: If(SelectedType = "Customer", Value(txtCreditLimit.Text)),
                                           BankName: If(SelectedType = "Vendor", txtBankName.Text),
                                           BankAccount: If(SelectedType = "Vendor", txtBankAccount.Text)
                                       })
                                   );
-                                  Set(gLastRequestID, rid);
-                                  Notify(rid & " submitted. It's now with the approvers.", NotificationType.Success);
+                                  Set(gLastRequestID, EditID);
+                                  Notify(EditID & " resubmitted. It's back with the approver who asked for changes.", NotificationType.Success);
+                                  Set(gEditID, "");
                                   Reset(ddEntity);
                                   Reset(tglNotDuplicate);
+                                  Reset(txtReplyNote);
                                   Reset(txtCustomerName);
                                   Reset(ddCustomerCountry);
                                   Reset(txtRegistrationNo);
@@ -3009,7 +3176,7 @@ Screens:
                                   Reset(ddProductFamily);
                                   Reset(ddUnitOfMeasure);
                                   Reset(txtHSCode);
-                                  Reset(tglIsRegulated);
+                                  Reset(ddIsRegulated);
                                   Reset(txtRegulatoryLicenceNo);
                                   Reset(txtShelfLifeMonths);
                                   Reset(txtVendorName);
@@ -3024,7 +3191,90 @@ Screens:
                                   Reset(ddDepartment);
                                   Reset(txtOwner);
                                   Reset(txtBudgetYear),
-                                  Notify("Couldn't submit: " & FirstError.Message, NotificationType.Error)
+                                  Notify("Couldn't resubmit: " & FirstError.Message, NotificationType.Error)
+                              ),
+                              With(
+                                  {rid: "REQ-" & Text(Coalesce(First(Sort(Requests, ID, SortOrder.Descending)).ID, 0) + 1, "0000")},
+                                  IfError(
+                                      Patch(Requests, Defaults(Requests), {
+                                          Title: rid,
+                                          RequestType: SelectedType,
+                                          Entity: SelectedEntity,
+                                          Requestor: User().FullName,
+                                          Status: "Pending approval",
+                                          CurrentStage: "Submitted, waiting for approvers",
+                                          SubmittedAt: Now(),
+                                          Country: Switch(SelectedType, "Customer", ddCustomerCountry.Selected.Value, "Vendor", txtVendorCountry.Text),
+                                          CustomerName: If(SelectedType = "Customer", txtCustomerName.Text),
+                                          RegistrationNo: If(SelectedType = "Customer", txtRegistrationNo.Text),
+                                          BillingAddress: If(SelectedType = "Customer", txtBillingAddress.Text),
+                                          ContactEmail: If(SelectedType = "Customer", txtContactEmail.Text),
+                                          Segment: If(SelectedType = "Customer", ddSegment.Selected.Value),
+                                          ItemDescription: If(SelectedType = "Item", txtItemDescription.Text),
+                                          ProductFamily: If(SelectedType = "Item", ddProductFamily.Selected.Value),
+                                          UnitOfMeasure: If(SelectedType = "Item", ddUnitOfMeasure.Selected.Value),
+                                          ManufacturerPartNo: If(SelectedType = "Item", txtManufacturerPartNo.Text),
+                                          HSCode: If(SelectedType = "Item", txtHSCode.Text),
+                                          IsRegulated: If(SelectedType = "Item", ddIsRegulated.Selected.Value in ["Yes", "Not sure"]),
+                                          RegulatedAnswer: If(SelectedType = "Item", ddIsRegulated.Selected.Value),
+                                          RegulatoryLicenceNo: If(SelectedType = "Item" && ddIsRegulated.Selected.Value = "Yes", txtRegulatoryLicenceNo.Text),
+                                          ShelfLifeMonths: If(SelectedType = "Item" && "ShelfLifeMonths" in VisibleFields.FieldName, Value(txtShelfLifeMonths.Text)),
+                                          VendorName: If(SelectedType = "Vendor", txtVendorName.Text),
+                                          TaxID: If(SelectedType = "Vendor", txtTaxID.Text),
+                                          SuppliesRegulatedGoods: If(SelectedType = "Vendor", tglSuppliesRegulatedGoods.Value),
+                                          ISO13485CertNo: If(SelectedType = "Vendor" && tglSuppliesRegulatedGoods.Value, txtISO13485CertNo.Text),
+                                          CostCenterName: If(SelectedType = "Cost Center", txtCostCenterName.Text),
+                                          Department: If(SelectedType = "Cost Center", ddDepartment.Selected.Value),
+                                          Owner: If(SelectedType = "Cost Center", txtOwner.Text),
+                                          BudgetYear: If(SelectedType = "Cost Center", Value(txtBudgetYear.Text)),
+                                          DuplicateCheck: DupStatus,
+                                          PossibleMatchID: DupRecordID
+                                      });
+                                      If(SelectedType in ["Customer", "Vendor"],
+                                          Patch(SensitiveDetails, Defaults(SensitiveDetails), {
+                                              Title: rid,
+                                              RequestID: rid,
+                                              PaymentTerms: If(SelectedType = "Customer", ddCustomerPaymentTerms.Selected.Value, ddVendorPaymentTerms.Selected.Value),
+                                              CreditLimit: If(SelectedType = "Customer", Value(txtCreditLimit.Text)),
+                                              BankName: If(SelectedType = "Vendor", txtBankName.Text),
+                                              BankAccount: If(SelectedType = "Vendor", txtBankAccount.Text)
+                                          })
+                                      );
+                                      Set(gLastRequestID, rid);
+                                      Notify(rid & " submitted. It's now with the approvers.", NotificationType.Success);
+                                      Reset(ddEntity);
+                                      Reset(tglNotDuplicate);
+                                      Reset(txtReplyNote);
+                                      Reset(txtCustomerName);
+                                      Reset(ddCustomerCountry);
+                                      Reset(txtRegistrationNo);
+                                      Reset(txtBillingAddress);
+                                      Reset(txtContactEmail);
+                                      Reset(ddSegment);
+                                      Reset(ddCustomerPaymentTerms);
+                                      Reset(txtCreditLimit);
+                                      Reset(txtItemDescription);
+                                      Reset(txtManufacturerPartNo);
+                                      Reset(ddProductFamily);
+                                      Reset(ddUnitOfMeasure);
+                                      Reset(txtHSCode);
+                                      Reset(ddIsRegulated);
+                                      Reset(txtRegulatoryLicenceNo);
+                                      Reset(txtShelfLifeMonths);
+                                      Reset(txtVendorName);
+                                      Reset(txtVendorCountry);
+                                      Reset(txtTaxID);
+                                      Reset(tglSuppliesRegulatedGoods);
+                                      Reset(txtISO13485CertNo);
+                                      Reset(txtBankName);
+                                      Reset(txtBankAccount);
+                                      Reset(ddVendorPaymentTerms);
+                                      Reset(txtCostCenterName);
+                                      Reset(ddDepartment);
+                                      Reset(txtOwner);
+                                      Reset(txtBudgetYear),
+                                      Notify("Couldn't submit: " & FirstError.Message, NotificationType.Error)
+                                  )
                               )
                           )
                         PressedBorderColor: =RGBA(0, 69, 120, 1)
@@ -3035,5 +3285,5 @@ Screens:
                         RadiusTopLeft: =4
                         RadiusTopRight: =4
                         Size: =12
-                        Text: ="Submit request"
+                        Text: =If(Editing, "Resubmit", "Submit request")
                         Width: =180

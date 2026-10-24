@@ -66,13 +66,14 @@
                   FillPortions: =0
                   FocusedBorderThickness: =4
                   Font: =Font.'Segoe UI'
-                  Height: =40
+                  Height: =48
                   LayoutMinHeight: =16
                   LayoutMinWidth: =16
                   Size: =11
                   Text: |-
-                    ="Signed in: " & User().FullName
+                    ="Lives Group" & Char(10) & "Signed in: " & User().FullName
                   Width: =260
+                  Wrap: =true
             - btnGoNew_3:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -692,7 +693,7 @@
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
                               Height: =36
-                              HintText: ="name@company.com"
+                              HintText: ="their Lives Group email"
                               HoverBorderColor: =RGBA(16, 110, 190, 1)
                               HoverColor: =RGBA(50, 49, 48, 1)
                               HoverFill: =RGBA(255, 255, 255, 1)
@@ -2651,6 +2652,75 @@
                         LayoutMinWidth: =16
                         PaddingLeft: =0
                       Children:
+                        - blkRF_Check:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =1
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                            Children:
+                              - lblRF_Check:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =2
+                                    Color: =RGBA(50, 49, 48, 1)
+                                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                    DisabledColor: =RGBA(161, 159, 157, 1)
+                                    FillPortions: =0
+                                    FocusedBorderThickness: =4
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =22
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    PaddingLeft: =0
+                                    Size: =11
+                                    Text: ="Format check (blank = default)"
+                              - ddRF_Check:
+                                  Control: Classic/DropDown@2.3.1
+                                  Properties:
+                                    AllowEmptySelection: =true
+                                    BorderColor: =RGBA(200, 198, 196, 1)
+                                    ChevronBackground: =RGBA(255, 255, 255, 1)
+                                    ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
+                                    ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                                    ChevronFill: =RGBA(50, 49, 48, 1)
+                                    ChevronHoverBackground: =RGBA(245, 245, 245, 1)
+                                    ChevronHoverFill: =RGBA(50, 49, 48, 1)
+                                    Color: =RGBA(50, 49, 48, 1)
+                                    Default: =galRF.Selected.Check
+                                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                    DisabledColor: =RGBA(161, 159, 157, 1)
+                                    DisabledFill: =RGBA(242, 242, 241, 0)
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    FillPortions: =0
+                                    Font: =Font.'Segoe UI'
+                                    Height: =36
+                                    HoverBorderColor: =RGBA(16, 110, 190, 1)
+                                    HoverColor: =RGBA(50, 49, 48, 1)
+                                    HoverFill: =RGBA(245, 245, 245, 1)
+                                    Items: =["None", "Text", "RegNo", "HSCode", "TaxID", "LicenceNo", "PartNo", "BankAccount", "Email", "Months", "Year"]
+                                    Items.Value: =Value
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    PaddingBottom: =5
+                                    PaddingLeft: =12
+                                    PaddingRight: =5
+                                    PaddingTop: =5
+                                    PressedBorderColor: =RGBA(16, 110, 190, 1)
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    PressedFill: =RGBA(0, 120, 212, 1)
+                                    SelectionColor: =RGBA(50, 49, 48, 1)
+                                    SelectionFill: =RGBA(0, 120, 212, 1)
+                                    Size: =11
                         - blkRF_ConditionField:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
@@ -2709,6 +2779,21 @@
                                     RadiusTopLeft: =4
                                     RadiusTopRight: =4
                                     Size: =11
+                  - rowEditRF4:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =66
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                      Children:
                         - blkRF_ConditionValue:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
@@ -2767,21 +2852,6 @@
                                     RadiusTopLeft: =4
                                     RadiusTopRight: =4
                                     Size: =11
-                  - rowEditRF4:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Fill: =RGBA(255, 255, 255, 1)
-                        FillPortions: =0
-                        Height: =66
-                        LayoutAlignItems: =LayoutAlignItems.Stretch
-                        LayoutDirection: =LayoutDirection.Horizontal
-                        LayoutGap: =12
-                        LayoutMinHeight: =16
-                        LayoutMinWidth: =16
-                        PaddingLeft: =0
-                      Children:
                         - blkRF_Sensitive:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
@@ -2851,6 +2921,21 @@
                                     SelectionColor: =RGBA(50, 49, 48, 1)
                                     SelectionFill: =RGBA(0, 120, 212, 1)
                                     Size: =11
+                  - rowEditRF5:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0
+                        Height: =66
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =0
+                      Children:
                         - blkRF_VisibleToRoles:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
@@ -2909,21 +2994,6 @@
                                     RadiusTopLeft: =4
                                     RadiusTopRight: =4
                                     Size: =11
-                  - rowEditRF5:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Fill: =RGBA(255, 255, 255, 1)
-                        FillPortions: =0
-                        Height: =66
-                        LayoutAlignItems: =LayoutAlignItems.Stretch
-                        LayoutDirection: =LayoutDirection.Horizontal
-                        LayoutGap: =12
-                        LayoutMinHeight: =16
-                        LayoutMinWidth: =16
-                        PaddingLeft: =0
-                      Children:
                         - blkRF_HelpText:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
@@ -3010,6 +3080,7 @@
                                   FieldName: Trim(txtRF_FieldName.Text),
                                   DisplayLabel: Trim(txtRF_DisplayLabel.Text),
                                   Required: ddRF_Required.Selected.Value,
+                                  Check: ddRF_Check.Selected.Value,
                                   ConditionField: Trim(txtRF_ConditionField.Text),
                                   ConditionValue: Trim(txtRF_ConditionValue.Text),
                                   Sensitive: ddRF_Sensitive.Selected.Value,

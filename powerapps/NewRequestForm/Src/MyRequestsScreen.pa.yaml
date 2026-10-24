@@ -80,13 +80,14 @@ Screens:
                         FillPortions: =0
                         FocusedBorderThickness: =4
                         Font: =Font.'Segoe UI'
-                        Height: =40
+                        Height: =48
                         LayoutMinHeight: =16
                         LayoutMinWidth: =16
                         Size: =11
                         Text: |-
-                          ="Signed in: " & User().FullName
+                          ="Lives Group" & Char(10) & "Signed in: " & User().FullName
                         Width: =260
+                        Wrap: =true
                   - btnGoNew_2:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -248,7 +249,7 @@ Screens:
                                     HoverBorderColor: =RGBA(16, 110, 190, 1)
                                     HoverColor: =RGBA(50, 49, 48, 1)
                                     HoverFill: =RGBA(245, 245, 245, 1)
-                                    Items: =["All", "Pending approval", "Rejected", "Created in SAP"]
+                                    Items: =["All", "Pending approval", "Changes requested", "Resubmitted", "Rejected", "Created in SAP"]
                                     Items.Value: =Value
                                     LayoutMinHeight: =16
                                     LayoutMinWidth: =16
@@ -405,7 +406,7 @@ Screens:
                                     BorderColor: =RGBA(0, 0, 0, 0)
                                     BorderStyle: =BorderStyle.None
                                     BorderThickness: =2
-                                    Color: =Switch(ThisItem.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), RGBA(0, 90, 158, 1))
+                                    Color: =Switch(ThisItem.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), RGBA(0, 90, 158, 1))
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     FocusedBorderThickness: =4
@@ -539,7 +540,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =Switch(SelectedRequest.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), RGBA(0, 90, 158, 1))
+                              Color: =Switch(SelectedRequest.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), RGBA(0, 90, 158, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -553,6 +554,39 @@ Screens:
                               Size: =12
                               Text: =SelectedRequest.Status & " - " & SelectedRequest.CurrentStage
                               Wrap: =true
+                        - btnEditResubmit:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              DisabledFill: =RGBA(237, 235, 233, 1)
+                              Fill: =RGBA(0, 120, 212, 1)
+                              FillPortions: =0
+                              Font: =Font.'Segoe UI'
+                              Height: =38
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =RGBA(16, 110, 190, 1)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              OnSelect: |-
+                                =Set(gEditID, SelectedRequestID);
+                                Navigate(NewRequestScreen, ScreenTransition.None)
+                              PressedBorderColor: =RGBA(0, 69, 120, 1)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(16, 110, 190, 1)
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Size: =12
+                              Text: ="Edit and resubmit"
+                              Visible: =!IsBlank(galRequests.Selected) && SelectedRequest.Status = "Changes requested" && Lower(SelectedRequest.'Created By'.Email) = Lower(User().Email)
+                              Width: =200
                         - lblHeadWaiting:
                             Control: Label@2.5.1
                             Properties:
@@ -677,6 +711,48 @@ Screens:
                               PaddingLeft: =0
                               Size: =11
                               Text: =SubmittedText
+                              VerticalAlign: =VerticalAlign.Top
+                              Wrap: =true
+                        - lblHeadChanges:
+                            Control: Label@2.5.1
+                            Properties:
+                              Visible: =!IsBlank(galRequests.Selected)
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              FontWeight: =FontWeight.Semibold
+                              Height: =28
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =12
+                              Text: ="Changes after approvers asked"
+                        - lblBodyChanges:
+                            Control: Label@2.5.1
+                            Properties:
+                              Visible: =!IsBlank(galRequests.Selected)
+                              AutoHeight: =true
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(50, 49, 48, 1)
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(161, 159, 157, 1)
+                              FillPortions: =0
+                              FocusedBorderThickness: =4
+                              Font: =Font.'Segoe UI'
+                              Height: =40
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =0
+                              Size: =11
+                              Text: =Coalesce(SelectedRequest.ChangeNote, "None.")
                               VerticalAlign: =VerticalAlign.Top
                               Wrap: =true
                         - lblHeadSensitive:

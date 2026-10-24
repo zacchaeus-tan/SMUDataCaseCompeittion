@@ -70,6 +70,8 @@ CHOICES = {
     "ProductFamily": ["A", "B", "C"],
     "UnitOfMeasure": ["Kit", "Box", "Pack", "Unit", "Set"],
     "Department": ["Sales", "Marketing", "Regulatory Affairs", "Service", "Finance", "Warehouse"],
+    # No default: the requestor has to answer. "Not sure" sends the item to Quality/Regulatory to decide.
+    "IsRegulated": ["Yes", "No", "Not sure"],
 }
 
 # (request type, FieldName in RequiredFields, control name, kind, extra)
@@ -88,7 +90,7 @@ FIELDS = [
     ("Item", "ProductFamily", "ddProductFamily", "choice", {}),
     ("Item", "UnitOfMeasure", "ddUnitOfMeasure", "choice", {}),
     ("Item", "HSCode", "txtHSCode", "text", {}),
-    ("Item", "IsRegulated", "tglIsRegulated", "toggle", {}),
+    ("Item", "IsRegulated", "ddIsRegulated", "choice", {"help": "RegulatedHint"}),
     ("Item", "RegulatoryLicenceNo", "txtRegulatoryLicenceNo", "text", {}),
     ("Item", "ShelfLifeMonths", "txtShelfLifeMonths", "number", {}),
     ("Vendor", "VendorName", "txtVendorName", "text", {}),
@@ -104,6 +106,50 @@ FIELDS = [
     ("Cost Center", "Owner", "txtOwner", "text", {}),
     ("Cost Center", "BudgetYear", "txtBudgetYear", "number", {}),
 ]
+
+
+# Format check per field when the RequiredFields row leaves Check blank; MDM can override it on the Rules
+# screen (or switch it off with "None"). Every free-text field is also checked for placeholders (N/A, TBC, -).
+DEFAULT_CHECKS = {
+    "CustomerName": "Text", "RegistrationNo": "RegNo", "BillingAddress": "Text", "ContactEmail": "Email",
+    "ItemDescription": "Text", "ManufacturerPartNo": "PartNo", "HSCode": "HSCode",
+    "RegulatoryLicenceNo": "LicenceNo", "ShelfLifeMonths": "Months", "VendorName": "Text",
+    "TaxID": "TaxID", "ISO13485CertNo": "LicenceNo", "BankName": "Text", "BankAccount": "BankAccount",
+    "CostCenterName": "Text", "Owner": "Text", "BudgetYear": "Year",
+}
+CHECKS = ["None", "Text", "RegNo", "HSCode", "TaxID", "LicenceNo", "PartNo", "BankAccount", "Email", "Months", "Year"]
+PLACEHOLDERS = ["na", "nil", "none", "null", "tbc", "tba", "tbd", "x", "xx", "xxx", "xxxx", "unknown", "test",
+                "dummy", "pending", "later", "asap", "idk", "same", "sameasabove", "asabove", "abc", "asdf",
+                "qwerty", "123", "1234", "12345", "0", "00", "000"]
+FREE_TEXT = [f[1] for f in FIELDS if f[3] in ("text", "email")]
+NUMBERS = [f[1] for f in FIELDS if f[3] == "number"]
+# Plain labels for the change note (Country / PaymentTerms appear on two request types; one row each)
+LABELS = {"CustomerName": "Customer name", "Country": "Country", "RegistrationNo": "Registration no.",
+          "BillingAddress": "Billing address", "ContactEmail": "Contact email", "Segment": "Segment",
+          "PaymentTerms": "Payment terms", "CreditLimit": "Credit limit", "ItemDescription": "Item description",
+          "ManufacturerPartNo": "Manufacturer part no.", "ProductFamily": "Product family",
+          "UnitOfMeasure": "Unit of measure", "HSCode": "HS code", "IsRegulated": "Regulated",
+          "RegulatoryLicenceNo": "Regulatory licence no.", "ShelfLifeMonths": "Shelf life (months)",
+          "VendorName": "Vendor name", "TaxID": "Tax ID", "SuppliesRegulatedGoods": "Supplies regulated goods",
+          "ISO13485CertNo": "ISO 13485 certificate no.", "BankName": "Bank name", "BankAccount": "Bank account",
+          "CostCenterName": "Cost centre name", "Department": "Department", "Owner": "Owner",
+          "BudgetYear": "Budget year"}
+UNIQUE_FIELDS = list({f[1]: f for f in reversed(FIELDS)}.values())[::-1]
+# Old value of each field on the request being edited (for the edit form's defaults and the change note)
+SENSITIVE = {"PaymentTerms", "CreditLimit", "BankName", "BankAccount"}
+
+
+def old_value(f):
+    """Power Fx for the field's saved value as text, on the request being edited (EditRec / EditSens)."""
+    _, name, _, kind, _ = f
+    src = "EditSens" if name in SENSITIVE else "EditRec"
+    if name == "IsRegulated":
+        return 'Coalesce(EditRec.RegulatedAnswer, If(EditRec.IsRegulated, "Yes", "No"))'
+    if kind == "toggle":
+        return f'If({src}.{name}, "Yes", "No")'
+    if kind == "number":
+        return f"Text({src}.{name})"
+    return f"{src}.{name}"
 
 
 def text_of(f):
@@ -154,7 +200,8 @@ SelectedEntity = ddEntity.Selected.Code;
 FieldRules = ForAll(
     RequiredFields,
     {{RequestType: RequestType, FieldName: FieldName, DisplayLabel: DisplayLabel, Required: Required,
-      ConditionField: ConditionField, ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText}}
+      ConditionField: ConditionField, ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText,
+      Check: Check}}
 );
 TypeRules = Filter(FieldRules, RequestType = SelectedType);
 
@@ -169,7 +216,80 @@ VisibleFields = Filter(
     Required <> "Conditional" || LookUp(FieldValues, F = ConditionField).V = ConditionValue
 );
 MissingFields = Filter(VisibleFields, IsBlank(Trim(LookUp(FieldValues, F = FieldName).V)));
-EmailInvalid = SelectedType = "Customer" && !IsBlank(txtContactEmail.Text) && !IsMatch(txtContactEmail.Text, Match.Email);
+
+// ---- Filled in, but plausible? Placeholders (N/A, TBC, -) never pass; formats come from the field's Check
+// (RequiredFields, editable on the Rules screen), else the default below. k = the value's letters and digits only.
+DefaultChecks = Table(
+{",\n".join(f'    {{F: "{k}", C: "{v}"}}' for k, v in DEFAULT_CHECKS.items())}
+);
+FreeTextFields = {fx_list(FREE_TEXT)};
+NumberFields = {fx_list(NUMBERS)};
+Placeholders = {fx_list(PLACEHOLDERS)};
+FieldChecks = ForAll(
+    Filter(VisibleFields, FieldName in FreeTextFields || FieldName in NumberFields) As r,
+    With(
+        {{v: Trim(LookUp(FieldValues, F = r.FieldName).V),
+         c: Coalesce(r.Check, LookUp(DefaultChecks, F = r.FieldName).C, "None")}},
+        With(
+            {{k: Lower(Concat(Filter(ForAll(Sequence(Len(v)), Mid(v, Value, 1)) As ch, IsMatch(ch.Value, "[A-Za-z0-9]")), Value))}},
+            {{FieldName: r.FieldName, DisplayLabel: r.DisplayLabel,
+             Problem: If(
+                IsBlank(v), "",
+                !(r.FieldName in NumberFields) && (IsBlank(k) || k in Placeholders),
+                    "looks like a placeholder. Enter the real value, or ask the MDM team if you don't have it",
+                c = "Text", If(Len(k) >= 3, "", "is too short"),
+                c = "Email", If(IsMatch(v, Match.Email), "", "isn't a valid email address"),
+                c = "RegNo", With({{u: Upper(k)}}, Switch(ddCustomerCountry.Selected.Value,
+                    "SG", If(IsMatch(u, "^(?:\\d{{8}}[A-Z]|\\d{{9}}[A-Z]|[TSR]\\d{{2}}[A-Z]{{2}}\\d{{4}}[A-Z])$"), "",
+                        "doesn't look like a Singapore UEN (e.g. 200288778W)"),
+                    "MY", If(IsMatch(u, "^(?:\\d{{12}}|\\d{{14}}|\\d{{6,7}}[A-Z])$"), "",
+                        "doesn't look like an SSM registration no. (12 digits, e.g. 201901000005)"),
+                    "TH", If(IsMatch(u, "^\\d{{13}}$"), "", "should be the 13-digit Thai tax ID"),
+                    "ID", If(IsMatch(u, "^\\d{{15,16}}$"), "", "should be the 15 or 16 digit NPWP (e.g. 01.234.567.8-901.000)"),
+                    "VN", If(IsMatch(u, "^(?:\\d{{10}}|\\d{{13}})$"), "", "should be the 10-digit tax code (MST), or 13 digits for a branch"),
+                    "")),
+                c = "HSCode", If(IsMatch(k, "^\\d{{6,10}}$"), "", "should be 6 to 10 digits (e.g. 3822.19.00)"),
+                c = "TaxID", If(Len(k) >= 5 && Len(k) <= 20 && IsMatch(k, "\\d", MatchOptions.Contains), "",
+                    "should be 5 to 20 letters and digits, including at least one digit"),
+                c = "LicenceNo", If(Len(k) >= 5 && Len(k) <= 30 && IsMatch(k, "\\d", MatchOptions.Contains), "",
+                    "should be 5 to 30 letters and digits, including at least one digit"),
+                c = "PartNo", If(Len(k) >= 3, "", "is too short for a part no."),
+                c = "BankAccount", If(Len(k) >= 6 && Len(k) <= 34 && IsMatch(k, "\\d{{4}}", MatchOptions.Contains), "",
+                    "doesn't look like a bank account no. (6 to 34 characters, mostly digits)"),
+                c = "Months", If(Value(v) >= 1 && Value(v) <= 120, "", "should be between 1 and 120 months"),
+                c = "Year", If(Value(v) >= Year(Today()) - 1 && Value(v) <= Year(Today()) + 2, "",
+                    "should be between " & (Year(Today()) - 1) & " and " & (Year(Today()) + 2)),
+                "")}}
+        )
+    )
+);
+FieldProblems = Filter(FieldChecks, !IsBlank(Problem));
+EmailInvalid = "ContactEmail" in FieldProblems.FieldName;
+
+// ---- Editing a request an approver sent back (My requests > Edit and resubmit). The ID sits in a hidden
+// label on this screen, so these formulas don't depend on a variable.
+EditID = lblEditID.Text;
+Editing = !IsBlank(EditID);
+EditRec = With({{id: EditID}}, If(!IsBlank(id), LookUp(Requests, Title = id)));
+EditSens = With({{id: EditID}}, If(!IsBlank(id), LookUp(SensitiveDetails, RequestID = id)));
+EditAsk = With(
+    {{id: EditID}},
+    If(!IsBlank(id), First(Sort(Filter(ApprovalLog, RequestID = id && Action = "Request changes"), Timestamp, SortOrder.Descending)))
+);
+// What the requestor changed, compared with what was submitted. Sensitive values are named, never shown.
+EditChanges = If(
+    Editing,
+    Filter(
+        Table(
+{",\n".join(f'            {{L: "{lbl}", Old: {old_value(f)}, New: LookUp(FieldValues, F = "{f[1]}").V, S: {"true" if f[1] in SENSITIVE else "false"}}}' for f, lbl in [(f, LABELS[f[1]]) for f in UNIQUE_FIELDS])}
+        ),
+        Coalesce(Old, "") <> Coalesce(New, "")
+    )
+);
+ChangesText = If(
+    CountRows(EditChanges) = 0, "No fields changed.",
+    Concat(EditChanges, L & If(S, " changed", ": " & Char(34) & Old & Char(34) & " -> " & Char(34) & New & Char(34)), "; ") & "."
+);
 
 // ---- Live duplicate checks. Customers use the same clean-up as sharepoint/LISTS.md
 LegalWords = {fx_list(LEGAL)};
@@ -203,7 +323,7 @@ NameMatch = If(
 ItemKeyWords = Filter(Split(Trim({strip_punct("Lower(txtItemDescription.Text)")}), " ") As w, Len(w.Value) >= 4);
 ItemRows = ForAll(
     ItemMaster,
-    {{RecordID: Title, Name: Description, Norm: NormalizedName, PartNo: ManufacturerPartNo}}
+    {{RecordID: Title, Name: Description, Norm: NormalizedName, PartNo: ManufacturerPartNo, Regulated: Regulated}}
 );
 PartMatch = If(
     !IsBlank(Trim(txtManufacturerPartNo.Text)),
@@ -212,6 +332,13 @@ PartMatch = If(
 ItemNameMatch = If(
     CountRows(ItemKeyWords) > 0,
     First(Filter(ItemRows As c, CountRows(Filter(ItemKeyWords As k, !(k.Value in c.Norm))) = 0))
+);
+// Help under "Is this regulated?": what the closest existing item says, and what "Not sure" does
+RegulatedHint = With(
+    {{m: Coalesce(PartMatch, ItemNameMatch)}},
+    If(IsBlank(m), "",
+       "Similar item " & m.RecordID & " (" & m.Name & ") is " & If(m.Regulated, "regulated. ", "not regulated. ")) &
+    "Not sure? Choose Not sure and Quality/Regulatory will decide."
 );
 // Vendors: same tax ID blocks
 VendorRows = ForAll(VendorMaster, {{RecordID: Title, Name: VendorName, TaxID: TaxID}});
@@ -266,14 +393,17 @@ DupMessage = Switch(
     ""
 );
 
-CanSubmit = !IsBlank(SelectedEntity) && CountRows(MissingFields) = 0 && !EmailInvalid &&
-    DupStatus <> "Blocked" && (DupStatus <> "Possible match" || tglNotDuplicate.Value);
+CanSubmit = !IsBlank(SelectedEntity) && CountRows(MissingFields) = 0 && CountRows(FieldProblems) = 0 &&
+    DupStatus <> "Blocked" && (DupStatus <> "Possible match" || tglNotDuplicate.Value) &&
+    (!Editing || CountRows(EditChanges) > 0 || !IsBlank(Trim(txtReplyNote.Text)));
 StatusText = If(
-    CanSubmit, "Ready to submit.",
+    CanSubmit, If(Editing, "Ready to resubmit. ", "Ready to submit. ") & If(Editing, ChangesText, ""),
     Trim(
         If(IsBlank(SelectedEntity), "Choose a business entity. ", "") &
         If(CountRows(MissingFields) > 0, "Still needed: " & Concat(MissingFields, DisplayLabel, ", ") & ". ", "") &
-        If(EmailInvalid, "Check the contact email. ", "") &
+        If(CountRows(FieldProblems) > 0, "Check: " & Concat(FieldProblems, DisplayLabel & " " & Problem, "; ") & ". ", "") &
+        If(Editing && CountRows(EditChanges) = 0 && IsBlank(Trim(txtReplyNote.Text)),
+           "Make the changes asked for, or reply to the approver. ", "") &
         Switch(DupStatus,
             "Blocked", "This " & Lower(SelectedType) & " already exists, so it can't be submitted again. ",
             "Possible match", If(tglNotDuplicate.Value, "", "Confirm the possible match above. "),
@@ -303,14 +433,21 @@ SelectedLog = With(
         {{Role: ActorRole, Action: Action, Actor: Lower(Actor), Who: Actor, Detail: Detail, At: Timestamp}}
     )
 );
-// Still waiting: an Assigned row with no Approve/Reject from the same role yet
+// Still waiting: an approver can be asked again after a resubmit, so each Assigned row says its round
+// ("Stage 1, round 2"). A round is open while that role has made fewer decisions than its round number.
+DecisionActions = ["Approve", "Reject", "Request changes"];
 WaitingOn = Filter(
     SelectedLog As a,
     a.Action = "Assigned" &&
-    IsBlank(LookUp(SelectedLog As d, d.Role = a.Role && (d.Action = "Approve" || d.Action = "Reject")))
+    CountRows(Filter(SelectedLog As d, d.Role = a.Role && d.Action in DecisionActions)) =
+        If("round " in a.Detail, Value(Last(Split(a.Detail, "round ")).Value), 1) - 1
 );
-WaitingText = If(
-    CountRows(WaitingOn) = 0, "No one. " & SelectedRequest.Status & ".",
+LastAsk = First(Sort(Filter(SelectedLog, Action = "Request changes"), At, SortOrder.Descending));
+WaitingText = If(SelectedRequest.Status = "Changes requested",
+    "You (" & SelectedRequest.Requestor & "): " & LastAsk.Role & " asked for changes: " & LastAsk.Detail &
+    " Press Edit and resubmit." & If(CountRows(WaitingOn) > 0, Char(10), ""), "") &
+If(
+    CountRows(WaitingOn) = 0, If(SelectedRequest.Status = "Changes requested", "", "No one. " & SelectedRequest.Status & "."),
     Concat(
         WaitingOn As w,
         w.Role & " - " &
@@ -358,7 +495,7 @@ SubmittedText = With(
                 {{L: "Product family", V: r.ProductFamily}},
                 {{L: "Unit of measure", V: r.UnitOfMeasure}},
                 {{L: "HS code", V: r.HSCode}},
-                {{L: "Regulated", V: If(r.RequestType = "Item", If(r.IsRegulated, "Yes", "No"))}},
+                {{L: "Regulated", V: If(r.RequestType = "Item", Coalesce(r.RegulatedAnswer, If(r.IsRegulated, "Yes", "No")))}},
                 {{L: "Regulatory licence no.", V: r.RegulatoryLicenceNo}},
                 {{L: "Shelf life (months)", V: Text(r.ShelfLifeMonths)}},
                 {{L: "Tax ID", V: r.TaxID}},
@@ -410,7 +547,7 @@ ApproverPreview = ForAll(
         x.Active && (x.RequestType = SelectedType || x.RequestType = "Any") &&
         (x.Entity = SelectedEntity || x.Entity = "Any") &&
         (IsBlank(x.ConditionField) ||
-         (x.ConditionField = "IsRegulated" && SelectedType = "Item" && tglIsRegulated.Value) ||
+         (x.ConditionField = "IsRegulated" && SelectedType = "Item" && ddIsRegulated.Selected.Value in ["Yes", "Not sure"]) ||
          (x.ConditionField = "SuppliesRegulatedGoods" && SelectedType = "Vendor" && tglSuppliesRegulatedGoods.Value))
     ) As r,
     With(
@@ -490,7 +627,7 @@ def label(name, text, **extra):
 BLOCK_W = "Min(Parent.Width - 48, 720)"
 
 
-def block(name, title_expr, input_ctl, help_expr, visible):
+def block(name, title_expr, input_ctl, help_expr, visible, help_color="RGBA(96, 94, 92, 1)"):
     """One field: title, input, help text, stacked in a small vertical container."""
     return ctl(name, "GroupContainer@1.5.0", {
         "Fill": "RGBA(255, 255, 255, 1)", "FillPortions": "0", "Height": "92", "Width": BLOCK_W,
@@ -502,15 +639,17 @@ def block(name, title_expr, input_ctl, help_expr, visible):
               FontWeight="FontWeight.Semibold", PaddingLeft="0"),
         input_ctl,
         label(name.replace("blk", "hlp"), help_expr, FillPortions="0", Height="20", Size="10",
-              Color="RGBA(96, 94, 92, 1)", PaddingLeft="0"),
+              Color=help_color, PaddingLeft="0"),
     ], variant="AutoLayout")
 
 
 def input_for(f):
+    """The field's input. Its default is blank, or the saved value while a sent-back request is being edited."""
     _, name, c, kind, _ = f
     base = {"FillPortions": "0", "Height": "38"}
+    default = f'If(Editing, {old_value(f)}, "")'
     if kind in ("text", "number", "email"):
-        p = dict(TEXTINPUT, **base, Default='""', Size="12")
+        p = dict(TEXTINPUT, **base, Default=default, Size="12")
         if kind == "number":
             p["Format"] = "TextFormat.Number"
         if kind == "email":
@@ -519,44 +658,51 @@ def input_for(f):
         return ctl(c, "Classic/TextInput@2.3.2", p)
     if kind in ("choice", "country"):
         items = COUNTRIES if kind == "country" else CHOICES[name]
-        p = dict(DROPDOWN, **base, Items=fx_list(items), AllowEmptySelection="true", Default='""', Size="12")
+        p = dict(DROPDOWN, **base, Items=fx_list(items), AllowEmptySelection="true", Default=default, Size="12")
         return ctl(c, "Classic/DropDown@2.3.1", p)
     if kind == "toggle":
-        p = dict(TOGGLE, **base, Default="false", TrueText='"Yes"', FalseText='"No"', Size="12",
+        p = dict(TOGGLE, **base, Default=f"If(Editing, EditRec.{name}, false)", TrueText='"Yes"', FalseText='"No"', Size="12",
                  Width="160", AlignInContainer="AlignInContainer.Start")
         return ctl(c, "Classic/Toggle@2.1.0", p)
     raise ValueError(kind)
 
 
 def field_block(f):
-    rtype, name, c, kind, _ = f
+    rtype, name, c, kind, extra = f
     rule = f'LookUp(VisibleFields, FieldName = "{name}")'
     title = (f'With({{r: {rule}}}, r.DisplayLabel & If(r.Sensitive = "Yes", "  (restricted)", "") & " *")')
+    problem = f'LookUp(FieldProblems, FieldName = "{name}").Problem'
+    help_text = extra.get("help", f"{rule}.HelpText")
     return block("blk" + c[3:] if c.startswith("txt") or c.startswith("tgl") else "blk" + c[2:],
-                 title, input_for(f), f"{rule}.HelpText",
-                 f'SelectedType = "{rtype}" && "{name}" in VisibleFields.FieldName')
+                 title, input_for(f),
+                 f'If(IsBlank({problem}), {help_text}, {rule}.DisplayLabel & " " & {problem})',
+                 f'SelectedType = "{rtype}" && "{name}" in VisibleFields.FieldName',
+                 help_color=f"If(IsBlank({problem}), RGBA(96, 94, 92, 1), RGBA(164, 38, 44, 1))")
 
 
 # ---------------------------------------------------------------------------- screen tree
 top_blocks = [
     block("blkRequestType", '"Request type *"',
           ctl("ddRequestType", "Classic/DropDown@2.3.1",
-              dict(DROPDOWN, FillPortions="0", Height="38", Items="RequestTypes", Default='"Customer"', Size="12")),
+              dict(DROPDOWN, FillPortions="0", Height="38", Items="RequestTypes", Size="12",
+                   Default='If(Editing, EditRec.RequestType, "Customer")',
+                   DisplayMode="If(Editing, DisplayMode.Disabled, DisplayMode.Edit)")),
           '"What are you asking MDM to create?"', "true"),
     block("blkEntity", '"Business entity *"',
           ctl("ddEntity", "Classic/DropDown@2.3.1",
-              dict(DROPDOWN, FillPortions="0", Height="38", Size="12", AllowEmptySelection="true", Default='""',
+              dict(DROPDOWN, FillPortions="0", Height="38", Size="12", AllowEmptySelection="true",
+                   Default='If(Editing, LookUp(BusinessUnits, Title = EditRec.Entity).BusinessUnitName, "")',
+                   DisplayMode="If(Editing, DisplayMode.Disabled, DisplayMode.Edit)",
                    Items="ForAll(Filter(BusinessUnits, Active = true), {Value: BusinessUnitName, Code: Title})")),
           '"Which Lives Group business this is for"', "true"),
 ]
 
-reset_targets = ["ddEntity", "tglNotDuplicate"] + [f[2] for f in FIELDS]
+reset_targets = ["ddEntity", "tglNotDuplicate", "txtReplyNote"] + [f[2] for f in FIELDS]
 
-PATCH_REQ = ",\n".join([
-    "Title: rid", "RequestType: SelectedType", "Entity: SelectedEntity",
+IDENT = ["Title: rid", "RequestType: SelectedType", "Entity: SelectedEntity", "Requestor: User().FullName",
+         'Status: "Pending approval"', 'CurrentStage: "Submitted, waiting for approvers"', "SubmittedAt: Now()"]
+DATA = [
     'Country: Switch(SelectedType, "Customer", ddCustomerCountry.Selected.Value, "Vendor", txtVendorCountry.Text)',
-    "Requestor: User().FullName", 'Status: "Pending approval"', 'CurrentStage: "Submitted, waiting for approvers"',
-    "SubmittedAt: Now()",
     'CustomerName: If(SelectedType = "Customer", txtCustomerName.Text)',
     'RegistrationNo: If(SelectedType = "Customer", txtRegistrationNo.Text)',
     'BillingAddress: If(SelectedType = "Customer", txtBillingAddress.Text)',
@@ -567,8 +713,10 @@ PATCH_REQ = ",\n".join([
     'UnitOfMeasure: If(SelectedType = "Item", ddUnitOfMeasure.Selected.Value)',
     'ManufacturerPartNo: If(SelectedType = "Item", txtManufacturerPartNo.Text)',
     'HSCode: If(SelectedType = "Item", txtHSCode.Text)',
-    'IsRegulated: If(SelectedType = "Item", tglIsRegulated.Value)',
-    'RegulatoryLicenceNo: If(SelectedType = "Item" && tglIsRegulated.Value, txtRegulatoryLicenceNo.Text)',
+    # "Not sure" counts as regulated for routing, so Quality/Regulatory sees it; RegulatedAnswer keeps the answer
+    'IsRegulated: If(SelectedType = "Item", ddIsRegulated.Selected.Value in ["Yes", "Not sure"])',
+    'RegulatedAnswer: If(SelectedType = "Item", ddIsRegulated.Selected.Value)',
+    'RegulatoryLicenceNo: If(SelectedType = "Item" && ddIsRegulated.Selected.Value = "Yes", txtRegulatoryLicenceNo.Text)',
     'ShelfLifeMonths: If(SelectedType = "Item" && "ShelfLifeMonths" in VisibleFields.FieldName, Value(txtShelfLifeMonths.Text))',
     'VendorName: If(SelectedType = "Vendor", txtVendorName.Text)',
     'TaxID: If(SelectedType = "Vendor", txtTaxID.Text)',
@@ -579,21 +727,44 @@ PATCH_REQ = ",\n".join([
     'Owner: If(SelectedType = "Cost Center", txtOwner.Text)',
     'BudgetYear: If(SelectedType = "Cost Center", Value(txtBudgetYear.Text))',
     "DuplicateCheck: DupStatus", "PossibleMatchID: DupRecordID",
+]
+PATCH_REQ = ",\n".join(IDENT + DATA)
+# Resubmit after "Request changes": same fields, plus a dated line in ChangeNote saying what changed
+PATCH_RESUBMIT = ",\n".join(DATA + [
+    'Status: "Resubmitted"', 'CurrentStage: "Resubmitted; back with the approver who asked for changes"',
+    'ChangeNote: If(IsBlank(EditRec.ChangeNote), "", EditRec.ChangeNote & Char(10)) & Text(Now(), "dd mmm yyyy hh:mm") & '
+    '" " & User().FullName & ": " & ChangesText & If(IsBlank(Trim(txtReplyNote.Text)), "", " Reply: " & Trim(txtReplyNote.Text))',
 ])
-PATCH_SENS = ",\n".join([
-    "Title: rid", "RequestID: rid",
+SENS_DATA = [
     'PaymentTerms: If(SelectedType = "Customer", ddCustomerPaymentTerms.Selected.Value, ddVendorPaymentTerms.Selected.Value)',
     'CreditLimit: If(SelectedType = "Customer", Value(txtCreditLimit.Text))',
     'BankName: If(SelectedType = "Vendor", txtBankName.Text)',
     'BankAccount: If(SelectedType = "Vendor", txtBankAccount.Text)',
-])
+]
+PATCH_SENS = ",\n".join(["Title: rid", "RequestID: rid"] + SENS_DATA)
 
 
 def indent(s, n):
     return "\n".join(" " * n + line for line in s.split("\n"))
 
 
-SUBMIT = f"""With(
+RESUBMIT = f"""IfError(
+    Patch(Requests, EditRec, {{
+{indent(PATCH_RESUBMIT, 8)}
+    }});
+    If(!IsBlank(EditSens),
+        Patch(SensitiveDetails, EditSens, {{
+{indent(",\n".join(SENS_DATA), 12)}
+        }})
+    );
+    Set(gLastRequestID, EditID);
+    Notify(EditID & " resubmitted. It's back with the approver who asked for changes.", NotificationType.Success);
+    Set(gEditID, "");
+{indent(";\n".join(f"Reset({t})" for t in reset_targets), 4)},
+    Notify("Couldn't resubmit: " & FirstError.Message, NotificationType.Error)
+)"""
+
+CREATE = f"""With(
     {{rid: "REQ-" & Text(Coalesce(First(Sort(Requests, ID, SortOrder.Descending)).ID, 0) + 1, "0000")}},
     IfError(
         Patch(Requests, Defaults(Requests), {{
@@ -610,6 +781,7 @@ SUBMIT = f"""With(
         Notify("Couldn't submit: " & FirstError.Message, NotificationType.Error)
     )
 )"""
+SUBMIT = f"If(\n    Editing,\n{indent(RESUBMIT, 4)},\n{indent(CREATE, 4)}\n)"
 
 def outline(style):
     """White button with a blue outline (secondary action)."""
@@ -645,13 +817,44 @@ def header(n, title, active):
         [
             label(f"lblAppTitle{'' if n == 1 else n}", f'"{title}"', Size="18", Wrap="false",
                   FontWeight="FontWeight.Semibold", FillPortions="1", Height="40"),
-            label(f"lblRequestor{'' if n == 1 else n}", '"Signed in: " & User().FullName', Size="11",
-                  Color="RGBA(96, 94, 92, 1)", Align="Align.Right", FillPortions="0", Width="260", Height="40"),
+            label(f"lblRequestor{'' if n == 1 else n}", '"Lives Group" & Char(10) & "Signed in: " & User().FullName',
+                  Size="11", Wrap="true", Color="RGBA(96, 94, 92, 1)", Align="Align.Right", FillPortions="0",
+                  Width="260", Height="48"),
         ] + nav_buttons(n, active), variant="AutoLayout")
 
 
+def row(name, children, height, gap="12", align="LayoutAlignItems.Stretch", pad_left="0"):
+    """A fixed-height horizontal strip (no wrapping: wrapped containers ignored child heights)."""
+    return ctl(name, "GroupContainer@1.5.0", {
+        "Fill": "RGBA(255, 255, 255, 1)", "FillPortions": "0", "Height": str(height), "LayoutMinHeight": "16",
+        "LayoutMinWidth": "16", "LayoutDirection": "LayoutDirection.Horizontal", "LayoutAlignItems": align,
+        "LayoutGap": gap, "PaddingLeft": pad_left, "DropShadow": "DropShadow.None"}, children, variant="AutoLayout")
+
+
+edit_banner = ctl("EditBanner", "GroupContainer@1.5.0", dict(
+    CARD, FillPortions="0", Height="150", Visible="Editing", Fill="RGBA(255, 244, 206, 1)",
+    LayoutDirection="LayoutDirection.Vertical", LayoutAlignItems="LayoutAlignItems.Stretch",
+    LayoutGap="4", PaddingLeft="16", PaddingRight="16"),
+    [
+        label("lblEditMessage", '"Editing " & EditID & ". " & Coalesce(EditAsk.ActorRole, "An approver") & '
+                                '" asked for changes: " & Coalesce(EditAsk.Detail, "(no comment)")',
+              Size="12", FontWeight="FontWeight.Semibold", FillPortions="0", Height="44", Wrap="true", PaddingLeft="0"),
+        ctl("txtReplyNote", "Classic/TextInput@2.3.2", dict(
+            TEXTINPUT, FillPortions="0", Height="38", Size="11", Default='""',
+            HintText='"Reply to the approver (optional), e.g. Licence no. added from the HSA certificate"')),
+        row("rowEditButtons", [
+            label("lblEditHelp", '"Change the fields below, then press Resubmit. Only the approver who asked sees '
+                                 'it again; the MDM final check sees what changed."',
+                  FillPortions="1", Size="10", Wrap="true", Color="RGBA(96, 94, 92, 1)", PaddingLeft="0"),
+            ctl("btnCancelEdit", "Classic/Button@2.2.0", outline(dict(
+                BUTTON, Text='"Cancel edit"', FillPortions="0", Width="120", Height="34", Size="11",
+                OnSelect='Set(gEditID, "");\nReset(txtReplyNote);\nNavigate(MyRequestsScreen, ScreenTransition.None)'))),
+        ], 40, align="LayoutAlignItems.Center"),
+    ], variant="AutoLayout")
+
 screen_children = [
     header(1, "OneRecord | New request", "New"),
+    edit_banner,
     ctl("DupBanner", "GroupContainer@1.5.0", dict(
         CARD, FillPortions="0", Height="96", Visible='DupStatus <> "Clear"',
         Fill='If(DupStatus = "Blocked", RGBA(253, 231, 233, 1), RGBA(255, 244, 206, 1))',
@@ -686,6 +889,8 @@ screen_children = [
         CARD, FillPortions="0", Height="75", LayoutAlignItems="LayoutAlignItems.Center",
         LayoutDirection="LayoutDirection.Horizontal", PaddingLeft="16", PaddingRight="16", LayoutGap="12"),
         [
+            # Holds the ID of a sent-back request being edited; App formulas read it (see EditID)
+            label("lblEditID", 'Coalesce(gEditID, "")', Visible="false", FillPortions="0", Width="10", Height="10"),
             label("lblStatus",
                   'If(IsBlank(gLastRequestID), "", "Last submitted: " & gLastRequestID & ".  ") & StatusText',
                   Size="11", Wrap="true", FillPortions="1", Height="56",
@@ -697,7 +902,7 @@ screen_children = [
                 BorderStyle="BorderStyle.Solid", BorderThickness="1",
                 OnSelect=";\n".join(f"Reset({t})" for t in reset_targets))),
             ctl("btnSubmit", "Classic/Button@2.2.0", dict(
-                BUTTON, Text='"Submit request"', FillPortions="0", Width="180", Height="40", Size="12",
+                BUTTON, Text='If(Editing, "Resubmit", "Submit request")', FillPortions="0", Width="180", Height="40", Size="12",
                 DisplayMode="If(CanSubmit, DisplayMode.Edit, DisplayMode.Disabled)", OnSelect=SUBMIT)),
         ], variant="AutoLayout"),
 ]
@@ -719,7 +924,7 @@ app_yaml = HEADER + "App:\n  Properties:\n    Formulas: |-\n" + indent("=" + FOR
 
 # ---------------------------------------------------------------------------- My requests screen
 STATUS_COLOR = ('Switch({s}, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), '
-                'RGBA(0, 90, 158, 1))')
+                '"Changes requested", RGBA(157, 93, 0, 1), RGBA(0, 90, 158, 1))')
 row_name = ("Coalesce(ThisItem.CustomerName, ThisItem.ItemDescription, ThisItem.VendorName, "
             "ThisItem.CostCenterName)")
 # Three fixed lines per row (ID and type, name, entity and status): wrapped text in one short label got clipped.
@@ -779,7 +984,8 @@ list_panel = ctl("ListPanel", "GroupContainer@1.5.0", dict(
         "LayoutMinWidth": "16", "LayoutDirection": "LayoutDirection.Horizontal",
         "LayoutAlignItems": "LayoutAlignItems.Center", "LayoutGap": "12", "DropShadow": "DropShadow.None"}, [
         ctl("ddStatusFilter", "Classic/DropDown@2.3.1", dict(
-            DROPDOWN, Items=fx_list(["All", "Pending approval", "Rejected", "Created in SAP"]), Default='"All"',
+            DROPDOWN, Items=fx_list(["All", "Pending approval", "Changes requested", "Resubmitted", "Rejected",
+                                     "Created in SAP"]), Default='"All"',
             FillPortions="0", Width="220", Height="36", Size="11")),
         ctl("tglShowAll", "Classic/Toggle@2.1.0", dict(
             TOGGLE, Default="false", Visible="IsMDM", FillPortions="1", Height="36", Size="11",
@@ -810,9 +1016,18 @@ detail_panel = ctl("DetailPanel", "GroupContainer@1.5.0", dict(
         label("lblDetailStatus", 'SelectedRequest.Status & " - " & SelectedRequest.CurrentStage', Size="12",
               FontWeight="FontWeight.Semibold", Wrap="true", AutoHeight="true", FillPortions="0", Height="30",
               PaddingLeft="0", Color=STATUS_COLOR.format(s="SelectedRequest.Status")),
-    ] + section("Waiting", "Waiting on", "WaitingText")
+    ]] + [
+        ctl("btnEditResubmit", "Classic/Button@2.2.0", dict(
+            BUTTON, Text='"Edit and resubmit"', FillPortions="0", Width="200", Height="38", Size="12",
+            AlignInContainer="AlignInContainer.Start",
+            Visible='!IsBlank(galRequests.Selected) && SelectedRequest.Status = "Changes requested" && '
+                    "Lower(SelectedRequest.'Created By'.Email) = Lower(User().Email)",
+            OnSelect="Set(gEditID, SelectedRequestID);\nNavigate(NewRequestScreen, ScreenTransition.None)")),
+    ] + [shown_with_selection(c) for c in
+        section("Waiting", "Waiting on", "WaitingText")
       + section("Timeline", "Timeline", "TimelineText")
       + section("Submitted", "Submitted details", "SubmittedText")
+      + section("Changes", "Changes after approvers asked", 'Coalesce(SelectedRequest.ChangeNote, "None.")')
       + section("Sensitive", "Sensitive details (only shown to you if SharePoint allows it)", "SensitiveText")], variant="AutoLayout")
 
 mine_screen = ctl("ScreenContainer2", "GroupContainer@1.5.0", {
@@ -837,12 +1052,6 @@ mine_yaml = HEADER + "\n".join([
 GREY = "RGBA(96, 94, 92, 1)"
 
 
-def row(name, children, height, gap="12", align="LayoutAlignItems.Stretch", pad_left="0"):
-    """A fixed-height horizontal strip (no wrapping: wrapped containers ignored child heights)."""
-    return ctl(name, "GroupContainer@1.5.0", {
-        "Fill": "RGBA(255, 255, 255, 1)", "FillPortions": "0", "Height": str(height), "LayoutMinHeight": "16",
-        "LayoutMinWidth": "16", "LayoutDirection": "LayoutDirection.Horizontal", "LayoutAlignItems": align,
-        "LayoutGap": gap, "PaddingLeft": pad_left, "DropShadow": "DropShadow.None"}, children, variant="AutoLayout")
 
 
 def small_block(name, title, input_ctl):
@@ -917,6 +1126,7 @@ GRIDS = [
      'If({r}.Required = "Conditional", " when " & {r}.ConditionField & " = " & {r}.ConditionValue, "")',
      [("RequestType", "Request type", "choice"), ("FieldName", "Field name", "text"),
       ("DisplayLabel", "Label", "text"), ("Required", "Required", "choice"),
+      ("Check", "Format check (blank = default)", "choice"),
       ("ConditionField", "Only when field", "text"), ("ConditionValue", "equals", "text"),
       ("Sensitive", "Sensitive", "choice"), ("VisibleToRoles", "Sensitive values visible to", "text"),
       ("HelpText", "Help text", "text")],
@@ -940,7 +1150,7 @@ GRIDS = [
 ]
 CHOICE_ITEMS = {("RR", "RequestType"): TYPES + ["Any"], ("RR", "ConditionField"): CONDITIONS,
                 ("RF", "RequestType"): TYPES, ("RF", "Required"): ["Always", "Conditional"],
-                ("RF", "Sensitive"): ["Yes", "No"], ("RO", "TimeZone"): TIME_ZONES}
+                ("RF", "Sensitive"): ["Yes", "No"], ("RF", "Check"): CHECKS, ("RO", "TimeZone"): TIME_ZONES}
 GAL_H, ROW_H = 240, 66
 
 
@@ -1050,7 +1260,7 @@ admin_body = ctl("AdminBody", "GroupContainer@1.5.0", dict(
             Size="11"))),
     ], ROW_H),
     row("rowNewBU4", [
-        small_block("blkNewBUHeadEmail", "BU Head email", text_in("txtNewBUHeadEmail", "name@company.com")),
+        small_block("blkNewBUHeadEmail", "BU Head email", text_in("txtNewBUHeadEmail", "their Lives Group email")),
         small_block("blkNewBUEscalate", "Escalate to (optional)", text_in("txtNewBUEscalate", "email")),
     ], ROW_H),
     ctl("btnAddBU", "Classic/Button@2.2.0", dict(

@@ -18,7 +18,8 @@ App:
       FieldRules = ForAll(
           RequiredFields,
           {RequestType: RequestType, FieldName: FieldName, DisplayLabel: DisplayLabel, Required: Required,
-            ConditionField: ConditionField, ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText}
+            ConditionField: ConditionField, ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText,
+            Check: Check}
       );
       TypeRules = Filter(FieldRules, RequestType = SelectedType);
       
@@ -37,7 +38,7 @@ App:
           {F: "ProductFamily", V: ddProductFamily.Selected.Value},
           {F: "UnitOfMeasure", V: ddUnitOfMeasure.Selected.Value},
           {F: "HSCode", V: txtHSCode.Text},
-          {F: "IsRegulated", V: If(tglIsRegulated.Value, "Yes", "No")},
+          {F: "IsRegulated", V: ddIsRegulated.Selected.Value},
           {F: "RegulatoryLicenceNo", V: txtRegulatoryLicenceNo.Text},
           {F: "ShelfLifeMonths", V: txtShelfLifeMonths.Text},
           {F: "VendorName", V: txtVendorName.Text},
@@ -58,7 +59,121 @@ App:
           Required <> "Conditional" || LookUp(FieldValues, F = ConditionField).V = ConditionValue
       );
       MissingFields = Filter(VisibleFields, IsBlank(Trim(LookUp(FieldValues, F = FieldName).V)));
-      EmailInvalid = SelectedType = "Customer" && !IsBlank(txtContactEmail.Text) && !IsMatch(txtContactEmail.Text, Match.Email);
+      
+      // ---- Filled in, but plausible? Placeholders (N/A, TBC, -) never pass; formats come from the field's Check
+      // (RequiredFields, editable on the Rules screen), else the default below. k = the value's letters and digits only.
+      DefaultChecks = Table(
+          {F: "CustomerName", C: "Text"},
+          {F: "RegistrationNo", C: "RegNo"},
+          {F: "BillingAddress", C: "Text"},
+          {F: "ContactEmail", C: "Email"},
+          {F: "ItemDescription", C: "Text"},
+          {F: "ManufacturerPartNo", C: "PartNo"},
+          {F: "HSCode", C: "HSCode"},
+          {F: "RegulatoryLicenceNo", C: "LicenceNo"},
+          {F: "ShelfLifeMonths", C: "Months"},
+          {F: "VendorName", C: "Text"},
+          {F: "TaxID", C: "TaxID"},
+          {F: "ISO13485CertNo", C: "LicenceNo"},
+          {F: "BankName", C: "Text"},
+          {F: "BankAccount", C: "BankAccount"},
+          {F: "CostCenterName", C: "Text"},
+          {F: "Owner", C: "Text"},
+          {F: "BudgetYear", C: "Year"}
+      );
+      FreeTextFields = ["CustomerName", "RegistrationNo", "BillingAddress", "ContactEmail", "ItemDescription", "ManufacturerPartNo", "HSCode", "RegulatoryLicenceNo", "VendorName", "Country", "TaxID", "ISO13485CertNo", "BankName", "BankAccount", "CostCenterName", "Owner"];
+      NumberFields = ["CreditLimit", "ShelfLifeMonths", "BudgetYear"];
+      Placeholders = ["na", "nil", "none", "null", "tbc", "tba", "tbd", "x", "xx", "xxx", "xxxx", "unknown", "test", "dummy", "pending", "later", "asap", "idk", "same", "sameasabove", "asabove", "abc", "asdf", "qwerty", "123", "1234", "12345", "0", "00", "000"];
+      FieldChecks = ForAll(
+          Filter(VisibleFields, FieldName in FreeTextFields || FieldName in NumberFields) As r,
+          With(
+              {v: Trim(LookUp(FieldValues, F = r.FieldName).V),
+               c: Coalesce(r.Check, LookUp(DefaultChecks, F = r.FieldName).C, "None")},
+              With(
+                  {k: Lower(Concat(Filter(ForAll(Sequence(Len(v)), Mid(v, Value, 1)) As ch, IsMatch(ch.Value, "[A-Za-z0-9]")), Value))},
+                  {FieldName: r.FieldName, DisplayLabel: r.DisplayLabel,
+                   Problem: If(
+                      IsBlank(v), "",
+                      !(r.FieldName in NumberFields) && (IsBlank(k) || k in Placeholders),
+                          "looks like a placeholder. Enter the real value, or ask the MDM team if you don't have it",
+                      c = "Text", If(Len(k) >= 3, "", "is too short"),
+                      c = "Email", If(IsMatch(v, Match.Email), "", "isn't a valid email address"),
+                      c = "RegNo", With({u: Upper(k)}, Switch(ddCustomerCountry.Selected.Value,
+                          "SG", If(IsMatch(u, "^(?:\d{8}[A-Z]|\d{9}[A-Z]|[TSR]\d{2}[A-Z]{2}\d{4}[A-Z])$"), "",
+                              "doesn't look like a Singapore UEN (e.g. 200288778W)"),
+                          "MY", If(IsMatch(u, "^(?:\d{12}|\d{14}|\d{6,7}[A-Z])$"), "",
+                              "doesn't look like an SSM registration no. (12 digits, e.g. 201901000005)"),
+                          "TH", If(IsMatch(u, "^\d{13}$"), "", "should be the 13-digit Thai tax ID"),
+                          "ID", If(IsMatch(u, "^\d{15,16}$"), "", "should be the 15 or 16 digit NPWP (e.g. 01.234.567.8-901.000)"),
+                          "VN", If(IsMatch(u, "^(?:\d{10}|\d{13})$"), "", "should be the 10-digit tax code (MST), or 13 digits for a branch"),
+                          "")),
+                      c = "HSCode", If(IsMatch(k, "^\d{6,10}$"), "", "should be 6 to 10 digits (e.g. 3822.19.00)"),
+                      c = "TaxID", If(Len(k) >= 5 && Len(k) <= 20 && IsMatch(k, "\d", MatchOptions.Contains), "",
+                          "should be 5 to 20 letters and digits, including at least one digit"),
+                      c = "LicenceNo", If(Len(k) >= 5 && Len(k) <= 30 && IsMatch(k, "\d", MatchOptions.Contains), "",
+                          "should be 5 to 30 letters and digits, including at least one digit"),
+                      c = "PartNo", If(Len(k) >= 3, "", "is too short for a part no."),
+                      c = "BankAccount", If(Len(k) >= 6 && Len(k) <= 34 && IsMatch(k, "\d{4}", MatchOptions.Contains), "",
+                          "doesn't look like a bank account no. (6 to 34 characters, mostly digits)"),
+                      c = "Months", If(Value(v) >= 1 && Value(v) <= 120, "", "should be between 1 and 120 months"),
+                      c = "Year", If(Value(v) >= Year(Today()) - 1 && Value(v) <= Year(Today()) + 2, "",
+                          "should be between " & (Year(Today()) - 1) & " and " & (Year(Today()) + 2)),
+                      "")}
+              )
+          )
+      );
+      FieldProblems = Filter(FieldChecks, !IsBlank(Problem));
+      EmailInvalid = "ContactEmail" in FieldProblems.FieldName;
+      
+      // ---- Editing a request an approver sent back (My requests > Edit and resubmit). The ID sits in a hidden
+      // label on this screen, so these formulas don't depend on a variable.
+      EditID = lblEditID.Text;
+      Editing = !IsBlank(EditID);
+      EditRec = With({id: EditID}, If(!IsBlank(id), LookUp(Requests, Title = id)));
+      EditSens = With({id: EditID}, If(!IsBlank(id), LookUp(SensitiveDetails, RequestID = id)));
+      EditAsk = With(
+          {id: EditID},
+          If(!IsBlank(id), First(Sort(Filter(ApprovalLog, RequestID = id && Action = "Request changes"), Timestamp, SortOrder.Descending)))
+      );
+      // What the requestor changed, compared with what was submitted. Sensitive values are named, never shown.
+      EditChanges = If(
+          Editing,
+          Filter(
+              Table(
+                  {L: "Customer name", Old: EditRec.CustomerName, New: LookUp(FieldValues, F = "CustomerName").V, S: false},
+                  {L: "Registration no.", Old: EditRec.RegistrationNo, New: LookUp(FieldValues, F = "RegistrationNo").V, S: false},
+                  {L: "Billing address", Old: EditRec.BillingAddress, New: LookUp(FieldValues, F = "BillingAddress").V, S: false},
+                  {L: "Contact email", Old: EditRec.ContactEmail, New: LookUp(FieldValues, F = "ContactEmail").V, S: false},
+                  {L: "Segment", Old: EditRec.Segment, New: LookUp(FieldValues, F = "Segment").V, S: false},
+                  {L: "Credit limit", Old: Text(EditSens.CreditLimit), New: LookUp(FieldValues, F = "CreditLimit").V, S: true},
+                  {L: "Item description", Old: EditRec.ItemDescription, New: LookUp(FieldValues, F = "ItemDescription").V, S: false},
+                  {L: "Manufacturer part no.", Old: EditRec.ManufacturerPartNo, New: LookUp(FieldValues, F = "ManufacturerPartNo").V, S: false},
+                  {L: "Product family", Old: EditRec.ProductFamily, New: LookUp(FieldValues, F = "ProductFamily").V, S: false},
+                  {L: "Unit of measure", Old: EditRec.UnitOfMeasure, New: LookUp(FieldValues, F = "UnitOfMeasure").V, S: false},
+                  {L: "HS code", Old: EditRec.HSCode, New: LookUp(FieldValues, F = "HSCode").V, S: false},
+                  {L: "Regulated", Old: Coalesce(EditRec.RegulatedAnswer, If(EditRec.IsRegulated, "Yes", "No")), New: LookUp(FieldValues, F = "IsRegulated").V, S: false},
+                  {L: "Regulatory licence no.", Old: EditRec.RegulatoryLicenceNo, New: LookUp(FieldValues, F = "RegulatoryLicenceNo").V, S: false},
+                  {L: "Shelf life (months)", Old: Text(EditRec.ShelfLifeMonths), New: LookUp(FieldValues, F = "ShelfLifeMonths").V, S: false},
+                  {L: "Vendor name", Old: EditRec.VendorName, New: LookUp(FieldValues, F = "VendorName").V, S: false},
+                  {L: "Country", Old: EditRec.Country, New: LookUp(FieldValues, F = "Country").V, S: false},
+                  {L: "Tax ID", Old: EditRec.TaxID, New: LookUp(FieldValues, F = "TaxID").V, S: false},
+                  {L: "Supplies regulated goods", Old: If(EditRec.SuppliesRegulatedGoods, "Yes", "No"), New: LookUp(FieldValues, F = "SuppliesRegulatedGoods").V, S: false},
+                  {L: "ISO 13485 certificate no.", Old: EditRec.ISO13485CertNo, New: LookUp(FieldValues, F = "ISO13485CertNo").V, S: false},
+                  {L: "Bank name", Old: EditSens.BankName, New: LookUp(FieldValues, F = "BankName").V, S: true},
+                  {L: "Bank account", Old: EditSens.BankAccount, New: LookUp(FieldValues, F = "BankAccount").V, S: true},
+                  {L: "Payment terms", Old: EditSens.PaymentTerms, New: LookUp(FieldValues, F = "PaymentTerms").V, S: true},
+                  {L: "Cost centre name", Old: EditRec.CostCenterName, New: LookUp(FieldValues, F = "CostCenterName").V, S: false},
+                  {L: "Department", Old: EditRec.Department, New: LookUp(FieldValues, F = "Department").V, S: false},
+                  {L: "Owner", Old: EditRec.Owner, New: LookUp(FieldValues, F = "Owner").V, S: false},
+                  {L: "Budget year", Old: Text(EditRec.BudgetYear), New: LookUp(FieldValues, F = "BudgetYear").V, S: false}
+              ),
+              Coalesce(Old, "") <> Coalesce(New, "")
+          )
+      );
+      ChangesText = If(
+          CountRows(EditChanges) = 0, "No fields changed.",
+          Concat(EditChanges, L & If(S, " changed", ": " & Char(34) & Old & Char(34) & " -> " & Char(34) & New & Char(34)), "; ") & "."
+      );
       
       // ---- Live duplicate checks. Customers use the same clean-up as sharepoint/LISTS.md
       LegalWords = ["pte", "ltd", "sdn", "bhd", "co", "jsc", "pt", "inc", "gmbh", "ag", "sa", "the"];
@@ -92,7 +207,7 @@ App:
       ItemKeyWords = Filter(Split(Trim(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Substitute(Lower(txtItemDescription.Text), ".", " "), ",", " "), "(", " "), ")", " "), "-", " "), "/", " "), "'", " "), """", " "), "&", " "), ":", " "), ";", " "), "#", " "), "+", " ")), " ") As w, Len(w.Value) >= 4);
       ItemRows = ForAll(
           ItemMaster,
-          {RecordID: Title, Name: Description, Norm: NormalizedName, PartNo: ManufacturerPartNo}
+          {RecordID: Title, Name: Description, Norm: NormalizedName, PartNo: ManufacturerPartNo, Regulated: Regulated}
       );
       PartMatch = If(
           !IsBlank(Trim(txtManufacturerPartNo.Text)),
@@ -101,6 +216,13 @@ App:
       ItemNameMatch = If(
           CountRows(ItemKeyWords) > 0,
           First(Filter(ItemRows As c, CountRows(Filter(ItemKeyWords As k, !(k.Value in c.Norm))) = 0))
+      );
+      // Help under "Is this regulated?": what the closest existing item says, and what "Not sure" does
+      RegulatedHint = With(
+          {m: Coalesce(PartMatch, ItemNameMatch)},
+          If(IsBlank(m), "",
+             "Similar item " & m.RecordID & " (" & m.Name & ") is " & If(m.Regulated, "regulated. ", "not regulated. ")) &
+          "Not sure? Choose Not sure and Quality/Regulatory will decide."
       );
       // Vendors: same tax ID blocks
       VendorRows = ForAll(VendorMaster, {RecordID: Title, Name: VendorName, TaxID: TaxID});
@@ -155,14 +277,17 @@ App:
           ""
       );
       
-      CanSubmit = !IsBlank(SelectedEntity) && CountRows(MissingFields) = 0 && !EmailInvalid &&
-          DupStatus <> "Blocked" && (DupStatus <> "Possible match" || tglNotDuplicate.Value);
+      CanSubmit = !IsBlank(SelectedEntity) && CountRows(MissingFields) = 0 && CountRows(FieldProblems) = 0 &&
+          DupStatus <> "Blocked" && (DupStatus <> "Possible match" || tglNotDuplicate.Value) &&
+          (!Editing || CountRows(EditChanges) > 0 || !IsBlank(Trim(txtReplyNote.Text)));
       StatusText = If(
-          CanSubmit, "Ready to submit.",
+          CanSubmit, If(Editing, "Ready to resubmit. ", "Ready to submit. ") & If(Editing, ChangesText, ""),
           Trim(
               If(IsBlank(SelectedEntity), "Choose a business entity. ", "") &
               If(CountRows(MissingFields) > 0, "Still needed: " & Concat(MissingFields, DisplayLabel, ", ") & ". ", "") &
-              If(EmailInvalid, "Check the contact email. ", "") &
+              If(CountRows(FieldProblems) > 0, "Check: " & Concat(FieldProblems, DisplayLabel & " " & Problem, "; ") & ". ", "") &
+              If(Editing && CountRows(EditChanges) = 0 && IsBlank(Trim(txtReplyNote.Text)),
+                 "Make the changes asked for, or reply to the approver. ", "") &
               Switch(DupStatus,
                   "Blocked", "This " & Lower(SelectedType) & " already exists, so it can't be submitted again. ",
                   "Possible match", If(tglNotDuplicate.Value, "", "Confirm the possible match above. "),
@@ -192,14 +317,21 @@ App:
               {Role: ActorRole, Action: Action, Actor: Lower(Actor), Who: Actor, Detail: Detail, At: Timestamp}
           )
       );
-      // Still waiting: an Assigned row with no Approve/Reject from the same role yet
+      // Still waiting: an approver can be asked again after a resubmit, so each Assigned row says its round
+      // ("Stage 1, round 2"). A round is open while that role has made fewer decisions than its round number.
+      DecisionActions = ["Approve", "Reject", "Request changes"];
       WaitingOn = Filter(
           SelectedLog As a,
           a.Action = "Assigned" &&
-          IsBlank(LookUp(SelectedLog As d, d.Role = a.Role && (d.Action = "Approve" || d.Action = "Reject")))
+          CountRows(Filter(SelectedLog As d, d.Role = a.Role && d.Action in DecisionActions)) =
+              If("round " in a.Detail, Value(Last(Split(a.Detail, "round ")).Value), 1) - 1
       );
-      WaitingText = If(
-          CountRows(WaitingOn) = 0, "No one. " & SelectedRequest.Status & ".",
+      LastAsk = First(Sort(Filter(SelectedLog, Action = "Request changes"), At, SortOrder.Descending));
+      WaitingText = If(SelectedRequest.Status = "Changes requested",
+          "You (" & SelectedRequest.Requestor & "): " & LastAsk.Role & " asked for changes: " & LastAsk.Detail &
+          " Press Edit and resubmit." & If(CountRows(WaitingOn) > 0, Char(10), ""), "") &
+      If(
+          CountRows(WaitingOn) = 0, If(SelectedRequest.Status = "Changes requested", "", "No one. " & SelectedRequest.Status & "."),
           Concat(
               WaitingOn As w,
               w.Role & " - " &
@@ -247,7 +379,7 @@ App:
                       {L: "Product family", V: r.ProductFamily},
                       {L: "Unit of measure", V: r.UnitOfMeasure},
                       {L: "HS code", V: r.HSCode},
-                      {L: "Regulated", V: If(r.RequestType = "Item", If(r.IsRegulated, "Yes", "No"))},
+                      {L: "Regulated", V: If(r.RequestType = "Item", Coalesce(r.RegulatedAnswer, If(r.IsRegulated, "Yes", "No")))},
                       {L: "Regulatory licence no.", V: r.RegulatoryLicenceNo},
                       {L: "Shelf life (months)", V: Text(r.ShelfLifeMonths)},
                       {L: "Tax ID", V: r.TaxID},
@@ -293,7 +425,7 @@ App:
               x.Active && (x.RequestType = SelectedType || x.RequestType = "Any") &&
               (x.Entity = SelectedEntity || x.Entity = "Any") &&
               (IsBlank(x.ConditionField) ||
-               (x.ConditionField = "IsRegulated" && SelectedType = "Item" && tglIsRegulated.Value) ||
+               (x.ConditionField = "IsRegulated" && SelectedType = "Item" && ddIsRegulated.Selected.Value in ["Yes", "Not sure"]) ||
                (x.ConditionField = "SuppliesRegulatedGoods" && SelectedType = "Vendor" && tglSuppliesRegulatedGoods.Value))
           ) As r,
           With(

@@ -43,10 +43,11 @@ The Streamlit app remains the place for the regional business view and forecasti
 
 | Brief asks for | How the M365 build does it |
 |---|---|
-| A standard intake for Customer, Item, Vendor and Cost Center requests | **Power App "NewRequestForm"**, *New request* screen. It shows only the fields that apply. Labels, help text and required/conditional rules come from the **RequiredFields** list (e.g. *Regulatory licence no.* appears when an item is regulated). **Submit** stays disabled until the request is complete. A *Who will approve* card shows the approvers by name before submitting, read from the same **RoutingRules** and **Roles** the flow uses, and says when a step has nobody set up. |
+| A standard intake for Customer, Item, Vendor and Cost Center requests | **Power App "NewRequestForm"**, *New request* screen. It shows only the fields that apply. Labels, help text and required/conditional rules come from the **RequiredFields** list (e.g. *Regulatory licence no.* appears when an item is regulated). **Submit** stays disabled until the request is complete **and plausible**: placeholders such as *N/A*, *TBC* or *-* never pass, and each field has a format check (registration no. against the country's format: SG UEN, MY SSM, TH 13-digit tax ID, ID NPWP, VN MST; HS code 6–10 digits; generic checks for tax ID, licence, bank account). The problem shows in red under the field. MDM picks a field's check on the Rules screen (`RequiredFields.Check`). *Is this regulated?* has no default and offers **Not sure**, which sends the item to Quality/Regulatory to decide instead of skipping them; a hint shows whether the closest existing item is regulated. A *Who will approve* card shows the approvers by name before submitting, read from the same **RoutingRules** and **Roles** the flow uses, and says when a step has nobody set up. |
 | No duplicates reaching an approver | Live checks while typing. **Customer:** same registration no. or a known alias blocks; all main words of the name in the same country warns. **Item:** same manufacturer part no. blocks; similar description (any entity) warns. **Vendor:** same tax ID blocks. **Cost Center:** an existing cost centre for that entity + department blocks. A warning can be overridden with an explicit "this is a different …" switch. |
-| Faster approvals | **Flow "OneRecord - Route and approve"**. It reads **RoutingRules** and **Roles** and sends every stage-1 check **in parallel** as an approval card in Teams/Outlook. Conditional rules (e.g. Quality/Regulatory only for regulated items) come from the list. The MDM Analyst approves last. |
+| Faster approvals | **Flow "OneRecord - Route and approve"**. It reads **RoutingRules** and **Roles** and sends every stage-1 check **in parallel** as an approval card in Teams/Outlook. Conditional rules (e.g. Quality/Regulatory only for regulated items) come from the list. The MDM Analyst approves last. Each card offers **Approve / Request changes / Reject**. *Request changes* sends the request back to the requestor at once (Teams message, status *Changes requested*); they press **Edit and resubmit** in *My requests*, the form opens with their answers filled in, and only the approver who asked sees it again. The others carry on meanwhile. Every edit is written to the request's **ChangeNote** (sensitive fields are named, never shown), which the re-check and the MDM final check display. A request not resubmitted within 14 days is closed. A rejection now reaches the requestor straight away. |
 | Requestors and approvers know where a request stands | Approvers get cards plus **"OneRecord - Reminders and escalation"**: a reminder at 9 AM in the approver's own time zone once `SLADays` pass, escalation to `EscalateTo` after `EscalateAfterDays`. Requestors get Teams messages on rejection or completion. The app's **My requests** screen shows status, stage, days open, **who it is still waiting on**, a **timeline** of everything logged for the request, the submitted details and (permissions allowing) the sensitive details. The MDM team can switch to all requests. |
+| Closing the email route | **Flow "OneRecord - Email auto-reply"** (standard Outlook connector) watches the MDM mailbox. When a staff member emails a master data request (same phrases as the email classifier), it replies with the form link and the rule that emailed requests aren't set up in SAP. Customers and our own replies are ignored. |
 | A trustworthy record of who approved what | **ApprovalLog** list: every assignment, decision, reminder, escalation, routing gap and SAP file is a row. Team members have **read-only** access; only the flows (running as the owner) write to it. Sensitive values are never logged. |
 | Protecting sensitive fields | Bank details and credit terms are saved to **SensitiveDetails**, separate from the request. Item-level permissions let requestors read only their own rows; Finance and MDM have Design access to read all. Approval cards for roles allowed to see them (from **RequiredFields → VisibleToRoles**) carry a **link** to the row, never the values, so nothing sensitive goes into Teams or email. |
 | Changing rules, fields and approvers without IT | The app's **Rules** screen (MDM only) puts every rule in one place: a *rules check* that lists any business unit with nobody set up for an approval step, an **Add a business unit** form (creates the BU and its BU Head in one step), and editable tables for business units, approval steps, form fields, people and known names. New rows start switched off or blank, so a half-finished row can't change routing. Under the hood these are list rows: A new business unit is a **BusinessUnits** row plus its people in **Roles**. A new approval step is a **RoutingRules** row. Making a field required or conditional is a **RequiredFields** row. If a business unit has no approver for a step yet (Marcus's story), the request goes to the MDM Analyst instead of stalling. MDM is told in Teams, and the gap is logged and shown on the request. |
@@ -88,7 +89,9 @@ The app and flows are generated from code in this repo. Rebuilding takes about a
    Set these column types and leave the rest as single line of text:
    - **Requests:** `SubmittedAt`, `CompletedAt` = Date and time; `IsRegulated`, `SuppliesRegulatedGoods` = Yes/No;
      `ShelfLifeMonths`, `BudgetYear` = Number. SharePoint imports `ContactEmail` as a Person column; delete it
-     and create a single-line text column called `ContactEmail`. Then add a single-line text column `ManufacturerPartNo`.
+     and create a single-line text column called `ContactEmail`. Then add single-line text columns `ManufacturerPartNo`
+     and `RegulatedAnswer`, and a **multiple lines of text** column (plain text) called `ChangeNote`.
+   - **RequiredFields:** if your list predates the `Check` column, add it as a single-line text column (blank = the app's default check).
    - **SensitiveDetails:** `CreditLimit` = Number. **ApprovalLog:** `Timestamp` = Date and time.
    - **BusinessUnits:** `Active` = Yes/No. **ItemMaster:** `Regulated` = Yes/No.
    - **RoutingRules:** `Stage`, `SLADays`, `EscalateAfterDays` = Number; `Active` = Yes/No.
@@ -109,14 +112,18 @@ The app and flows are generated from code in this repo. Rebuilding takes about a
    4. Save and publish.
 4. **Flows.**
    1. In `powerautomate/pkg.py`, set `SITE` to your site URL and `LISTS` to your list IDs. The ID is the `List=` value in each list's settings URL.
-   2. Run `python3 powerautomate/build_route_approve.py` and `python3 powerautomate/build_reminders.py`.
-   3. In Power Automate, go to **Import → Import Package (Legacy)** and import each zip, choosing your SharePoint, Approvals and Teams connections.
+   2. Also set `APP_URL` (the app's web link) and `INTERNAL_DOMAIN` (staff email domain) in `pkg.py`. Run
+      `python3 powerautomate/build_route_approve.py`, `python3 powerautomate/build_reminders.py` and
+      `python3 powerautomate/build_email_autoreply.py`.
+   3. In Power Automate, go to **Import → Import Package (Legacy)** and import each zip, choosing your SharePoint, Approvals and Teams connections (Office 365 Outlook for the auto-reply, signed in as the mailbox it should watch).
    4. Turn the flows on. If you re-import a flow later, the import creates a second copy: switch the old one off, so requests don't get two sets of approvals.
 5. **Test.** Submit one request of each type, approve them in Teams, and run *OneRecord - Reminders (send now)* to see reminders.
 
 ### Limits we know about
 
-- A rejection reaches the requestor only after **all** stage-1 approvers have answered, because the flow waits for the whole parallel step.
+- While a request is sent back, the other approvers' cards stay open on the values they saw. Their decision still counts; the MDM final check shows what changed afterwards (ChangeNote). The approval steps are fixed at submission, so switching *regulated* from No to Yes during an edit doesn't add Quality/Regulatory; MDM sees that change.
+- The flow checks for a resubmit every 5 minutes, so a resubmitted request reaches the approver within about 5 minutes.
+- Format checks are deliberately simple patterns (no checksum). The MY check also accepts 14 digits, because the synthetic data uses 14-digit SSM numbers; real SSM numbers have 12.
 - Conditional routing understands two conditions (`IsRegulated`, `SuppliesRegulatedGoods`). A new kind of condition needs a flow change.
 - The Rules screen is hidden from everyone but the MDM Analyst in **Roles**, but that is display only. To stop others editing the rule lists directly in SharePoint, give Members **Read** on them.
 - RequiredFields can show, hide or require fields the app already has. A brand-new field needs an app change (one line in `gen_form.py`).
@@ -139,7 +146,7 @@ and escalation fire. The optional AI step for ambiguous emails and the AI action
 
 ### Demo script (Amy's story)
 
-1. As **Amy**, open *New request*, choose Item, set regulated to **Yes** (the licence field appears) and type
+1. As **Amy**, open *New request*, choose Item, set regulated to **Not sure** (Quality/Regulatory joins the approvers; try *N/A* as the HS code to see it blocked) and type
    *Dengue NS1 rapid test 25T* to trigger the duplicate warning.
 2. As **Wei Jie**, **QA** and the **BU Head**, open *Approvals* and approve. The three checks run at the same time.
 3. In the sidebar, press **+3 days** on a stalled request to fire a reminder and an escalation.
