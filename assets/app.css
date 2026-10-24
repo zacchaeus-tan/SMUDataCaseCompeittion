@@ -115,8 +115,8 @@ h5 { font-weight: 600 !important; color: var(--or-navy); }
 
 /* ---------------------------------------------------------------- overview */
 /* each action: number, tag, title, reason, then its evidence link aligned with the text; a hairline between items */
-[class*="st-key-act-"] { gap: 2px !important; padding-top: 8px; border-top: 1px solid #eef2f6; }
-.st-key-act-1 { padding-top: 0; border-top: none; }
+[class*="st-key-act-"] { gap: 4px !important; padding-top: 12px; border-top: 1px solid #eef2f6; }
+.st-key-act-1 { padding-top: 22px !important; border-top: none; }
 [class*="st-key-act-"] [data-testid="stHorizontalBlock"] { gap: 8px; }
 [class*="st-key-act-"] [data-testid="stPageLink"] { display: flex; justify-content: flex-end; }
 [class*="st-key-act-"] [data-testid="stPageLink"] a { padding: 0; min-height: 0; color: var(--or-primary); }

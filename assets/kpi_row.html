@@ -34,6 +34,8 @@
   .delta {
     align-self: flex-start; font-size: 13px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
     background: var(--tone-bg); color: var(--tone);
+    /* always one line: a long note ends in "…" (full text on hover) instead of growing over the number */
+    max-width: 100%; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .delta:empty { visibility: hidden; }
 

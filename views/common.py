@@ -82,7 +82,8 @@ def kpi(label, value, *, prefix="", suffix="", decimals=0, delta=None, tone="neu
         arrow = "↑ " if delta.startswith("+") else "↓ " if delta.startswith(("-", "−")) else ""
         delta = arrow + delta
     return (f'<div class="card {tone}"><div class="label">{escape(label)}{info}</div>'
-            f'<div class="value"{number}>{escape(shown)}</div><div class="delta">{escape(delta or "")}</div></div>')
+            f'<div class="value"{number}>{escape(shown)}</div>'
+            f'<div class="delta" title="{escape(delta or "")}">{escape(delta or "")}</div></div>')
 
 
 def kpi_row(cards, height=KPI_HEIGHT):
