@@ -40,11 +40,13 @@ workflow_pages = [
     st.Page(wp.audit_log, title="Audit log", url_path="audit-log", icon=":material/receipt_long:"),
     st.Page(wp.rules, title="Rules", url_path="rules", icon=":material/tune:"),
 ]
-common.PAGES.update({p.url_path: p for group in sections.values() for p in group})  # for "see the evidence" links
+common.PAGES.update({common.page_id(p): p for group in sections.values() for p in group})  # links and access
 
 ASSETS = Path(__file__).parent / "assets"
 st.logo(str(ASSETS / "logo_light.svg"), size="large", icon_image=str(ASSETS / "icon.svg"))
 nav = st.navigation([p for group in sections.values() for p in group] + workflow_pages, position="hidden")
+if not common.allowed(nav):  # e.g. just switched to Priya while on Forecasting: go to her start page
+    st.switch_page(common.PAGES[common.user()["pages"][0]])
 common.page_style()
 common.sidebar(sections, workflow_pages, nav)
 common.clock_events()

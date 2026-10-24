@@ -29,6 +29,25 @@ CHART_TEMPLATE = pio.templates.merge_templates(pio.templates["plotly_white"], go
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 PAGES = {}  # url_path -> page, filled in by app.py so pages can link to each other
+
+# Who uses the dashboard, and which pages each person sees (by url_path). The first page is where they land.
+USERS = {
+    "daniel": dict(name="Daniel", role="Regional Commercial Lead", tier="Primary user", initials="D",
+                   pages=["overview", "growth", "forecast", "actions", "business-case"]),
+    "analyst": dict(name="Commercial analyst", role="Sales operations", tier="Secondary user", initials="CA",
+                    pages=["overview", "growth", "forecast", "actions", "inbound", "business-case"]),
+    "priya": dict(name="Priya", role="MDM Analyst", tier="Ops panel", initials="P",
+                  pages=["data-quality", "inbound"]),
+}
+
+
+def user() -> dict:
+    return USERS[st.session_state.get("user", "daniel")]
+
+
+def page_id(page) -> str:
+    """A page's path, with the default page (whose url_path is empty) called "overview"."""
+    return page.url_path or "overview"
 KPI_HEIGHT = 132  # every KPI card the same height, with or without a change figure
 
 
@@ -58,7 +77,8 @@ def header(section, headline):
     st.html(f'<div class="or-topbar"><div><div class="or-section">{escape(section)}</div>'
             f'<h1>{escape(headline)}</h1></div>'
             f'<div class="or-who"><span class="or-period">Apr 2025 – Sep 2026 · synthetic data</span>'
-            f'<span class="or-avatar" title="Lives Group">LG</span></div></div>')
+            f'<span class="or-avatar" title="{escape(user()["name"])}, {escape(user()["role"])}">'
+            f'{escape(user()["initials"])}</span></div></div>')
 
 
 def tone(change, up_is_good=True):
@@ -184,9 +204,12 @@ def sidebar(sections, workflow_pages, current):
     and demo clock) folded into one section at the bottom."""
     with st.sidebar:
         for label, section_pages in sections.items():
+            mine = [p for p in section_pages if allowed(p)]
+            if not mine:
+                continue
             if label:
                 st.html(f'<div class="or-navlabel">{escape(label)}</div>')
-            for p in section_pages:
+            for p in mine:
                 _nav_link(p, current)
         st.html('<div style="height:20px"></div>')
         in_workflow = current.url_path in {p.url_path for p in workflow_pages}
@@ -195,6 +218,28 @@ def sidebar(sections, workflow_pages, current):
                 _nav_link(p, current)
             st.divider()
             _workflow_controls()
+        _user_switch()
+
+
+def _user_switch():
+    """Bottom of the sidebar: who is using the dashboard. Each user sees their own pages."""
+    u = user()
+    with st.container(key="userswitch"):
+        st.html(f'<div class="or-user"><span class="or-uavatar">{escape(u["initials"])}</span><div>'
+                f'<div class="or-uname">{escape(u["name"])}</div>'
+                f'<div class="or-urole">{escape(u["role"])} · {escape(u["tier"])}</div></div></div>')
+        # the choice lives in st.session_state["user"], not in the widget: Streamlit drops widget state on a run
+        # that never draws the widget, which is what happens when app.py redirects to the new user's start page
+        keys = list(USERS)
+        select(st, "Switch user", keys, index=keys.index(st.session_state.get("user", "daniel")), key="user_pick",
+               label_visibility="collapsed", format_func=lambda k: USERS[k]["name"],
+               help="Switch user: each person sees their own pages",
+               on_change=lambda: st.session_state.update(user=st.session_state["user_pick"]))
+
+
+def allowed(page) -> bool:
+    """Workflow pages are open to everyone (they demo the process); dashboard pages depend on the user."""
+    return page_id(page) not in PAGES or page_id(page) in user()["pages"]
 
 
 def _nav_link(page, current):
@@ -205,7 +250,7 @@ def _nav_link(page, current):
 
 def _workflow_controls():
     """Persona picker and demo clock: they only matter for the workflow mock-up."""
-    st.markdown("**Viewing as**")
+    st.markdown("**Workflow persona**")
     select(st, "Persona", list(workflow.PERSONAS), key="persona", label_visibility="collapsed",
                  help="Switch persona to see the request from each person's side. Sensitive fields are only "
                       "visible to Finance and MDM.")

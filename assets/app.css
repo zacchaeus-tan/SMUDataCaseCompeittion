@@ -113,6 +113,26 @@ h5 { font-weight: 600 !important; color: var(--or-navy); }
 }
 [data-testid="stSidebar"] [data-testid="stExpander"] summary { color: #ffffff; }
 
+/* user switcher, pinned to the bottom of the sidebar: the sidebar's blocks stretch to full height and the
+   switcher takes the leftover space above it (on a short screen it simply follows the other items) */
+[data-testid="stSidebarContent"] { display: flex; flex-direction: column; }
+[data-testid="stSidebarUserContent"],
+[data-testid="stSidebarUserContent"] > div { flex: 1 0 auto; display: flex; flex-direction: column; }
+[data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] { flex: 1 0 auto; }
+[data-testid="stSidebarUserContent"] { padding-bottom: 16px !important; }
+[data-testid="stSidebar"] [data-testid="stLayoutWrapper"]:has(> .st-key-userswitch) { margin-top: auto; }
+.st-key-userswitch {
+  margin-top: 18px; padding: 12px; border-radius: 14px; gap: 8px !important;
+  background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.22);
+}
+.or-user { display: flex; align-items: center; gap: 10px; }
+.or-uavatar {
+  flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  background: #ffffff; color: var(--or-primary); font-size: 13px; font-weight: 700;
+}
+.or-uname { font-size: 14px; font-weight: 600; color: #ffffff; line-height: 1.2; }
+.or-urole { font-size: 11.5px; color: rgba(255, 255, 255, 0.78); line-height: 1.3; }
+
 /* ---------------------------------------------------------------- overview */
 /* each action: number, tag, title, reason, then its evidence link aligned with the text; a hairline between items */
 [class*="st-key-act-"] { gap: 4px !important; padding-top: 12px; border-top: 1px solid #eef2f6; }
