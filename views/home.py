@@ -94,7 +94,7 @@ def _heatmap(g, country):
         row = c.COUNTRY_ORDER.index(country)
         fig.add_shape(type="rect", x0=-0.5, x1=2.5, y0=row - 0.5, y1=row + 0.5, line=dict(color=theme.NAVY, width=2.5))
     # top margin leaves room for the column labels (drawn above the grid) under the card heading
-    fig.update_layout(height=240, margin=dict(l=0, r=0, t=40, b=0), yaxis=dict(autorange="reversed", showgrid=False),
+    fig.update_layout(height=226, margin=dict(l=0, r=0, t=26, b=0), yaxis=dict(autorange="reversed", showgrid=False),
                       xaxis=dict(side="top", showgrid=False, ticks="", tickfont=dict(size=12.5, color=theme.TEXT)))
     c.chart(fig)
     st.caption(f"Units {GROWTH_LABEL}. Equipment (C) volumes are small: read as directional.", help=GROWTH_HELP)
@@ -146,7 +146,7 @@ def _trend(clean, f, window, country):
     fig.add_vline(x=nxt.index[0], line=dict(color=theme.MUTED, width=1, dash="dot"))
     fig.add_annotation(x=nxt.index[0], y=1, yref="paper", text="Forecast", showarrow=False, xanchor="left",
                        font=dict(size=11, color=theme.TEXT))
-    fig.update_layout(height=215, margin=dict(l=0, r=0, t=6, b=0), hovermode="x unified",
+    fig.update_layout(height=195, margin=dict(l=0, r=0, t=6, b=0), hovermode="x unified",
                       yaxis=dict(title=None, tickformat=",.0f"), xaxis_title=None, legend=dict(y=1.06))
     c.chart(fig)
     if country and ov.accuracy(f["backtest"], country)["change"] > 0:

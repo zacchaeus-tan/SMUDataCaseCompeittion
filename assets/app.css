@@ -46,11 +46,13 @@
 [data-testid="stMain"] [data-stale="true"] { opacity: 1 !important; transition: none !important; }
 
 /* ---------------------------------------------------------------- layout */
-[data-testid="stMainBlockContainer"] { padding-top: 1rem; padding-bottom: 1rem; max-width: 1500px; }
+[data-testid="stMainBlockContainer"] { padding-top: 1rem; padding-bottom: 0.25rem; max-width: 1500px; }
 [data-testid="stMainBlockContainer"] [data-testid="stVerticalBlock"] { gap: 0.75rem; }
 [class*="st-key-card"] [data-testid="stVerticalBlock"] { gap: 0.4rem; }
 [class*="st-key-card"] h5 { padding: 0 0 2px; }
 h5 { font-weight: 600 !important; color: var(--or-navy); }
+/* no link icon next to headings: a dashboard heading isn't something to link to */
+[data-testid="stHeaderActionElements"] { display: none !important; }
 
 /* Cards: charts, tables, expanders, metrics and any container keyed "card-..." sit on white panels */
 [data-testid="stPlotlyChart"],
@@ -95,14 +97,16 @@ h5 { font-weight: 600 !important; color: var(--or-navy); }
 }
 
 /* ---------------------------------------------------------------- sidebar */
-[data-testid="stSidebar"] [data-testid="stPageLink"] a { border-radius: 12px; padding: 5px 12px; color: #ffffff; }
-[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover { background: rgba(255, 255, 255, 0.14); }
+/* each page is a rounded box inside the sidebar: faint on hover, a clear highlight for the current page */
+[data-testid="stSidebar"] [data-testid="stPageLink"] a {
+  border-radius: 10px; padding: 8px 12px; color: #ffffff; transition: background 0.15s ease;
+}
+[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover { background: rgba(255, 255, 255, 0.10); }
 [data-testid="stSidebar"] [data-testid="stPageLink"] a span { color: inherit; }
-/* current page: a light pill that runs into the page, like a tab */
 [data-testid="stSidebar"] [class*="st-key-navon"] a,
 [data-testid="stSidebar"] [class*="st-key-navon"] a:hover {
-  background: var(--or-page); color: var(--or-navy); font-weight: 600;
-  border-radius: 24px 0 0 24px; margin-right: -2rem; padding-right: 2rem;
+  background: rgba(255, 255, 255, 0.20); color: #ffffff; font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
 }
 [data-testid="stSidebar"] .or-navlabel {
   font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
@@ -136,13 +140,22 @@ h5 { font-weight: 600 !important; color: var(--or-navy); }
 /* ---------------------------------------------------------------- overview */
 /* each action: number, tag, title, reason, then its evidence link aligned with the text; a hairline between items */
 [class*="st-key-act-"] { gap: 4px !important; padding-top: 12px; border-top: 1px solid #eef2f6; }
-.st-key-act-1 { padding-top: 22px !important; border-top: none; }
+.st-key-act-1 { padding-top: 6px !important; border-top: none; }
 [class*="st-key-act-"] [data-testid="stHorizontalBlock"] { gap: 8px; }
 [class*="st-key-act-"] [data-testid="stPageLink"] { display: flex; justify-content: flex-end; }
-[class*="st-key-act-"] [data-testid="stPageLink"] a { padding: 0; min-height: 0; color: var(--or-primary); }
+[class*="st-key-act-"] [data-testid="stPageLink"] a {
+  padding: 4px 12px; min-height: 0; border-radius: 8px; color: var(--or-primary);
+}
+[class*="st-key-act-"] [data-testid="stPageLink"] a:hover { background: #e6f4f2; }
 [class*="st-key-act-"] [data-testid="stPageLink"] a p { font-size: 12.5px; font-weight: 600; }
 [class*="st-key-act-"] [data-testid="stPageLink"] a span { color: var(--or-primary); font-size: 16px; }
 [class*="st-key-card"] h5 { padding-top: 0 !important; margin-top: 0; }
+/* Streamlit pulls the next element 16px up under a heading; in a card that lets a chart's white background
+   cover the heading's descenders ("g" in "growing"), so give card headings their own space instead */
+[class*="st-key-card"] [data-testid="stMarkdownContainer"]:has(> [data-testid="stHeadingWithActionElements"]) {
+  margin-bottom: 0;
+}
+[class*="st-key-card"] h5 { padding-bottom: 8px !important; line-height: 1.3; }
 .or-action { display: flex; gap: 12px; align-items: center; }
 .or-body { margin-left: 38px; }
 .or-body .or-why b { color: var(--or-navy); font-weight: 600; }
