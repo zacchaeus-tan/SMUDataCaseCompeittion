@@ -1,8 +1,13 @@
 """Shared loaders, cached analytics and small UI helpers for the Streamlit app."""
+import numbers
+from html import escape
+from pathlib import Path
+
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
 import streamlit as st
+import streamlit.components.v1 as components
 
 from onerecord import advisor, classify, dedup, forecast, insights, process, workflow
 from onerecord.config import COUNTRIES, DATA, KEY, PRODUCTS
@@ -20,7 +25,14 @@ CHART_TEMPLATE = pio.templates.merge_templates(pio.templates["plotly_white"], go
 )))
 
 
-KPI_HEIGHT = 136  # every KPI card the same height, with or without a change figure
+ASSETS = Path(__file__).resolve().parent.parent / "assets"
+KPI_HEIGHT = 132  # every KPI card the same height, with or without a change figure
+KPI_ROW = (ASSETS / "kpi_row.html").read_text()
+
+
+def page_style():
+    """Page-wide CSS: header band, blur-fade on load, border beam on highlighted containers."""
+    st.html(f"<style>{(ASSETS / 'app.css').read_text()}</style>")
 
 
 def chart(fig):
@@ -34,9 +46,42 @@ def table_height(rows):
 
 
 def header(section, headline):
-    """Page header: the section name small, the finding as the headline."""
-    st.caption(section.upper())
-    st.header(headline, anchor=False)
+    """Page header band: the section name small, the finding as the headline."""
+    st.html(f'<div class="or-hero"><div class="or-eyebrow">{escape(section)}</div>'
+            f'<div class="or-headline">{escape(headline)}</div></div>')
+
+
+def tone(change, up_is_good=True):
+    """Colour for a change: good, bad, or neutral when there is no change."""
+    if not change:
+        return "neutral"
+    return "good" if (change > 0) == up_is_good else "bad"
+
+
+def kpi(label, value, *, prefix="", suffix="", decimals=0, delta=None, tone="neutral", help=None):
+    """One KPI card for kpi_row. A numeric value counts up; text is shown as is."""
+    info = f'<span class="info" title="{escape(help)}">i</span>' if help else ""
+    if isinstance(value, numbers.Real) and not isinstance(value, bool):  # numpy numbers count too
+        shown = f"{prefix}{value:,.{decimals}f}{suffix}"
+        number = (f' data-to="{float(value)}" data-decimals="{decimals}" data-prefix="{escape(prefix)}" '
+                  f'data-suffix="{escape(suffix)}" data-key="{escape(label)}"')
+    else:
+        shown, number = str(value), ""
+    if delta:
+        arrow = "↑ " if delta.startswith("+") else "↓ " if delta.startswith(("-", "−")) else ""
+        delta = arrow + delta
+    return (f'<div class="card {tone}"><div class="label">{escape(label)}{info}</div>'
+            f'<div class="value"{number}>{escape(shown)}</div><div class="delta">{escape(delta or "")}</div></div>')
+
+
+def kpi_row(cards, beam=None):
+    """A row of equal-sized KPI cards; `beam` is the index of the one card to highlight with a border beam."""
+    if beam is not None:
+        cards = [card.replace('class="card ', 'class="card beam ', 1) if i == beam else card
+                 for i, card in enumerate(cards)]
+    html = (KPI_ROW.replace("__COLUMNS__", str(len(cards))).replace("__CARD_HEIGHT__", str(KPI_HEIGHT))
+            .replace("__CARDS__", "".join(cards)))
+    components.html(html, height=KPI_HEIGHT + 12)
 
 
 @st.cache_data(show_spinner=False)

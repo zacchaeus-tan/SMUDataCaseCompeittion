@@ -1,0 +1,80 @@
+<!-- One row of KPI cards, rendered in its own frame by views/common.py: kpi_row. __COLUMNS__, __CARD_HEIGHT__ and
+     __CARDS__ are filled in from Python. Numbers count up (Magic UI "Number Ticker"); a card with class "beam" gets a
+     light running round its border (Magic UI "Border Beam"). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1c2430; --muted: #5b6675; --line: #e3e7ed;
+    --good: #1a7f4b; --good-bg: #e6f4ec;
+    --bad: #c4571b; --bad-bg: #fbeee6;
+    --neutral: #1f4e79; --neutral-bg: #e8eff7;
+  }
+  html, body { margin: 0; background: transparent; }
+  body { font-family: "Source Sans 3", "Source Sans Pro", -apple-system, "Segoe UI", sans-serif; color: var(--ink); }
+  .row { display: grid; grid-template-columns: repeat(__COLUMNS__, minmax(0, 1fr)); gap: 16px; padding: 2px 2px 8px; }
+  .card {
+    position: relative; box-sizing: border-box; height: __CARD_HEIGHT__px; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 14px 18px 14px 22px; background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  }
+  .card::after { /* accent stripe in the card's tone */
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--tone);
+  }
+  .good { --tone: var(--good); --tone-bg: var(--good-bg); }
+  .bad { --tone: var(--bad); --tone-bg: var(--bad-bg); }
+  .neutral { --tone: var(--neutral); --tone-bg: var(--neutral-bg); }
+  .label { display: flex; align-items: flex-start; gap: 6px; font-size: 14px; line-height: 1.3; color: var(--muted); }
+  .info {
+    flex: none; display: inline-grid; place-items: center; width: 14px; height: 14px; margin-top: 1px;
+    border: 1px solid #9aa3ad; border-radius: 50%; font-size: 10px; color: #6b7684; cursor: help;
+  }
+  .value {
+    font-size: 32px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.1;
+    font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .delta {
+    align-self: flex-start; font-size: 13px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
+    background: var(--tone-bg); color: var(--tone);
+  }
+  .delta:empty { visibility: hidden; }
+
+  @property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+  @keyframes spin { to { --angle: 360deg; } }
+  .beam::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 2px; pointer-events: none;
+    background: conic-gradient(from var(--angle), transparent 0deg 250deg, #7fa7d0 310deg, #1f4e79 350deg, transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    animation: spin 5s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) { .beam::before { animation: none; } }
+</style>
+<div class="row">__CARDS__</div>
+<script>
+  // Number Ticker: count each number up, easing out. On a rerun it counts from the value it last showed, so moving
+  // an assumption slider animates the change instead of restarting from zero.
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const store = (() => { try { return window.sessionStorage; } catch (e) { return null; } })();
+  const show = (el, v) => {
+    const d = +el.dataset.decimals;
+    el.textContent = el.dataset.prefix +
+      v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }) + el.dataset.suffix;
+  };
+  document.querySelectorAll(".value[data-to]").forEach((el) => {
+    const to = +el.dataset.to, key = "kpi:" + el.dataset.key;
+    let from = 0;
+    try { from = store && store.getItem(key) !== null ? +store.getItem(key) : 0; } catch (e) {}
+    try { store && store.setItem(key, to); } catch (e) {}
+    if (still || from === to) return show(el, to);
+    const start = performance.now(), ms = 1100;
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / ms), ease = 1 - Math.pow(1 - t, 3);
+      show(el, from + (to - from) * ease);
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+</script>

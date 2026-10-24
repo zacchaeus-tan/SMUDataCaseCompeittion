@@ -41,6 +41,7 @@ pages = {
 ASSETS = Path(__file__).parent / "assets"
 st.logo(str(ASSETS / "logo.svg"), size="large", icon_image=str(ASSETS / "icon.svg"))
 nav = st.navigation(pages)
+common.page_style()
 common.sidebar()
 common.clock_events()
 nav.run()

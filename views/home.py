@@ -4,17 +4,22 @@ from . import common as c
 
 
 def render():
-    st.title("OneRecord")
-    st.markdown("#### Clean master data at the point of entry → faster setup → a five-country growth view you can trust")
+    c.header("OneRecord", "Clean master data at the point of entry, faster setup, and a five-country growth view "
+                          "you can trust")
     d, q = c.raw(), c.data_quality()
     f = c.forecasts()
     from onerecord.forecast import wape
     ab = f["backtest"][f["backtest"]["product"] != "C"]
-    k = st.columns(4)
-    k[0].metric("Request → SAP today", f"{d['requests'].cycle_days.median():.1f} days", help="Median, email process", border=True, height=c.KPI_HEIGHT)
-    k[1].metric("Customer records that are duplicates", f"{(q['clusters'].record_id != q['clusters'].golden_id).mean():.0%}", border=True, height=c.KPI_HEIGHT)
-    k[2].metric("Forecast error vs 6-month average", f"{wape(ab, 'calendar_model') / wape(ab, 'baseline_ma6') - 1:+.0%}", border=True, height=c.KPI_HEIGHT)
-    k[3].metric("False drop-off alarms removed", len(c.regional()["compare"]["raw_drop"]) - len(c.regional()["compare"]["clean_drop"]), border=True, height=c.KPI_HEIGHT)
+    dup_share = (q["clusters"].record_id != q["clusters"].golden_id).mean()
+    err_chg = wape(ab, "calendar_model") / wape(ab, "baseline_ma6") - 1
+    cmp = c.regional()["compare"]
+    c.kpi_row([
+        c.kpi("Time to SAP today", d["requests"].cycle_days.median(), decimals=1, suffix=" days",
+              help="Median, email process"),
+        c.kpi("Customer records that are duplicates", dup_share * 100, suffix="%"),
+        c.kpi("Forecast error vs 6-month average", err_chg * 100, suffix="%", tone=c.tone(err_chg, up_is_good=False)),
+        c.kpi("False drop-off alarms removed", len(cmp["raw_drop"]) - len(cmp["clean_drop"])),
+    ])
 
     left, right = st.columns(2)
     with left:

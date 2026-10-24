@@ -47,13 +47,17 @@ def growth():
 
     tot_now, tot_prev = g.units_now.sum(), g.units_prev.sum()
     val_now, val_prev = g.value_now.sum(), g.value_prev.sum()
-    k = st.columns(4)
-    k[0].metric("Units, Apr–Sep 2026", f"{tot_now:,.0f}", c.pct(tot_now / tot_prev - 1), border=True, height=c.KPI_HEIGHT)
-    k[1].metric("Order value (SGD)", f"{val_now / 1e6:,.2f}M", c.pct(val_now / val_prev - 1), border=True, height=c.KPI_HEIGHT)
-    k[2].metric("Active customers", f"{c.regional()['clean'].query('month >= @CURRENT[0]').customer_id.nunique()}",
-                help="Real customers after merging duplicate records", border=True, height=c.KPI_HEIGHT)
     best = g.loc[g[g["product"] != "C"].unit_growth.idxmax()]
-    k[3].metric("Fastest growing (A/B)", f"{best.country}, product {best['product']}", c.pct(best.unit_growth), border=True, height=c.KPI_HEIGHT)
+    units_chg, value_chg = tot_now / tot_prev - 1, val_now / val_prev - 1
+    c.kpi_row([
+        c.kpi("Units, Apr–Sep 2026", tot_now, delta=c.pct(units_chg), tone=c.tone(units_chg)),
+        c.kpi("Order value (SGD)", val_now / 1e6, decimals=2, suffix="M", delta=c.pct(value_chg),
+              tone=c.tone(value_chg)),
+        c.kpi("Active customers", c.regional()["clean"].query("month >= @CURRENT[0]").customer_id.nunique(),
+              help="Real customers after merging duplicate records"),
+        c.kpi("Fastest growing (A/B)", f"{best.country}, product {best['product']}", delta=c.pct(best.unit_growth),
+              tone=c.tone(best.unit_growth)),
+    ])
     _definition()
 
     _growth_map(g)
@@ -154,12 +158,14 @@ def forecasting():
     ab = bt[bt["product"] != "C"]
     cut = 1 - wape(ab, "calendar_model") / wape(ab, "baseline_ma6")
     c.header("Forecasting", f"The calendar model cuts forecast error by {cut:.0%} compared with the 6-month average")
-    k = st.columns(4)
-    k[0].metric("Today: 6-month average", f"{wape(ab, 'baseline_ma6'):.1%} error", border=True, height=c.KPI_HEIGHT)
-    k[1].metric("OneRecord calendar model", f"{wape(ab, 'calendar_model'):.1%} error",
-                f"{wape(ab, 'calendar_model') / wape(ab, 'baseline_ma6') - 1:+.0%}", delta_color="inverse", border=True, height=c.KPI_HEIGHT)
-    k[2].metric("Series improved", f"{(acc[acc['product'] != 'C'].Improvement > 0).sum()} of 10", help="Products A and B", border=True, height=c.KPI_HEIGHT)
-    k[3].metric("Horizon tested", "1–3 months", help="Rolling origins Apr–Sep 2026; error = WAPE", border=True, height=c.KPI_HEIGHT)
+    c.kpi_row([
+        c.kpi("Today: 6-month average", wape(ab, "baseline_ma6") * 100, decimals=1, suffix="% error"),
+        c.kpi("OneRecord calendar model", wape(ab, "calendar_model") * 100, decimals=1, suffix="% error",
+              delta=f"{-cut:+.0%}", tone=c.tone(-cut, up_is_good=False)),
+        c.kpi("Series improved", (acc[acc["product"] != "C"].Improvement > 0).sum(), suffix=" of 10",
+              help="Products A and B"),
+        c.kpi("Horizon tested", "1–3 months", help="Rolling origins Apr–Sep 2026; error = WAPE"),
+    ], beam=1)
     st.caption("Error is measured as WAPE: total absolute error divided by actual units. It covers Products A and "
                "B, forecasting 1–3 months ahead from each month Apr–Sep 2026, using only the data available at "
                "the time.")
@@ -325,8 +331,9 @@ def actions():
     cmp = c.regional()["compare"]
     c.header("Sales actions", f"{len(cmp['clean_drop'])} customers are ordering much less, with about "
                               f"S${cmp['clean_drop'].value_at_risk_per_q.sum():,.0f} a quarter at risk")
-    raw = st.toggle("Show raw SAP records (before duplicates are merged)",
-                    help="Runs the same analysis on the customer records as they sit in SAP today")
+    with st.container(key="beam_raw_toggle", border=True):  # border beam draws the eye to the demo switch
+        raw = st.toggle("Show raw SAP records (before duplicates are merged)",
+                        help="Runs the same analysis on the customer records as they sit in SAP today")
     if raw:
         golden = c.data_quality()["clusters"].set_index("record_id").golden_id
         drop = _flag_false(cmp["raw_drop"], cmp["clean_drop"], golden)
@@ -335,24 +342,24 @@ def actions():
     else:
         drop, xsell = cmp["clean_drop"], cmp["clean_xsell"]
 
-    k = st.columns(4)
+    at_risk = c.kpi("Value at risk per quarter", drop.value_at_risk_per_q.sum(), prefix="S$")
     if raw:
-        k[0].metric("Customer records in SAP", cmp["raw_customers"], border=True, height=c.KPI_HEIGHT)
-        k[1].metric("Drop-off alerts", len(drop), f"{false_drop} not real", delta_color="off", border=True, height=c.KPI_HEIGHT)
-        k[2].metric("Cross-sell leads", len(xsell), f"{false_xsell} not real", delta_color="off", border=True, height=c.KPI_HEIGHT)
+        c.kpi_row([
+            c.kpi("Customer records in SAP", cmp["raw_customers"]),
+            c.kpi("Drop-off alerts", len(drop), delta=f"{false_drop} not real", tone="bad"),
+            c.kpi("Cross-sell leads", len(xsell), delta=f"{false_xsell} not real", tone="bad"),
+            at_risk])
     else:
-        k[0].metric("Real customers", cmp["clean_customers"],
-                    f"{cmp['clean_customers'] - cmp['raw_customers']} duplicates merged", delta_color="off",
-                    border=True, height=c.KPI_HEIGHT)
-        k[1].metric("Drop-off alerts", len(drop), f"{len(drop) - len(cmp['raw_drop'])} vs raw records",
-                    delta_color="inverse", border=True, height=c.KPI_HEIGHT,
-                    help="With duplicate records, a customer whose orders moved to a new record looks like they "
-                         "stopped ordering.")
-        k[2].metric("Cross-sell leads", len(xsell), f"{len(xsell) - len(cmp['raw_xsell'])} vs raw records",
-                    delta_color="inverse", border=True, height=c.KPI_HEIGHT,
-                    help="With duplicate records, one hospital can be split into an A-only and a B-only record, "
-                         "which looks like a cross-sell gap.")
-    k[3].metric("Value at risk per quarter", f"S${drop.value_at_risk_per_q.sum():,.0f}", border=True, height=c.KPI_HEIGHT)
+        c.kpi_row([
+            c.kpi("Real customers", cmp["clean_customers"],
+                  delta=f"{cmp['clean_customers'] - cmp['raw_customers']} duplicates merged"),
+            c.kpi("Drop-off alerts", len(drop), delta=f"{len(drop) - len(cmp['raw_drop'])} vs raw records",
+                  tone="good", help="With duplicate records, a customer whose orders moved to a new record looks "
+                                    "like they stopped ordering."),
+            c.kpi("Cross-sell leads", len(xsell), delta=f"{len(xsell) - len(cmp['raw_xsell'])} vs raw records",
+                  tone="good", help="With duplicate records, one hospital can be split into an A-only and a B-only "
+                                    "record, which looks like a cross-sell gap."),
+            at_risk])
     if raw:
         st.warning(f"On raw records, {false_drop} of {len(drop)} drop-off alerts and {false_xsell} of {len(xsell)} "
                    f"cross-sell leads are false or counted twice, because the same customer has more than one record. "
@@ -419,9 +426,8 @@ def inbound():
         st.markdown("First by channel (a dedicated order inbox, and the form for setup requests), then by rules the "
                     "MDM team can read, then by an AI prompt for whatever is left. Anything uncertain goes to a "
                     "person. There is no custom model to train or maintain.")
-    k = st.columns(4)
-    for i, lab in enumerate(["purchase_order", "enquiry", "follow_up", "mdm_request"]):
-        k[i].metric(classify.LABELS[lab], int((main.predicted == lab).sum()), border=True, height=c.KPI_HEIGHT)
+    c.kpi_row([c.kpi(classify.LABELS[lab], int((main.predicted == lab).sum()))
+               for lab in ["purchase_order", "enquiry", "follow_up", "mdm_request"]])
     by = main[main.predicted != "review"].groupby(["country", "predicted"]).size().reset_index(name="emails")
     by["predicted"] = by.predicted.map(classify.LABELS)
     label_order = [classify.LABELS[lab] for lab in ["purchase_order", "enquiry", "follow_up", "mdm_request"]]
@@ -435,14 +441,14 @@ def inbound():
     with a:
         st.markdown("##### Accuracy on the mailbox sample (660 emails)")
         acc = (main.predicted == main.true_label).mean()
-        st.metric("Correct", f"{acc:.0%}", border=True, height=c.KPI_HEIGHT)
+        c.kpi_row([c.kpi("Correct", acc * 100, suffix="%")])
         st.caption("Likely optimistic, because the synthetic emails follow patterns the rules were written for.")
     with b:
         st.markdown("##### Stress test: 24 hand-written messy emails")
         auto = hold[hold.predicted != "review"]
-        st.metric("Labelled by rules", f"{len(auto)} of {len(hold)}",
-                  f"{(auto.predicted == auto.true_label).mean():.0%} of those correct" if len(auto) else None,
-                  delta_color="off", border=True, height=c.KPI_HEIGHT)
+        c.kpi_row([c.kpi("Labelled by rules", len(auto), suffix=f" of {len(hold)}",
+                         delta=f"{(auto.predicted == auto.true_label).mean():.0%} of those correct" if len(auto)
+                         else None)])
         st.caption("The rules made no mistakes, but sent most of the messy emails to review. The AI step is "
                    "meant to handle these.")
     st.markdown("##### Review queue (stress test)")
@@ -471,12 +477,12 @@ def quality():
     is_dup = cl.record_id != cl.golden_id
     c.header("Data quality", f"{is_dup.sum()} of {len(cl)} customer records ({is_dup.mean():.0%}) are duplicates "
                              f"of another record")
-    k = st.columns(4)
-    k[0].metric("Customer records", len(cl), border=True, height=c.KPI_HEIGHT)
-    k[1].metric("Duplicate records found", int((cl.record_id != cl.golden_id).sum()),
-                f"{(cl.record_id != cl.golden_id).mean():.0%} of records", delta_color="off", border=True, height=c.KPI_HEIGHT)
-    k[2].metric("Sent to human review", int((pairs.decision == "review").sum()), border=True, height=c.KPI_HEIGHT)
-    k[3].metric("Duplicate item codes", len(q["item_map"]), border=True, height=c.KPI_HEIGHT)
+    c.kpi_row([
+        c.kpi("Customer records", len(cl)),
+        c.kpi("Duplicate records found", int(is_dup.sum()), delta=f"{is_dup.mean():.0%} of records", tone="bad"),
+        c.kpi("Sent to human review", int((pairs.decision == "review").sum())),
+        c.kpi("Duplicate item codes", len(q["item_map"])),
+    ])
     st.caption(f"Checked against the synthetic answer key: precision {s['precision']:.0%}, recall {s['recall']:.0%} "
                f"({s['found_pairs']} of {s['true_pairs']} duplicate pairs). Real SAP data will be messier, which "
                f"is why borderline matches go to human review.")
@@ -545,11 +551,13 @@ def business_case():
             ("Licences per year (SGD)", 0, 20000, 3000, 500, "Licences and AI credits")])
 
     st.markdown("##### Where the time goes today")
-    k = st.columns(4)
-    k[0].metric("Median time to SAP", f"{d['requests'].cycle_days.median():.1f} days", border=True, height=c.KPI_HEIGHT)
-    k[1].metric("Slowest 10%", f"{d['requests'].cycle_days.quantile(.9):.0f}+ days", border=True, height=c.KPI_HEIGHT)
-    k[2].metric("Bounced back at least once", f"{(d['requests'].bounces > 0).mean():.0%}", border=True, height=c.KPI_HEIGHT)
-    k[3].metric("Time spent on actual work", f"{touch:.1%}", help="The rest of the time is spent waiting", border=True, height=c.KPI_HEIGHT)
+    c.kpi_row([
+        c.kpi("Median time to SAP", d["requests"].cycle_days.median(), decimals=1, suffix=" days"),
+        c.kpi("Slowest 10%", round(d["requests"].cycle_days.quantile(.9)), suffix="+ days"),
+        c.kpi("Bounced back at least once", (d["requests"].bounces > 0).mean() * 100, suffix="%"),
+        c.kpi("Time spent on actual work", touch * 100, decimals=1, suffix="%",
+              help="The rest of the time is spent waiting"),
+    ])
     fig = px.bar(bd, x="share", y="stage", orientation="h", text_auto=".0%", color_discrete_sequence=["#1f4e79"])
     fig.update_layout(height=220, margin=dict(l=0, r=0, t=10, b=0), xaxis_tickformat=".0%", yaxis_title="",
                       xaxis_title="share of elapsed time")
@@ -559,11 +567,14 @@ def business_case():
     sim = process.simulate(d["requests"], d["steps"], bounce_avoided=bounce / 100, notice_cut=notice / 100,
                            escalate_after_days=esc)
     now_med, fut_med = sim.cycle_days.median(), sim.future_days.median()
-    k = st.columns(3)
-    k[0].metric("Median time to SAP", f"{fut_med:.1f} days", f"{fut_med - now_med:+.1f} days", delta_color="inverse", border=True, height=c.KPI_HEIGHT)
-    k[1].metric("Slowest 10%", f"{sim.future_days.quantile(.9):.1f} days",
-                f"{sim.future_days.quantile(.9) - sim.cycle_days.quantile(.9):+.1f}", delta_color="inverse", border=True, height=c.KPI_HEIGHT)
-    k[2].metric("Faster", f"{1 - fut_med / now_med:.0%}", border=True, height=c.KPI_HEIGHT)
+    slow_chg = sim.future_days.quantile(.9) - sim.cycle_days.quantile(.9)
+    c.kpi_row([
+        c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days", delta=f"{fut_med - now_med:+.1f} days",
+              tone=c.tone(fut_med - now_med, up_is_good=False)),
+        c.kpi("Slowest 10%", sim.future_days.quantile(.9), decimals=1, suffix=" days", delta=f"{slow_chg:+.1f} days",
+              tone=c.tone(slow_chg, up_is_good=False)),
+        c.kpi("Faster", (1 - fut_med / now_med) * 100, suffix="%"),
+    ])
     long = pd.concat([sim.assign(scenario="Today (email)", days=sim.cycle_days),
                       sim.assign(scenario="OneRecord", days=sim.future_days)])
     fig = px.histogram(long, x="days", color="scenario", barmode="overlay", nbins=40, opacity=0.7,
@@ -594,12 +605,13 @@ def business_case():
         c.header("Business case", f"Pays back in {12 * co / b:.1f} months, with requests reaching SAP in "
                                   f"{fut_med:.1f} days instead of {now_med:.1f}" if b else
                                   "These assumptions don't produce a benefit")
-        k = st.columns(4)
-        k[0].metric("Payback", f"{12 * co / b:.1f} months" if b else "—", border=True, height=c.KPI_HEIGHT)
-        k[1].metric("Annual benefit", f"S${b:,.0f}", border=True, height=c.KPI_HEIGHT)
-        k[2].metric("Year-1 cost", f"S${co:,.0f}", border=True, height=c.KPI_HEIGHT)
-        k[3].metric("Median time to SAP", f"{fut_med:.1f} days", f"{fut_med - now_med:+.1f} days",
-                    delta_color="inverse", border=True, height=c.KPI_HEIGHT)
+        c.kpi_row([
+            c.kpi("Payback", 12 * co / b, decimals=1, suffix=" months") if b else c.kpi("Payback", "—"),
+            c.kpi("Annual benefit", b, prefix="S$"),
+            c.kpi("Year-1 cost", co, prefix="S$"),
+            c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days", delta=f"{fut_med - now_med:+.1f} days",
+                  tone=c.tone(fut_med - now_med, up_is_good=False)),
+        ], beam=0)
     c.assumption("sales-driven benefits are counted at gross margin rather than order value. Rates, hours, margin "
                  "and conversion are placeholders to agree with Lives Group. Staff time savings alone don't cover "
                  "the build cost; most of the benefit comes from new accounts going live sooner and from sales "
