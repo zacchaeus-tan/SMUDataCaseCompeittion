@@ -165,7 +165,7 @@ The request workflow is demoed in the Microsoft 365 build; the older Streamlit m
 4. As **Priya**, open *MDM check*, approve, and download the SAP file.
 5. As **Priya**, open *Rules* and onboard Marcus's new BU. Then as **Marcus**, a *New request* for that BU routes to
    its own BU Head, with no IT change.
-6. Finish on *Five-country growth*, *Forecasting* and *Sales actions*.
+6. Finish on *Country deep-dive*, *Forecasting* and *Customers*.
 
 ## Repository map
 
