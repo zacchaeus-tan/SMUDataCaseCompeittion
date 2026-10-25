@@ -763,6 +763,13 @@ def business_case():
                        color_discrete_map=SCENARIO_COLORS)
     fig.update_layout(height=260, margin=dict(l=0, r=0, t=10, b=0), legend_title="")
     c.chart(fig)
+    # Floor: the same design if Teams notifications and reminders changed nothing at all
+    floor = process.simulate(d["requests"], d["steps"], bounce_avoided=bounce / 100, notice_cut=0,
+                             escalate_after_days=esc)
+    st.caption(f"Even if notifications and reminders changed nothing (approvers take exactly as long as today), "
+               f"parallel approvals and the smart form alone give a median of **{floor.future_days.median():.1f} days** "
+               f"(slowest 10%: {floor.future_days.quantile(.9):.1f}). That is the floor of the range; "
+               f"{fut_med:.1f} days is with the settings above.")
     c.assumption("parallel approvals use the same historical approver waiting times, and only the settings above "
                  "change. These are simulated results; a 4-week pilot with one entity would confirm them.")
 

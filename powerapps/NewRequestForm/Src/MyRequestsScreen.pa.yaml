@@ -270,7 +270,7 @@ Screens:
                                     BorderColor: =RGBA(0, 0, 0, 0)
                                     BorderStyle: =BorderStyle.None
                                     Color: =RGBA(50, 49, 48, 1)
-                                    Default: =false
+                                    Default: =IsMDM && !IsBlank(Param("requestId"))
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     FalseFill: =RGBA(96, 94, 92, 1)
                                     FalseHoverFill: =RGBA(50, 49, 48, 1)
@@ -345,6 +345,7 @@ Screens:
                             Properties:
                               BorderColor: =RGBA(237, 235, 233, 1)
                               BorderThickness: =1
+                              Default: =If(!IsBlank(Param("requestId")), LookUp(MyRequestList, Title = Param("requestId")))
                               FillPortions: =1
                               Items: =MyRequestList
                               LayoutMinHeight: =16

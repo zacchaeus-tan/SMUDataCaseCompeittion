@@ -4,10 +4,11 @@
 Usage: python3 powerautomate/build_route_approve.py   ->  powerautomate/OneRecord-RouteAndApprove.zip
 Each approval also writes an "Assigned" row to ApprovalLog, which build_reminders.py relies on.
 """
+import re
 from pathlib import Path
 
-from pkg import (CC, CUST, ITEM, LISTS, LOG, REQ, RF, ROLE, RULE, SENS, SITE, VEND, after, condition, definition,
-                 log_row, sp, teams_chat, write_package)
+from pkg import (CC, CUST, ESCALATE_AFTER, ESCALATED_WAIT, ITEM, LISTS, LOG, REQ, RF, ROLE, RULE, SENS, SITE, VEND,
+                 after, app_link, condition, definition, log_row, sp, teams_chat, write_package)
 
 OUT = Path(__file__).with_name("OneRecord-RouteAndApprove.zip")
 NAME = "OneRecord - Route and approve"
@@ -24,8 +25,21 @@ def update_request(prev, **cols):
     return after(sp("PatchItem", "Requests", **params), *prev)
 
 
+REQUEST_LINK = app_link("@{triggerBody()?['Title']}")
+ANY = ["Succeeded", "Failed", "TimedOut", "Skipped"]
+STATUS, BODY = "['status']", "['outputs']?['body']"  # parts of actions('X'): works even when X was skipped
+
+
 def teams_to_requestor(message, *prev):
-    return after(teams_chat("@{triggerBody()?['Author']?['Email']}", message), *prev)
+    """A Teams message to the requestor, ending with a link that opens the request in the app."""
+    return after(teams_chat("@{triggerBody()?['Author']?['Email']}", f"{message}<br>{REQUEST_LINK}"), *prev)
+
+
+def duration_text(iso):
+    """P4D -> '4 days', PT10M -> '10 minutes' (for messages)."""
+    m = re.fullmatch(r"P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?", iso)
+    parts = [f"{n} {unit}{'' if n == '1' else 's'}" for n, unit in zip(m.groups(), ("day", "hour", "minute")) if n]
+    return " ".join(parts) or iso
 
 
 NAME_EXPR = f"coalesce({t('CustomerName')}, {t('ItemDescription')}, {t('VendorName')}, {t('CostCenterName')})"
@@ -64,12 +78,14 @@ def stage_loop(stage):
         f"and(equals(item()?['{RULE['ConditionField']}'], 'SuppliesRegulatedGoods'), equals({t('SuppliesRegulatedGoods')}, true))))"
     )
     role = f"items('{loop}')?['{RULE['ApproverRole']}']"
-    first_resp = f"first(outputs('{approval}')?['body/responses'])"
+    escalated = f"Escalated_approval_{stage}"  # stage 1 only: the card re-sent to approver + EscalateTo
+    card = f"Card_{stage}"  # whichever card decided: the first one, or the re-sent one after escalation
+    first_resp = f"first(outputs('{card}')?['body']?['responses'])"
     comments = f"{first_resp}?['comments']"
     # The card's result. Anything other than Approve / Reject / Request changes (the sender pressed Cancel request,
     # or the approval action failed) counts as "Cancelled", so it can never slip through as an approval.
     outcome = f"outputs('Outcome_{stage}')"
-    raw_outcome = f"outputs('{approval}')?['body/outcome']"
+    raw_outcome = f"outputs('{card}')?['body']?['outcome']"
     round_no = f"add(iterationIndexes('{rnd}'), 1)"
 
     def cur(col):
@@ -83,6 +99,8 @@ def stage_loop(stage):
     found = f"first(body('Find_stage_{stage}_approver'))?['{ROLE['PersonEmail']}']"
     mdm = f"first(body('Find_MDM_analyst'))?['{ROLE['PersonEmail']}']"
     valid = f"contains(coalesce({found}, ''), '@')"
+    esc_found = f"first(body('Find_stage_{stage}_approver'))?['{ROLE['EscalateTo']}']"
+    esc_to = f"outputs('{routing}')?['escalateTo']"
     approver_email = f"@{{outputs('{routing}')?['email']}}"
     gap = f"outputs('{routing}')?['gap']"
     entity = t('Entity')
@@ -95,8 +113,8 @@ def stage_loop(stage):
             CurrentStage=f"@{{{short(f'concat({role}, {chr(39)} asked for changes: {chr(39)}, coalesce({comments}, {chr(39)}(no comment){chr(39)}))')}}}"),
         f"Tell_requestor_changes_{stage}": teams_to_requestor(
             f"@{{{role}}} asked for changes on your request @{{triggerBody()?['Title']}}: "
-            f"@{{coalesce({comments}, '(no comment)')}}. Open OneRecord, go to My requests, select the request and "
-            f"press Edit and resubmit.", f"Mark_changes_requested_{stage}"),
+            f"@{{coalesce({comments}, '(no comment)')}}. Open it with the link below and press Edit and resubmit.",
+            f"Mark_changes_requested_{stage}"),
         # Poll every 5 minutes until the requestor resubmits (the app sets Status = "Resubmitted")
         f"Wait_for_resubmit_{stage}": after({
             "type": "Until", "expression": f"@not(equals({status_now(poll)}, 'Changes requested'))",
@@ -132,64 +150,106 @@ def stage_loop(stage):
         "runAfter": {f"Wait_for_resubmit_{stage}": ["Succeeded", "Failed", "TimedOut"]},
     }
 
+    def card_action(assigned_to, title_suffix="", note="", timeout=None):
+        """The approval card (Approve / Request changes / Reject). The first answer decides."""
+        action = {"type": "OpenApiConnectionWebhook", "inputs": {
+                "parameters": {
+                    "approvalType": "CustomResponse",  # exact value from Peek code in the tenant
+                    "WebhookApprovalCreationInput/responseOptions": RESPONSES,
+                    "WebhookApprovalCreationInput/title":
+                        f"@{{triggerBody()?['Title']}}: @{{{t('RequestType')}}} request for @{{{t('Entity')}}} "
+                        f"(@{{{role}}} check)@{{if(greater({round_no}, 1), concat(' - round ', string({round_no})), '')}}"
+                        + title_suffix,
+                    "WebhookApprovalCreationInput/assignedTo": assigned_to,
+                    "WebhookApprovalCreationInput/details": (
+                        note +
+                        f"**Requested by:** @{{{t('Requestor')}}}\n\n"
+                        f"**Name:** @{{{name_now}}}\n\n"
+                        f"**Country:** @{{{cur('Country')}}}\n\n"
+                        f"**Duplicate check:** @{{if(equals({cur('DuplicateCheck')}, 'Clear'), '', '\u26a0\ufe0f ')}}"
+                        f"@{{{cur('DuplicateCheck')}}} @{{{cur('PossibleMatchID')}}}\n\n"
+                        f"@{{if(empty({cur('DupReason')}), '', concat('**Requestor says it is not a duplicate:** ', "
+                        f"{cur('DupReason')}))}}\n\n"
+                        f"**Your check:** @{{{role}}} (stage {stage})\n\n"
+                        f"@{{if(equals({t('RequestType')}, 'Item'), concat('**Regulated (requestor answer):** ', "
+                        f"coalesce({cur('RegulatedAnswer')}, if(equals({cur('IsRegulated')}, true), 'Yes', 'No'))), '')}}\n\n"
+                        f"@{{if(and(equals({role}, '{QA_ROLE}'), equals({cur('RegulatedAnswer')}, 'Not sure')), "
+                        f"'**The requestor was not sure whether this item is regulated, so you decide.** Approve = not "
+                        f"regulated (it is recorded as No). If it is regulated, choose Request changes and ask for the "
+                        f"licence no.', '')}}\n\n"
+                        f"@{{if(empty({cur('ChangeNote')}), '', concat('**Changed after an approver asked:** ', "
+                        f"{cur('ChangeNote')}))}}\n\n"
+                        f"If something is missing or wrong, choose **Request changes** and say what: it goes back to the "
+                        f"requestor and returns to you when fixed.\n\n"
+                        f"@{{if({gap}, concat('**Note:** No ', {role}, ' is set up for ', {entity}, "
+                        f"' in Roles, so this came to MDM. Your decision counts for the ', {role}, ' step.'), '')}}\n\n"
+                        f"@{{if(and(contains(outputs('Sensitive_roles'), concat(';', {role}, ';')), "
+                        f"not(empty(outputs('Sensitive_link')))), concat('**Payment & bank details:** "
+                        f"[View in the restricted SensitiveDetails list](', outputs('Sensitive_link'), ')'), '')}}"),
+                    "WebhookApprovalCreationInput/itemLink": "@{triggerBody()?['{Link}']}",
+                    "WebhookApprovalCreationInput/itemLinkDescription": "Open the request in SharePoint",
+                    "WebhookApprovalCreationInput/enableNotifications": True,
+                    "WebhookApprovalCreationInput/enableReassignment": True,
+                },
+                "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                         "connectionName": "shared_approvals", "operationId": "StartAndWaitForAnApproval"},
+                "authentication": "@parameters('$authentication')"}}
+        if timeout:
+            action["limit"] = {"timeout": timeout}
+        return action
+
+    alive = (f"contains(createArray('Pending approval', 'Changes requested', 'Resubmitted'), "
+             f"coalesce(outputs('Status_now_{stage}')?['body/{REQ['Status']}'], ''))")
+    if stage == 1:
+        both = f"if(empty({esc_to}), outputs('{routing}')?['email'], concat(outputs('{routing}')?['email'], ';', {esc_to}))"
+        waited = duration_text(ESCALATE_AFTER)
+        escalation = {f"If_escalate_{stage}": {**condition(f"equals(actions('{approval}')?['status'], 'TimedOut')", {
+            f"Log_escalated_{stage}": log_row(
+                "@triggerBody()?['Title']", f"@{{coalesce(if(empty({esc_to}), null, {esc_to}), outputs('{routing}')?['email'])}}",
+                f"@{{{role}}}", "Escalated",
+                # starts "Stage 1, round N:" so the reminders flow can match it to the open Assigned row
+                f"Stage {stage}, round @{{{round_no}}}: no answer within {waited}; card re-sent to @{{{both}}}"),
+            escalated: after(card_action(
+                f"@{{{both}}}", title_suffix=" (escalated)", timeout=ESCALATED_WAIT,
+                note=(f"**Escalated:** this wasn't answered within {waited}, so it now goes to @{{{both}}}. "
+                      f"Either of you can answer; the first answer counts. It replaces the earlier card, which no "
+                      f"longer changes anything.\n\n")), f"Log_escalated_{stage}"),
+        }), "runAfter": {approval: ANY}}}
+        pick = lambda part: (f"if(equals(actions('{approval}')?['status'], 'TimedOut'), "
+                             f"actions('{escalated}')?{part}, actions('{approval}')?{part})")
+        card_inputs = {"status": f"@{{{pick(STATUS)}}}", "body": f"@{pick(BODY)}"}
+        card_after = {f"If_escalate_{stage}": ANY}
+    else:
+        escalation = {}
+        card_inputs = {"status": f"@{{actions('{approval}')?['status']}}",
+                       "body": f"@actions('{approval}')?['outputs']?['body']"}
+        card_after = {approval: ANY}
+
     round_actions = {
         latest: sp("GetItem", "Requests", id="@triggerBody()?['ID']"),
         f"Log_stage_{stage}_assigned": after(log_row(
             "@triggerBody()?['Title']", approver_email, f"@{{{role}}}", "Assigned",
             f"Stage {stage}, round @{{{round_no}}}"), latest),
-        approval: after({"type": "OpenApiConnectionWebhook", "inputs": {
-            "parameters": {
-                "approvalType": "CustomResponse",  # exact value from Peek code in the tenant
-                "WebhookApprovalCreationInput/responseOptions": RESPONSES,
-                "WebhookApprovalCreationInput/title":
-                    f"@{{triggerBody()?['Title']}}: @{{{t('RequestType')}}} request for @{{{t('Entity')}}} "
-                    f"(@{{{role}}} check)@{{if(greater({round_no}, 1), concat(' - round ', string({round_no})), '')}}",
-                "WebhookApprovalCreationInput/assignedTo": approver_email,
-                "WebhookApprovalCreationInput/details": (
-                    f"**Requested by:** @{{{t('Requestor')}}}\n\n"
-                    f"**Name:** @{{{name_now}}}\n\n"
-                    f"**Country:** @{{{cur('Country')}}}\n\n"
-                    f"**Duplicate check:** @{{if(equals({cur('DuplicateCheck')}, 'Clear'), '', '\u26a0\ufe0f ')}}"
-                    f"@{{{cur('DuplicateCheck')}}} @{{{cur('PossibleMatchID')}}}\n\n"
-                    f"@{{if(empty({cur('DupReason')}), '', concat('**Requestor says it is not a duplicate:** ', "
-                    f"{cur('DupReason')}))}}\n\n"
-                    f"**Your check:** @{{{role}}} (stage {stage})\n\n"
-                    f"@{{if(equals({t('RequestType')}, 'Item'), concat('**Regulated (requestor answer):** ', "
-                    f"coalesce({cur('RegulatedAnswer')}, if(equals({cur('IsRegulated')}, true), 'Yes', 'No'))), '')}}\n\n"
-                    f"@{{if(and(equals({role}, '{QA_ROLE}'), equals({cur('RegulatedAnswer')}, 'Not sure')), "
-                    f"'**The requestor was not sure whether this item is regulated, so you decide.** Approve = not "
-                    f"regulated (it is recorded as No). If it is regulated, choose Request changes and ask for the "
-                    f"licence no.', '')}}\n\n"
-                    f"@{{if(empty({cur('ChangeNote')}), '', concat('**Changed after an approver asked:** ', "
-                    f"{cur('ChangeNote')}))}}\n\n"
-                    f"If something is missing or wrong, choose **Request changes** and say what: it goes back to the "
-                    f"requestor and returns to you when fixed.\n\n"
-                    f"@{{if({gap}, concat('**Note:** No ', {role}, ' is set up for ', {entity}, "
-                    f"' in Roles, so this came to MDM. Your decision counts for the ', {role}, ' step.'), '')}}\n\n"
-                    f"@{{if(and(contains(outputs('Sensitive_roles'), concat(';', {role}, ';')), "
-                    f"not(empty(outputs('Sensitive_link')))), concat('**Payment & bank details:** "
-                    f"[View in the restricted SensitiveDetails list](', outputs('Sensitive_link'), ')'), '')}}"),
-                "WebhookApprovalCreationInput/itemLink": "@{triggerBody()?['{Link}']}",
-                "WebhookApprovalCreationInput/itemLinkDescription": "Open the request in SharePoint",
-                "WebhookApprovalCreationInput/enableNotifications": True,
-                "WebhookApprovalCreationInput/enableReassignment": True,
-            },
-            "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
-                     "connectionName": "shared_approvals", "operationId": "StartAndWaitForAnApproval"},
-            "authentication": "@parameters('$authentication')"}}, f"Log_stage_{stage}_assigned"),
-        f"Outcome_{stage}": {"type": "Compose", "inputs":
-            f"@if(and(equals(actions('{approval}')?['status'], 'Succeeded'), "
+        approval: after(card_action(approver_email, timeout=ESCALATE_AFTER if stage == 1 else None),
+                        f"Log_stage_{stage}_assigned"),
+        **escalation,
+        card: {"type": "Compose", "inputs": card_inputs, "runAfter": card_after},
+        f"Outcome_{stage}": after({"type": "Compose", "inputs":
+            f"@if(and(equals(outputs('{card}')?['status'], 'Succeeded'), "
             f"contains(createArray('Approve', 'Reject', 'Request changes'), coalesce({raw_outcome}, ''))), "
-            f"{raw_outcome}, 'Cancelled')",
-            "runAfter": {approval: ["Succeeded", "Failed", "TimedOut", "Skipped"]}},
+            f"{raw_outcome}, 'Cancelled')"}, card),
+        # A decision only changes the request while it is still open: once one approver has rejected it (or it was
+        # cancelled or closed), later answers from the other parallel cards are logged but change nothing.
+        f"Status_now_{stage}": after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"), f"Outcome_{stage}"),
         # Answered by someone other than the assigned approver: the card was reassigned in Teams. Log the hand-off.
         f"If_stage_{stage}_reassigned": after(condition(
             f"and(not(equals({outcome}, 'Cancelled')), not(empty({first_resp}?['responder/email'])), "
-            f"not(equals(toLower({first_resp}?['responder/email']), toLower(outputs('{routing}')?['email']))))", {
+            f"not(equals(toLower({first_resp}?['responder/email']), toLower(outputs('{routing}')?['email']))), "
+            f"not(equals(toLower({first_resp}?['responder/email']), toLower({esc_to}))))", {
                 f"Log_reassigned_{stage}": log_row(
                     "@triggerBody()?['Title']", f"@{{{first_resp}?['responder/email']}}", f"@{{{role}}}", "Reassigned",
                     f"Stage {stage}, round @{{{round_no}}}: assigned to @{{outputs('{routing}')?['email']}}, "
-                    f"answered by @{{{first_resp}?['responder/displayName']}}")}), f"Outcome_{stage}"),
+                    f"answered by @{{{first_resp}?['responder/displayName']}}")}), f"Status_now_{stage}"),
         f"Log_stage_{stage}_decision": after(sp("PostItem", "ApprovalLog", **{
             "item/Title": "@triggerBody()?['Title']",
             f"item/{LOG['RequestID']}": "@triggerBody()?['Title']",
@@ -200,7 +260,7 @@ def stage_loop(stage):
             f"item/{LOG['Detail']}": f"@{{{short(f'concat({chr(39)}Stage {stage}, round {chr(39)}, string({round_no}), {chr(39)}. {chr(39)}, coalesce({comments}, {chr(39)}{chr(39)}))')}}}",
         }), f"If_stage_{stage}_reassigned"),
         # The card was cancelled (Cancel request in Teams): the request is withdrawn
-        f"If_stage_{stage}_cancelled": after(condition(f"equals({outcome}, 'Cancelled')", {
+        f"If_stage_{stage}_cancelled": after(condition(f"and(equals({outcome}, 'Cancelled'), {alive})", {
             f"Mark_cancelled_stage_{stage}": update_request(
                 [], Status="Cancelled", CurrentStage=f"Cancelled at @{{{role}}} check (stage {stage})"),
             f"Tell_requestor_cancelled_{stage}": teams_to_requestor(
@@ -208,7 +268,7 @@ def stage_loop(stage):
                 f"Submit a new request if it's still needed.", f"Mark_cancelled_stage_{stage}"),
         }), f"Log_stage_{stage}_decision"),
         # A rejection reaches the requestor straight away, not after every parallel approver has answered
-        f"If_stage_{stage}_rejected": after(condition(f"equals({outcome}, 'Reject')", {
+        f"If_stage_{stage}_rejected": after(condition(f"and(equals({outcome}, 'Reject'), {alive})", {
             f"Mark_rejected_stage_{stage}": update_request(
                 [], Status="Rejected", CurrentStage=f"Rejected at @{{{role}}} check (stage {stage})"),
             f"Tell_requestor_rejected_{stage}": teams_to_requestor(
@@ -225,7 +285,8 @@ def stage_loop(stage):
                     f"Requestor was not sure; @{{{first_resp}?['responder/displayName']}} ({QA_ROLE}) approved, "
                     f"so it is recorded as not regulated"), f"Record_not_regulated_{stage}"),
             }), f"If_stage_{stage}_rejected"),
-        f"If_stage_{stage}_changes_requested": after(condition(f"equals({outcome}, 'Request changes')", sent_back),
+        f"If_stage_{stage}_changes_requested": after(condition(f"and(equals({outcome}, 'Request changes'), {alive})",
+                                                               sent_back),
                                                      f"If_stage_{stage}_regulated_decided"),
         f"Round_end_{stage}": after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"),
                                     f"If_stage_{stage}_changes_requested"),
@@ -240,13 +301,14 @@ def stage_loop(stage):
             "found": f"@{{{found}}}",
             "gap": f"@not({valid})",
             "email": f"@if({valid}, {found}, {mdm})",
+            "escalateTo": f"@{{if(and({valid}, contains(coalesce({esc_found}, ''), '@')), {esc_found}, '')}}",
         }}, f"Find_stage_{stage}_approver"),
         f"If_stage_{stage}_routing_gap": after(condition(gap, {
             f"Tell_MDM_routing_gap_{stage}": teams_chat(
                 f"@{{{mdm}}}",
                 f"Routing gap: no valid @{{{role}}} is set up for @{{{entity}}} in the Roles list, so "
                 f"@{{triggerBody()?['Title']}} was sent to you instead. Please add or fix a Roles row "
-                f"(Role = @{{{role}}}, Entity = @{{{entity}}} or Any)."),
+                f"(Role = @{{{role}}}, Entity = @{{{entity}}} or Any).<br>{REQUEST_LINK}"),
             f"Log_routing_gap_{stage}": after(log_row(
                 "@triggerBody()?['Title']", "OneRecord", "System", "Routing gap",
                 f"No valid @{{{role}}} for @{{{entity}}} (found: '@{{outputs('{routing}')?['found']}}'); "
@@ -274,7 +336,7 @@ def rejected_gate(stage, prev):
     """After a stage: re-read the request; if it was rejected or closed, stop (the requestor was already told)."""
     check = f"Check_after_stage_{stage}"
     return {
-        check: after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"), prev),
+        check: {**sp("GetItem", "Requests", id="@triggerBody()?['ID']"), "runAfter": {prev: ANY}},
         f"If_rejected_after_stage_{stage}": after({
             "type": "If",
             "expression": {"or": [{"equals": [f"@outputs('{check}')?['body/{REQ['Status']}']", "Rejected"]},
@@ -484,8 +546,8 @@ actions["Tell_requestor_approved"] = teams_to_requestor(
 actions["Tell_MDM_to_import"] = after(teams_chat(
     f"@{{{mdm_email}}}",
     "@{triggerBody()?['Title']} is approved. Import SAP_Imports/@{outputs('SAP_file_name')} into SAP B1 with the "
-    "Data Transfer Workbench, then open OneRecord, go to My requests (All requests), select it and press "
-    "Mark as created in SAP."), "Tell_requestor_approved")
+    "Data Transfer Workbench, then open it with the link below and press Mark as created in SAP.<br>"
+    + REQUEST_LINK), "Tell_requestor_approved")
 # Wait (checking every 5 minutes, up to about 17 days) for MDM to confirm the import
 actions["Wait_for_SAP_import"] = after({
     "type": "Until", "expression": f"@equals(outputs('{poll}')?['body/{REQ['Status']}'], 'Created in SAP')",
@@ -513,7 +575,7 @@ actions["After_SAP_import"] = {
         "Tell_MDM_not_confirmed": after(teams_chat(
             f"@{{{mdm_email}}}",
             "@{triggerBody()?['Title']} has been ready for SAP import for over two weeks and hasn't been marked as "
-            "created in SAP. Please import it or reject it."), "Log_import_not_confirmed"),
+            "created in SAP. Please import it or reject it.<br>" + REQUEST_LINK), "Log_import_not_confirmed"),
     }),
     "runAfter": {"Wait_for_SAP_import": ["Succeeded", "Failed", "TimedOut"]},
 }

@@ -5,6 +5,7 @@ manifest.json is also its folder name and its entry in Microsoft.Flow/flows/mani
 connectionsMap.json is keyed by the connection reference name used in the definition.
 """
 import json
+import os
 import uuid
 import zipfile
 
@@ -24,6 +25,19 @@ LISTS = {  # list GUIDs on the team site
 # The request form's web link (Power Apps > the app > ... > Details > Web link). The email auto-reply sends it.
 APP_URL = ("https://apps.powerapps.com/play/e/default-c98a79ca-5a9a-4791-a243-f06afd67464d/a/"
            "967cb70c-0e04-409d-8b53-60f87ab250ea?tenantId=c98a79ca-5a9a-4791-a243-f06afd67464d")
+# Escalation: a stage-1 card that isn't answered within ESCALATE_AFTER is re-sent to the approver AND their
+# EscalateTo (Roles), and the first of them to answer decides. The time is fixed in the flow (an approval's timeout
+# can't come from a list), so keep RoutingRules.EscalateAfterDays in step with it. For a demo build, set it short:
+#   ESCALATE_AFTER=PT10M python3 powerautomate/build_route_approve.py
+ESCALATE_AFTER = os.environ.get("ESCALATE_AFTER", "P4D")
+ESCALATED_WAIT = "P20D"  # how long the re-sent card waits before the request is cancelled (runs end at 30 days)
+
+
+def app_link(request_id, text=None):
+    """HTML link that opens the app on My requests with this request selected (the app reads Param("requestId"))."""
+    return f'<a href="{APP_URL}&amp;requestId={request_id}">{text or "Open " + request_id + " in OneRecord"}</a>'
+
+
 # Only staff get the auto-reply (a customer emailing a new billing address must not be sent an internal form).
 # Lives Group would use its own domain; the demo tenant's teammates are on SMU addresses.
 INTERNAL_DOMAIN = "smu.edu.sg"

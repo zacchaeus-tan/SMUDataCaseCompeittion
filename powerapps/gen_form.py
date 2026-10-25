@@ -507,8 +507,10 @@ SelectedLog = With(
 // Still waiting: an approver can be asked again after a resubmit, so each Assigned row says its round
 // ("Stage 1, round 2"). A round is open while that role has made fewer decisions than its round number.
 DecisionActions = ["Approve", "Reject", "Request changes", "Cancelled"];
+// Once a request is rejected, cancelled or closed, its other open cards no longer count.
 WaitingOn = Filter(
     SelectedLog As a,
+    SelectedRequest.Status in ["Pending approval", "Changes requested", "Resubmitted"] &&
     a.Action = "Assigned" &&
     CountRows(Filter(SelectedLog As d, d.Role = a.Role && d.Action in DecisionActions)) =
         If("round " in a.Detail, Value(Last(Split(a.Detail, "round ")).Value), 1) - 1
@@ -528,7 +530,14 @@ If(
             LookUp(RolesRows, Role = w.Role && Email = w.Actor && (Entity = SelectedRequest.Entity || Entity = "Any")).Name,
             LookUp(RolesRows, Email = w.Actor).Name,
             w.Actor
-        ) & " (waiting " & DateDiff(w.At, Now(), TimeUnit.Days) & " days)",
+        ) & " (waiting " & DateDiff(w.At, Now(), TimeUnit.Days) & " days)" &
+        // The flow re-sends an unanswered stage-1 card to the approver's manager and logs "Escalated" with the
+        // same "Stage N, round R" as the Assigned row
+        If(!IsBlank(LookUp(SelectedLog As x, x.Action = "Escalated" && x.Role = w.Role && StartsWith(x.Detail, w.Detail & ":"))),
+           ", escalated: " & Coalesce(
+               LookUp(RolesRows, Email = LookUp(SelectedLog As x, x.Action = "Escalated" && x.Role = w.Role &&
+                                                StartsWith(x.Detail, w.Detail & ":")).Actor).Name,
+               "their manager") & " can answer too", ""),
         Char(10)
     )
 );
@@ -1003,6 +1012,7 @@ screen_yaml = HEADER + "\n".join([
 ] + screen(6)) + "\n"
 
 app_yaml = HEADER + "App:\n  Properties:\n    Formulas: |-\n" + indent("=" + FORMULAS, 6) + \
+    "\n    StartScreen: =If(IsBlank(Param(\"requestId\")), NewRequestScreen, MyRequestsScreen)" + \
     "\n    Theme: =PowerAppsTheme\n"
 
 # ---------------------------------------------------------------------------- My requests screen
@@ -1015,7 +1025,9 @@ row_name = ("Coalesce(ThisItem.CustomerName, ThisItem.ItemDescription, ThisItem.
 # Three fixed lines per row (ID and type, name, entity and status): wrapped text in one short label got clipped.
 # Selecting a request re-reads the log, so the timeline isn't a cached, empty answer from an earlier look.
 gallery = ctl("galRequests", "Gallery@2.15.0", {
-    "Items": "MyRequestList", "TemplateSize": "104", "TemplatePadding": "0", "FillPortions": "1",
+    "Items": "MyRequestList", "TemplateSize": "104",
+    # Opened from a Teams link (...&requestId=REQ-0004): select that request
+    "Default": 'If(!IsBlank(Param("requestId")), LookUp(MyRequestList, Title = Param("requestId")))', "TemplatePadding": "0", "FillPortions": "1",
     "BorderColor": "RGBA(237, 235, 233, 1)", "BorderThickness": "1", "ShowScrollbar": "true",
     "TemplateFill": "If(ThisItem.IsSelected, RGBA(222, 236, 249, 1), RGBA(255, 255, 255, 1))",
     "LayoutMinHeight": "16", "LayoutMinWidth": "16", "OnSelect": "Refresh(ApprovalLog);\nRefresh(SensitiveDetails)",
@@ -1073,7 +1085,7 @@ list_panel = ctl("ListPanel", "GroupContainer@1.5.0", dict(
                                      "Cancelled", "Ready for SAP import", "Created in SAP"]), Default='"All"',
             FillPortions="0", Width="220", Height="36", Size="11")),
         ctl("tglShowAll", "Classic/Toggle@2.1.0", dict(
-            TOGGLE, Default="false", Visible="IsMDM", FillPortions="1", Height="36", Size="11",
+            TOGGLE, Default='IsMDM && !IsBlank(Param("requestId"))', Visible="IsMDM", FillPortions="1", Height="36", Size="11",
             TrueText='"All requests"', FalseText='"Only mine"')),
         ctl("btnRefresh", "Classic/Button@2.2.0", outline(dict(
             BUTTON, Text='"Refresh"', FillPortions="0", Width="100", Height="36", Size="11",

@@ -356,8 +356,10 @@ App:
       // Still waiting: an approver can be asked again after a resubmit, so each Assigned row says its round
       // ("Stage 1, round 2"). A round is open while that role has made fewer decisions than its round number.
       DecisionActions = ["Approve", "Reject", "Request changes", "Cancelled"];
+      // Once a request is rejected, cancelled or closed, its other open cards no longer count.
       WaitingOn = Filter(
           SelectedLog As a,
+          SelectedRequest.Status in ["Pending approval", "Changes requested", "Resubmitted"] &&
           a.Action = "Assigned" &&
           CountRows(Filter(SelectedLog As d, d.Role = a.Role && d.Action in DecisionActions)) =
               If("round " in a.Detail, Value(Last(Split(a.Detail, "round ")).Value), 1) - 1
@@ -377,7 +379,14 @@ App:
                   LookUp(RolesRows, Role = w.Role && Email = w.Actor && (Entity = SelectedRequest.Entity || Entity = "Any")).Name,
                   LookUp(RolesRows, Email = w.Actor).Name,
                   w.Actor
-              ) & " (waiting " & DateDiff(w.At, Now(), TimeUnit.Days) & " days)",
+              ) & " (waiting " & DateDiff(w.At, Now(), TimeUnit.Days) & " days)" &
+              // The flow re-sends an unanswered stage-1 card to the approver's manager and logs "Escalated" with the
+              // same "Stage N, round R" as the Assigned row
+              If(!IsBlank(LookUp(SelectedLog As x, x.Action = "Escalated" && x.Role = w.Role && StartsWith(x.Detail, w.Detail & ":"))),
+                 ", escalated: " & Coalesce(
+                     LookUp(RolesRows, Email = LookUp(SelectedLog As x, x.Action = "Escalated" && x.Role = w.Role &&
+                                                      StartsWith(x.Detail, w.Detail & ":")).Actor).Name,
+                     "their manager") & " can answer too", ""),
               Char(10)
           )
       );
@@ -502,4 +511,5 @@ App:
               b.Title & ": nobody set up as " & g.Value & Char(10)
           )
       );
+    StartScreen: =If(IsBlank(Param("requestId")), NewRequestScreen, MyRequestsScreen)
     Theme: =PowerAppsTheme

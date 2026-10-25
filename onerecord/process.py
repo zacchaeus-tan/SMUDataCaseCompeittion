@@ -33,7 +33,8 @@ def simulate(requests: pd.DataFrame, steps: pd.DataFrame, bounce_avoided=0.9, no
     for rid, g in steps.groupby("request_id"):
         approvals = g[g.step.str.contains("approval")]
         waits = approvals.wait_days.values * (1 - notice_cut)
-        waits = np.where(waits > escalate_after_days, escalate_after_days + 1.0, waits)
+        # Escalation can only shorten a wait: anything longer than the limit is resolved ~1 day after it
+        waits = np.minimum(waits, escalate_after_days + 1.0)
         bounced = (g.step == "Requestor rework").any()
         keep_bounce = bounced and rng.random() > bounce_avoided
         rework = g[g.step == "Requestor rework"].wait_days.sum() if keep_bounce else 0.0
