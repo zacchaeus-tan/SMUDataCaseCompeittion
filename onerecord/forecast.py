@@ -8,7 +8,8 @@ AI model:          "business-calendar" regression, fitted on log units across al
                    by country), the hospital year-end budget push (Nov/Dec), the January lull, and public
                    holidays (Lunar New Year, Tet, Songkran, Hari Raya / Lebaran). Few parameters, so it
                    learns from 12-18 months of history where a full seasonal model cannot.
-Both are scored by a rolling backtest: forecast 1-3 months ahead from each origin Apr-Sep 2026.
+Both are scored by a rolling backtest: forecast 1-3 months ahead from each origin Apr-Sep 2026 (the headline
+figures), and 1-6 months ahead from each origin Jan-Sep 2026 (how far ahead the forecast holds).
 Accuracy metric: WAPE = sum |forecast - actual| / sum actual (lower is better). MAPE (the average of each
 month's % miss) is shown alongside; it weighs small months as much as big ones, so it runs higher.
 """
@@ -119,7 +120,7 @@ def accuracy_table(bt: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def forecast_ahead(Y: pd.DataFrame, n=3) -> pd.DataFrame:
+def forecast_ahead(Y: pd.DataFrame, n=6) -> pd.DataFrame:
     predict, effects = fit_calendar_model(Y)
     last = Y.columns[-1]
     rows = []
@@ -159,6 +160,7 @@ def stock_plan(Y: pd.DataFrame, ahead: pd.DataFrame, acc: pd.DataFrame, change_b
     """Next quarter vs the last quarter, per country x product, turned into a stocking action.
     A series the model forecast poorly in the back-test is flagged instead of acted on."""
     last3 = Y.iloc[:, -3:].sum(axis=1)
+    ahead = ahead[ahead.horizon <= 3]  # stock is planned a quarter at a time
     err = acc.set_index(["country", "product"])["Model error"]
     rows = []
     for (cc, p), g in ahead.groupby(["country", "product"]):

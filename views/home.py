@@ -64,7 +64,7 @@ def _kpis(clean, g, f, window, country):
               help=f"{window[0]} to {window[-1]}. Customer purchase orders only."),
         c.kpi("Growth, Apr–Sep 2026", growth * 100, prefix="+" if growth >= 0 else "", suffix="%", decimals=1,
               key="ov-growth",
-              delta=f"{mom:+.0%} in the last 3 months", tone=c.tone(mom),
+              delta=f"Jul–Sep alone: {mom:+.0%} YoY", tone=c.tone(mom),
               help=GROWTH_HELP + " The change underneath is the last 3 months on the same months a year earlier."),
         c.kpi("Forecast, Oct–Dec 2026", nq["units"], suffix=" units", key="ov-forecast",
               delta=f"{nq['change']:+.0%} on Oct–Dec 2025" if nq["change"] is not None else None,
@@ -72,7 +72,7 @@ def _kpis(clean, g, f, window, country):
               help="AI calendar model: each country and product's trend plus dengue season, the hospital "
                    "year-end budget spend, the January lull and public holidays."),
         c.kpi("Forecast error, AI model", acc["model"] * 100, suffix="%", decimals=1, key="ov-error",
-              delta=f"{acc['change']:+.0%} vs 6-month avg",
+              delta=f"{abs(acc['change']):.0%} {'lower' if acc['change'] <= 0 else 'higher'} than 6-month avg",
               tone=c.tone(acc["change"], up_is_good=False),
               help=f"Average miss as a share of actual units (WAPE), forecasting 1–3 months ahead from each "
                    f"month Apr–Sep 2026, Products A and B. Lower is better. Today's 6-month average misses by "
@@ -93,10 +93,11 @@ def _heatmap(g, country):
     if country:
         row = c.COUNTRY_ORDER.index(country)
         fig.add_shape(type="rect", x0=-0.5, x1=2.5, y0=row - 0.5, y1=row + 0.5, line=dict(color=theme.NAVY, width=2.5))
-    # top margin leaves room for the column labels (drawn above the grid) under the card heading
-    fig.update_layout(height=226, margin=dict(l=0, r=0, t=26, b=0), yaxis=dict(autorange="reversed", showgrid=False),
+    # top margin leaves room for the column labels (drawn above the grid) under the card heading; the left margin is
+    # fixed because Plotly sizes it for narrower text than Poppins draws, which clipped the country names
+    fig.update_layout(height=226, margin=dict(l=72, r=0, t=26, b=0), yaxis=dict(autorange="reversed", showgrid=False),
                       xaxis=dict(side="top", showgrid=False, ticks="", tickfont=dict(size=12.5, color=theme.TEXT)))
-    c.chart(fig)
+    c.chart(fig, pad=False)
     st.caption(f"Units {GROWTH_LABEL}. Equipment (C) volumes are small: read as directional.", help=GROWTH_HELP)
 
 
@@ -146,9 +147,9 @@ def _trend(clean, f, window, country):
     fig.add_vline(x=nxt.index[0], line=dict(color=theme.MUTED, width=1, dash="dot"))
     fig.add_annotation(x=nxt.index[0], y=1, yref="paper", text="Forecast", showarrow=False, xanchor="left",
                        font=dict(size=11, color=theme.TEXT))
-    fig.update_layout(height=195, margin=dict(l=0, r=0, t=6, b=0), hovermode="x unified",
+    fig.update_layout(height=185, margin=dict(l=0, r=0, t=6, b=0), hovermode="x unified",
                       yaxis=dict(title=None, tickformat=",.0f"), xaxis_title=None, legend=dict(y=1.06))
-    c.chart(fig)
+    c.chart(fig, pad=False)
     if country and ov.accuracy(f["backtest"], country)["change"] > 0:
         st.caption(f"The AI model does worse than the 6-month average in {COUNTRIES[country]}: the drop comes from "
                    "customers ordering less, not from the calendar. Act on the customer list, not the forecast.")

@@ -42,7 +42,7 @@ def momentum(clean: pd.DataFrame, country=None) -> float:
 
 def next_quarter(ahead: pd.DataFrame, clean: pd.DataFrame, country=None) -> dict:
     """Forecast units for the next 3 months vs the same months a year earlier."""
-    a = _in(ahead, country)
+    a = _in(ahead[ahead.horizon <= 3], country)
     months = sorted(a.month.unique())
     year_ago = [add_months(m, -12) for m in months]
     d = _in(clean, country)

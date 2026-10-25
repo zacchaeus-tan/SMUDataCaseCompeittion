@@ -85,7 +85,7 @@ h5 { font-weight: 600 !important; color: var(--or-navy); }
   box-shadow: var(--or-shadow);
   border: none !important;
 }
-[data-testid="stPlotlyChart"] { padding: 8px 10px; box-sizing: border-box; }
+/* no padding on charts: the space is built into the figure (views/common.py: chart) */
 [data-testid="stDataFrame"], [data-testid="stTable"] { padding: 6px; box-sizing: border-box; }
 [class*="st-key-card"] { padding: 14px 18px; }
 /* a chart or table inside a card is part of that card, not a second card */
@@ -200,3 +200,13 @@ h5 { font-weight: 600 !important; color: var(--or-navy); }
 .or-strip b { color: var(--or-navy); font-size: 14px; }
 .or-strip .or-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
 .or-strip .or-title { font-weight: 600; color: var(--or-primary); }
+
+/* ---------------------------------------------------------------- smaller screens (laptops, tablets) */
+@media (max-width: 1200px) {
+  /* side-by-side columns move onto their own row once one would get too narrow for its content (Streamlit only
+     stacks them below 640px): 380px for charts and tables, 200px for a filter or input */
+  [data-testid="stMain"] [data-testid="stColumn"] { min-width: min(100%, 380px); }
+  [data-testid="stMain"] [data-testid="stColumn"]:has([data-testid="stWidgetLabel"]) { min-width: min(100%, 200px); }
+  /* except an action's tag and its evidence link, which belong on one line */
+  [class*="st-key-act-"] [data-testid="stColumn"] { min-width: 0; }
+}

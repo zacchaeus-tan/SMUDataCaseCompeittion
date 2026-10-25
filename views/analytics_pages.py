@@ -6,8 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from onerecord import advisor, classify, process
-from onerecord.config import COUNTRIES, CURRENT, PRIOR_YEAR, PRODUCTS
+from onerecord import advisor, classify, insights, process
+from onerecord.config import COUNTRIES, CURRENT, GROWTH_LABEL, PRIOR_YEAR, PRODUCTS
 
 from . import common as c
 from . import theme
@@ -50,14 +50,21 @@ def growth():
     val_now, val_prev = g.value_now.sum(), g.value_prev.sum()
     best = g.loc[g[g["product"] != "C"].unit_growth.idxmax()]
     units_chg, value_chg = tot_now / tot_prev - 1, val_now / val_prev - 1
+    clean = c.regional()["clean"]
+    active = lambda w: clean[(clean.month >= w[0]) & (clean.month <= w[1])].customer_id.nunique()
+    cust_now, cust_prev = active(CURRENT), active(PRIOR_YEAR)
+    vs = f"vs {c.period(PRIOR_YEAR)}"  # every change on these cards compares with the same months a year earlier
     c.kpi_row([
-        c.kpi("Units, Apr–Sep 2026", tot_now, delta=c.pct(units_chg), tone=c.tone(units_chg)),
-        c.kpi("Order value (SGD)", val_now / 1e6, decimals=2, suffix="M", delta=c.pct(value_chg),
-              tone=c.tone(value_chg)),
-        c.kpi("Active customers", c.regional()["clean"].query("month >= @CURRENT[0]").customer_id.nunique(),
-              help="Real customers after merging duplicate records"),
-        c.kpi("Fastest growing (A/B)", f"{best.country}, product {best['product']}", delta=c.pct(best.unit_growth),
-              tone=c.tone(best.unit_growth)),
+        c.kpi(f"Units, {c.period(CURRENT)}", tot_now, delta=f"{c.pct(units_chg)} {vs}", tone=c.tone(units_chg)),
+        c.kpi(f"Order value (SGD), {c.period(CURRENT)}", val_now / 1e6, decimals=2, suffix="M",
+              delta=f"{c.pct(value_chg)} {vs}", tone=c.tone(value_chg)),
+        c.kpi(f"Active customers, {c.period(CURRENT)}", cust_now, delta=f"{cust_now - cust_prev:+,} {vs}",
+              tone=c.tone(cust_now - cust_prev),
+              help="Customers who ordered at least once in the period, counted after merging duplicate records"),
+        c.kpi("Fastest growing (A/B)", f"{COUNTRIES[best.country]}, {best['product']}",
+              delta=f"{c.pct(best.unit_growth)} units {vs}", tone=c.tone(best.unit_growth),
+              help="The country and product (A or B) whose units grew most. Product C is left out: its volumes "
+                   "are too small for a fair comparison."),
     ])
     _definition()
 
@@ -72,7 +79,7 @@ def growth():
         m = g.pivot(index="country", columns="product", values="unit_growth").reindex(c.COUNTRY_ORDER)
         fig = px.imshow(m, text_auto="+.0%", color_continuous_scale=DIVERGING, zmin=-0.3, zmax=0.3, aspect="auto",
                         labels=dict(color="YoY", x="Product", y=""))
-        fig.update_layout(height=row_h, margin=dict(l=0, r=0, t=10, b=0), coloraxis_showscale=False)
+        fig.update_layout(height=row_h - 16, margin=dict(l=0, r=0, t=10, b=0), coloraxis_showscale=False)
         c.chart(fig)
     with right:
         st.markdown("##### By country and product")
@@ -90,6 +97,7 @@ def growth():
                "a lot. Treat them as a rough guide.")
 
     _country_focus()
+    _by_entity()
 
     st.markdown("##### Monthly units by country")
     prod = st.radio("Product", list(PRODUCTS), horizontal=True, format_func=lambda p: c.PRODUCT_LABEL[p])
@@ -115,6 +123,39 @@ def growth():
         f"growth there will come from selling more products to existing customers.")
 
 
+def _by_entity():
+    """SPD, QTS and QTG side by side, and how many customers buy from more than one of them."""
+    clean = c.regional()["clean"]
+    st.markdown("##### By business entity")
+    between = lambda w: clean[(clean.month >= w[0]) & (clean.month <= w[1])]
+    now, prev = between(CURRENT), between(PRIOR_YEAR)
+    t = now.groupby("entity").agg(products=("product", lambda s: ", ".join(c.PRODUCT_LABEL[p] for p in sorted(s.unique()))),
+                                  units=("quantity", "sum"), value=("line_value_sgd", "sum"),
+                                  customers=("customer_id", "nunique"), countries=("country", "nunique"))
+    t["growth"] = (t.units / prev.groupby("entity").quantity.sum().reindex(t.index) - 1) * 100
+    t["share"] = t.value / t.value.sum() * 100
+    t["value"] = t.value.round()
+    t = t.sort_values("value", ascending=False).reset_index()
+    t = t[["entity", "products", "units", "growth", "value", "share", "customers", "countries"]]
+    st.dataframe(t, hide_index=True, width="stretch", height=c.table_height(len(t)), column_config={
+        "entity": st.column_config.TextColumn("Entity"),
+        "products": st.column_config.TextColumn("Sells"),
+        "units": st.column_config.NumberColumn("Units", format="localized"),
+        "growth": st.column_config.NumberColumn("YoY", format="%+.0f%%"),
+        "value": st.column_config.NumberColumn("Value (SGD)", format="localized"),
+        "share": st.column_config.NumberColumn("Share of value", format="%.0f%%"),
+        "customers": st.column_config.NumberColumn("Customers"),
+        "countries": st.column_config.NumberColumn("Countries")})
+    n = now.groupby("customer_id").entity.nunique()
+    shared = n[n > 1].index
+    value_share = now[now.customer_id.isin(shared)].line_value_sgd.sum() / now.line_value_sgd.sum()
+    st.caption(f"Apr–Sep 2026, units {GROWTH_LABEL}. In this data each entity sells one product line, so an "
+               f"entity's growth is its product's growth. The entity view matters for customers: {len(shared)} of "
+               f"{len(n)} customers buy from more than one entity, and they make up {value_share:.0%} of order value. "
+               f"Merging duplicate records is what lets one hospital show up as one customer across SPD, QTS and "
+               f"QTG, which is where the cross-sell list on Customers comes from.")
+
+
 def _country_focus():
     """One country: each product's monthly units, and the customers that order the most."""
     clean = c.regional()["clean"]
@@ -134,7 +175,7 @@ def _country_focus():
             # label each line at its end: the product colours alone are hard to tell apart for colour-blind readers
             fig.add_annotation(x=one.month.iloc[-1], y=one.quantity.iloc[-1], text=f"<b>{p}</b>", showarrow=False,
                                xanchor="left", xshift=8, font=dict(color=COLORS[p], size=13))
-        fig.update_layout(height=c.table_height(10), margin=dict(l=0, r=24, t=10, b=0), yaxis_title="units",
+        fig.update_layout(height=c.table_height(10) - 16, margin=dict(l=0, r=24, t=10, b=0), yaxis_title="units",
                           xaxis_title="", showlegend=False, hovermode="x unified")
         c.chart(fig)
     with right:
@@ -146,6 +187,7 @@ def _country_focus():
         top = top.nlargest(10, "value")
         before = prev.groupby("customer").line_value_sgd.sum().reindex(top.index)
         top["growth"] = (top.value / before - 1) * 100  # blank for customers with no orders a year earlier
+        top["value"] = top.value.round()
         st.dataframe(top.reset_index(), hide_index=True, width="stretch", height=c.table_height(10),
                      column_config={
                          "customer": st.column_config.TextColumn("Customer", width="large"),
@@ -209,7 +251,9 @@ def forecasting():
     c.kpi_row([
         c.kpi("Today: 6-month average", wape(ab, "baseline_ma6") * 100, decimals=1, suffix="% error"),
         c.kpi("AI calendar model", wape(ab, "calendar_model") * 100, decimals=1, suffix="% error",
-              delta=f"{-cut:+.0%}", tone=c.tone(-cut, up_is_good=False)),
+              delta=f"{cut:.0%} lower than 6-month avg", tone=c.tone(-cut, up_is_good=False),
+              help=f"{wape(ab, 'calendar_model'):.1%} vs {wape(ab, 'baseline_ma6'):.1%}: the model's misses are "
+                   f"{cut:.0%} smaller than today's 6-month average."),
         c.kpi("Series improved", (acc[acc["product"] != "C"].Improvement > 0).sum(), suffix=" of 10",
               help="Products A and B"),
         c.kpi("MAPE, AI model", mape_model * 100, decimals=1, suffix="%",
@@ -220,7 +264,8 @@ def forecasting():
     st.caption("Error is measured as WAPE: total absolute error divided by actual units. MAPE is the average of "
                "each month's % miss, so small months count as much as big ones and it runs higher. Both cover "
                "Products A and B, forecasting 1–3 months ahead from each month Apr–Sep 2026, using only the data "
-               "available at the time.")
+               "available at the time. The charts below forecast 6 months ahead; see how far ahead it holds at the "
+               "bottom of the page.")
 
     with st.expander("How the model works", expanded=False):
         st.markdown(
@@ -242,6 +287,8 @@ def forecasting():
         _forecast_all(f, prod)
     else:
         _forecast_one(f, country, prod, show_ma6)
+
+    _horizon(f["backtest_long"])
 
     st.markdown("##### Accuracy by series")
     st.dataframe(acc, hide_index=True, width="stretch", column_config={
@@ -278,6 +325,30 @@ def forecasting():
     _ai_brief(plan)
 
 
+def _horizon(bt):
+    """Error by how many months ahead the forecast was made, Products A and B."""
+    from onerecord.forecast import wape
+    st.markdown("##### How far ahead the forecast holds")
+    ab = bt[bt["product"] != "C"]
+    h = ab.groupby("horizon").apply(lambda g: pd.Series({"model": wape(g, "calendar_model"),
+                                                         "ma6": wape(g, "baseline_ma6"),
+                                                         "tests": g.origin.nunique()}), include_groups=False)
+    fig = go.Figure()
+    fig.add_scatter(x=h.index, y=h.ma6, name="6-month average (today)", mode="lines+markers",
+                    line=dict(color=theme.BASELINE, width=2, dash="dot"),
+                    hovertemplate="%{y:.1%} error<extra>6-month average</extra>")
+    fig.add_scatter(x=h.index, y=h.model, name="AI calendar model", mode="lines+markers",
+                    line=dict(color=theme.FORECAST, width=2.5), customdata=h.tests,
+                    hovertemplate="%{y:.1%} error, %{customdata} starting months<extra>AI model</extra>")
+    fig.update_layout(height=260, margin=dict(l=0, r=0, t=10, b=0), yaxis=dict(tickformat=".0%", rangemode="tozero"),
+                      xaxis=dict(title="months ahead", dtick=1), legend=dict(orientation="h", y=1.12))
+    c.chart(fig)
+    st.caption(f"Each point is the error (WAPE) of forecasts made that many months ahead, starting from each month "
+               f"Jan–Sep 2026 that still has actual orders to check against: {int(h.tests.iloc[0])} starting months "
+               f"for 1 month ahead, {int(h.tests.iloc[-1])} for 6 months ahead. With 18 months of history, 7–12 "
+               f"months ahead can't be checked yet, so the forecast stops at 6.")
+
+
 def _seasonality(effects):
     st.markdown("##### Seasonality the model learned")
     eff = pd.Series(effects).sort_values()
@@ -293,7 +364,7 @@ def _seasonality(effects):
 
 
 def _forecast_one(f, country, prod, show_ma6):
-    """One country: actual orders, the back-test, and the next 3 months with a likely range."""
+    """One country: actual orders, the back-test, and the next 6 months with a likely range."""
     bt, acc = f["backtest"], f["accuracy"]
     hist = f["Y"].loc[(country, prod)]
     one = bt[(bt.country == country) & (bt["product"] == prod) & (bt.horizon == 1)]
@@ -310,12 +381,13 @@ def _forecast_one(f, country, prod, show_ma6):
     fig.add_scatter(x=ahead.month, y=ahead.low, name="Likely range (8 in 10 months)", mode="lines",
                     line=dict(width=0), fill="tonexty", fillcolor="rgba(120,120,120,0.18)")
     if show_ma6:
-        fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average, next 3 months", mode="lines",
+        fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average, next 6 months", mode="lines",
                         line=dict(color="#aaa", dash="dash"))
-    fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model, next 3 months", mode="lines+markers",
+    fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model, next 6 months", mode="lines+markers",
                     line=dict(color=COLORS[prod], dash="dash"))
-    fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units",
-                      legend=dict(orientation="h", y=-0.2))
+    # legend pinned to the bottom of the figure, in the space left under the month labels, so it can't cover them
+    fig.update_layout(height=440, margin=dict(l=0, r=0, t=10, b=70), yaxis_title="units",
+                      legend=dict(orientation="h", x=0, y=0, yanchor="bottom", yref="container"))
     c.chart(fig)
     row = acc[(acc.country == country) & (acc["product"] == prod)].iloc[0]
     st.caption(f"{COUNTRIES[country]}, product {prod}: the 6-month average's error is {row['MA6 error']:.1%}, "
@@ -323,7 +395,7 @@ def _forecast_one(f, country, prod, show_ma6):
 
 
 def _forecast_all(f, prod):
-    """Every country on one chart: actual orders solid, the next 3 months' forecast dashed in the same colour."""
+    """Every country on one chart: actual orders solid, the next 6 months' forecast dashed in the same colour."""
     from onerecord.forecast import wape
     fig = go.Figure()
     for k in c.COUNTRY_ORDER:
@@ -338,7 +410,7 @@ def _forecast_all(f, prod):
     fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units")
     c.chart(fig)
     bt = f["backtest"][f["backtest"]["product"] == prod]
-    st.caption(f"Solid lines are actual orders; dashed lines are the calendar model's forecast for the next 3 months. "
+    st.caption(f"Solid lines are actual orders; dashed lines are the calendar model's forecast for the next 6 months. "
                f"Across all five countries, product {prod}: the 6-month average's error is "
                f"{wape(bt, 'baseline_ma6'):.1%}, the model's is {wape(bt, 'calendar_model'):.1%}. Pick a single "
                f"country to see the likely range and the back-test.")
@@ -397,8 +469,9 @@ def actions():
     cmp = c.regional()["compare"]
     c.header("Customers", f"{len(cmp['clean_drop'])} customers are ordering much less, with about "
                               f"S${cmp['clean_drop'].value_at_risk_per_q.sum():,.0f} a quarter at risk")
-    raw = st.toggle("Show raw SAP records (before duplicates are merged)",
-                    help="Runs the same analysis on the customer records as they sit in SAP today")
+    raw = st.toggle("Data check: show raw SAP records (before duplicates are merged)",
+                    help="Runs the same analysis on the customer records as they sit in SAP today, to show what "
+                         "duplicate records do to the alerts. It checks the data; it isn't a business benchmark.")
     if raw:
         golden = c.data_quality()["clusters"].set_index("record_id").golden_id
         drop = _flag_false(cmp["raw_drop"], cmp["clean_drop"], golden)
@@ -407,49 +480,99 @@ def actions():
     else:
         drop, xsell = cmp["clean_drop"], cmp["clean_xsell"]
 
-    at_risk = c.kpi("Value at risk per quarter", drop.value_at_risk_per_q.sum(), prefix="S$")
+    at_risk = drop.value_at_risk_per_q.sum()
     if raw:
         c.kpi_row([
             c.kpi("Customer records in SAP", cmp["raw_customers"]),
             c.kpi("Drop-off alerts", len(drop), delta=f"{false_drop} not real", tone="bad"),
             c.kpi("Cross-sell leads", len(xsell), delta=f"{false_xsell} not real", tone="bad"),
-            at_risk])
+            c.kpi("Value at risk per quarter", at_risk, prefix="S$")])
     else:
+        # each card is compared with a business benchmark; what duplicates did to the numbers is the data check below
+        clean = c.regional()["clean"]
+        between = lambda w: clean[(clean.month >= w[0]) & (clean.month <= w[1])]
+        last_q = between(insights.RECENT)
+        year_ago = between(insights.RECENT_PRIOR).groupby("customer_id").quantity.sum()
+        established = int((year_ago >= insights.MIN_QUARTER_UNITS).sum())
+        conv = 0.10  # same conversion rate as the business case
         c.kpi_row([
-            c.kpi("Real customers", cmp["clean_customers"],
-                  delta=f"{cmp['clean_customers'] - cmp['raw_customers']} duplicates merged"),
-            c.kpi("Drop-off alerts", len(drop), delta=f"{len(drop) - len(cmp['raw_drop'])} vs raw records",
-                  tone="good", help="With duplicate records, a customer whose orders moved to a new record looks "
-                                    "like they stopped ordering."),
-            c.kpi("Cross-sell leads", len(xsell), delta=f"{len(xsell) - len(cmp['raw_xsell'])} vs raw records",
-                  tone="good", help="With duplicate records, one hospital can be split into an A-only and a B-only "
-                                    "record, which looks like a cross-sell gap."),
-            at_risk])
+            c.kpi("Customers, Apr 2025–Sep 2026", cmp["clean_customers"],
+                  delta=f"{cmp['raw_customers'] - cmp['clean_customers']} duplicate records merged",
+                  help="One hospital or lab counts once, however many SAP records SPD, QTS and QTG created for it."),
+            c.kpi("Drop-off alerts", len(drop), delta=f"{len(drop) / established:.0%} of established customers",
+                  tone="bad", help=f"Ordered at least 40% less in Jul–Sep 2026 than in Jul–Sep 2025 and than their own "
+                                   f"recent average. Established = at least {insights.MIN_QUARTER_UNITS} units in "
+                                   f"Jul–Sep 2025 ({established} customers)."),
+            c.kpi("Cross-sell leads", len(xsell),
+                  delta=f"S${xsell.est_value_sgd_per_year.sum() * conv / 1000:,.0f}k a year if {conv:.0%} convert",
+                  tone="good", help="Customers who buy A but not B (or B but not A), while most similar customers "
+                                    "buy both."),
+            c.kpi("Value at risk per quarter", at_risk, prefix="S$", tone="bad",
+                  delta=f"{at_risk / last_q.line_value_sgd.sum():.0%} of last quarter's order value"),
+        ])
+        st.caption(f"Data check: on the raw SAP records, before duplicates are merged, the same rules raise "
+                   f"{len(cmp['raw_drop'])} drop-off alerts and {len(cmp['raw_xsell'])} cross-sell leads. "
+                   f"{len(cmp['raw_drop']) - len(drop)} and {len(cmp['raw_xsell']) - len(xsell)} more than above: "
+                   f"a customer whose orders moved to a new record looks like they stopped ordering, and one hospital "
+                   f"split into an A-only and a B-only record looks like a cross-sell gap. Use the switch above to "
+                   f"see which ones.")
     if raw:
         st.warning(f"On raw records, {false_drop} of {len(drop)} drop-off alerts and {false_xsell} of {len(xsell)} "
                    f"cross-sell leads are false or counted twice, because the same customer has more than one record. "
                    f"Turn the switch off to see the cleaned view.")
 
     status = ["status"] if raw else []
-    t1, t2 = st.tabs(["Customers dropping off", "Cross-sell opportunities"])
+    quiet = c.regional()["quiet"]
+    t1, t0, t2 = st.tabs([f"Call list: dropping off ({len(drop)})", f"Early warning: gone quiet ({len(quiet)})",
+                          f"Cross-sell opportunities ({len(xsell)})"])
     with t1:
-        d = drop
+        # one ranked list to work down: biggest value at risk first, with the reason it was flagged in words
+        d = drop.reset_index(drop=True)
+        d.insert(0, "rank", d.index + 1)
+        d["why"] = [f"{now:,.0f} units in Jul–Sep vs {before:,.0f} a year earlier ({chg:+.0%})"
+                    for now, before, chg in zip(d.units_last_q, d.units_same_q_last_year, d.change)]
+        d["action"] = ["Call within 2 weeks" if r <= 10 else "Call this quarter" for r in d["rank"]]
         st.markdown(f"{len(d)} established customers ordered at least 40% less last quarter than in the same "
                     f"quarter last year, and than their own recent average. Value at risk is about "
-                    f"S${d.value_at_risk_per_q.sum():,.0f} per quarter.")
-        st.dataframe(d[status + ["name", "country", "units_last_q", "units_same_q_last_year", "change",
-                                 "value_at_risk_per_q", "last_order"]], hide_index=True, width="stretch",
+                    f"S${d.value_at_risk_per_q.sum():,.0f} per quarter. Ranked by value at risk: work down from #1.")
+        st.dataframe(d[["rank"] + status + ["name", "country", "why", "value_at_risk_per_q", "last_order",
+                                            "action"]], hide_index=True, width="stretch",
                      column_config={
+            "rank": st.column_config.NumberColumn("#", width="small"),
             "status": STATUS_COL,
             "name": st.column_config.TextColumn("Customer"),
             "country": COUNTRY_COL,
-            "units_last_q": st.column_config.NumberColumn("Units last quarter"),
-            "units_same_q_last_year": st.column_config.NumberColumn("Same quarter last year"),
-            "change": st.column_config.NumberColumn("YoY", format="percent"),
-            "value_at_risk_per_q": st.column_config.NumberColumn("At risk per quarter (SGD)", format="%.0f"),
-            "last_order": st.column_config.TextColumn("Last order")})
-        st.markdown("**Suggested next step:** account managers call the top 10 by value within two weeks and record "
-                    "the reason (competitor, budget, service issue), so patterns by country become visible.")
+            "why": st.column_config.TextColumn("Why flagged", width="large"),
+            "value_at_risk_per_q": st.column_config.NumberColumn("At risk per quarter (SGD)", format="localized"),
+            "last_order": st.column_config.TextColumn("Last order"),
+            "action": st.column_config.TextColumn("Next step")})
+        st.markdown("**Suggested next step:** account managers call the top 10 within two weeks and record the "
+                    "reason they hear (competitor, budget, service issue), so patterns by country become visible.")
+    with t0:
+        q = quiet.copy()
+        q.insert(0, "rank", q.index + 1)
+        q["why"] = [f"No order for {s} days; usually orders every {g} days"
+                    for s, g in zip(q.days_since, q.usual_gap)]
+        q["confirmed"] = q.id.isin(c.regional()["compare"]["clean_drop"].id).map({True: "Yes", False: ""})
+        st.markdown(f"{len(q)} larger customers have gone quiet: no order for longer than 9 in 10 of their own past "
+                    f"gaps between orders, and for at least 45 days. This can show up a month or two before a "
+                    f"customer counts as dropping off, which needs a full quarter of lower orders.")
+        st.dataframe(q[["rank", "name", "country", "why", "value_per_q", "last_order", "confirmed"]],
+                     hide_index=True, width="stretch", column_config={
+            "rank": st.column_config.NumberColumn("#", width="small"),
+            "name": st.column_config.TextColumn("Customer"),
+            "country": COUNTRY_COL,
+            "why": st.column_config.TextColumn("Why flagged", width="large"),
+            "value_per_q": st.column_config.NumberColumn("Usual order value per quarter (SGD)",
+                                                          format="localized"),
+            "last_order": st.column_config.TextColumn("Last order"),
+            "confirmed": st.column_config.TextColumn("Also on call list",
+                                                     help="Already dropping off on the quarter rule")})
+        st.markdown("**Suggested next step:** not a call about the missed order. The account manager makes their "
+                    "next routine check-in early (e.g. \"your usual kits are due, shall we hold stock?\") and "
+                    "notes anything they hear, such as a lost tender or a new supplier.")
+        c.assumption("only the top half of regular customers by order value is watched, so smaller buyers who "
+                     "order late don't create work. Calculated on merged customer records.")
     with t2:
         x = xsell
         st.markdown(f"{len(x)} customers buy only one of Products A and B, while most similar customers buy both. "
@@ -751,10 +874,10 @@ def business_case():
     now_med, fut_med = sim.cycle_days.median(), sim.future_days.median()
     slow_chg = sim.future_days.quantile(.9) - sim.cycle_days.quantile(.9)
     c.kpi_row([
-        c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days", delta=f"{fut_med - now_med:+.1f} days",
-              tone=c.tone(fut_med - now_med, up_is_good=False)),
-        c.kpi("Slowest 10%", sim.future_days.quantile(.9), decimals=1, suffix=" days", delta=f"{slow_chg:+.1f} days",
-              tone=c.tone(slow_chg, up_is_good=False)),
+        c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days",
+              delta=f"{fut_med - now_med:+.1f} days vs email today", tone=c.tone(fut_med - now_med, up_is_good=False)),
+        c.kpi("Slowest 10%", sim.future_days.quantile(.9), decimals=1, suffix=" days",
+              delta=f"{slow_chg:+.1f} days vs email today", tone=c.tone(slow_chg, up_is_good=False)),
         c.kpi("Faster", (1 - fut_med / now_med) * 100, suffix="%"),
     ])
     long = pd.concat([sim.assign(scenario="Today (email)", days=sim.cycle_days),
@@ -798,7 +921,8 @@ def business_case():
             c.kpi("Payback", 12 * co / b, decimals=1, suffix=" months") if b else c.kpi("Payback", "—"),
             c.kpi("Annual benefit", b, prefix="S$"),
             c.kpi("Year-1 cost", co, prefix="S$"),
-            c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days", delta=f"{fut_med - now_med:+.1f} days",
+            c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days",
+                  delta=f"{fut_med - now_med:+.1f} days vs email today",
                   tone=c.tone(fut_med - now_med, up_is_good=False)),
         ])
     c.assumption("sales-driven benefits are counted at gross margin rather than order value. Rates, hours, margin "
