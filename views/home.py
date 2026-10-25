@@ -96,7 +96,7 @@ def _heatmap(g, country):
     # top margin leaves room for the column labels (drawn above the grid) under the card heading
     fig.update_layout(height=226, margin=dict(l=0, r=0, t=26, b=0), yaxis=dict(autorange="reversed", showgrid=False),
                       xaxis=dict(side="top", showgrid=False, ticks="", tickfont=dict(size=12.5, color=theme.TEXT)))
-    c.chart(fig)
+    c.chart(fig, pad=False)
     st.caption(f"Units {GROWTH_LABEL}. Equipment (C) volumes are small: read as directional.", help=GROWTH_HELP)
 
 
@@ -146,9 +146,9 @@ def _trend(clean, f, window, country):
     fig.add_vline(x=nxt.index[0], line=dict(color=theme.MUTED, width=1, dash="dot"))
     fig.add_annotation(x=nxt.index[0], y=1, yref="paper", text="Forecast", showarrow=False, xanchor="left",
                        font=dict(size=11, color=theme.TEXT))
-    fig.update_layout(height=195, margin=dict(l=0, r=0, t=6, b=0), hovermode="x unified",
+    fig.update_layout(height=185, margin=dict(l=0, r=0, t=6, b=0), hovermode="x unified",
                       yaxis=dict(title=None, tickformat=",.0f"), xaxis_title=None, legend=dict(y=1.06))
-    c.chart(fig)
+    c.chart(fig, pad=False)
     if country and ov.accuracy(f["backtest"], country)["change"] > 0:
         st.caption(f"The AI model does worse than the 6-month average in {COUNTRIES[country]}: the drop comes from "
                    "customers ordering less, not from the calendar. Act on the customer list, not the forecast.")

@@ -52,13 +52,15 @@ KPI_HEIGHT = 132  # every KPI card the same height, with or without a change fig
 
 
 def page_style():
-    """Page-wide CSS, plus the script that draws line charts from left to right as they come on screen."""
+    """Page-wide CSS, plus scripts that draw line charts from left to right as they come on screen and stop table
+    columns being dragged around."""
     st.html(f"<style>{(ASSETS / 'app.css').read_text()}</style>")
-    with st.container(key="orscript"):  # hidden (app.css); the script works on the page around its frame
-        components.html(f"<script>{(ASSETS / 'chart_draw.js').read_text()}</script>", height=0)
+    scripts = "".join(f"<script>{(ASSETS / js).read_text()}</script>" for js in ("chart_draw.js", "table_lock.js"))
+    with st.container(key="orscript"):  # hidden (app.css); the scripts work on the page around their frame
+        components.html(scripts, height=0)
 
 
-def chart(fig):
+def chart(fig, pad=True):
     # Set on the figure itself, because Streamlit and per-trace colours override the template:
     # white backgrounds, tooltips as dark text on white (not on the cell or line colour), and no zooming or
     # panning, so a stray drag or scroll during a demo can't throw the chart off
@@ -66,6 +68,14 @@ def chart(fig):
                       hoverlabel=dict(bgcolor="white", bordercolor="#cbd5e1", font=dict(color=theme.NAVY, size=12.5)))
     fig.update_xaxes(fixedrange=True)
     fig.update_yaxes(fixedrange=True)
+    if pad:
+        # breathing room inside the chart's white box. Streamlit sizes the box to exactly the figure, so the space has
+        # to be part of the figure: CSS padding on the box pushed the figure past it and the box scrolled.
+        # Charts inside a card (pad=False) get their space from the card instead.
+        m, d = fig.layout.margin, dict(l=80, r=80, t=100, b=80)  # Plotly's defaults, for sides a chart doesn't set
+        side = lambda k: d[k] if getattr(m, k) is None else getattr(m, k)
+        fig.update_layout(height=(fig.layout.height or 450) + 16,
+                          margin=dict(l=side("l") + 10, r=side("r") + 10, t=side("t") + 8, b=side("b") + 8))
     st.plotly_chart(fig, theme=None, config={"displayModeBar": False, "scrollZoom": False, "doubleClick": False})
 
 

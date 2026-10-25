@@ -85,7 +85,7 @@ h5 { font-weight: 600 !important; color: var(--or-navy); }
   box-shadow: var(--or-shadow);
   border: none !important;
 }
-[data-testid="stPlotlyChart"] { padding: 8px 10px; box-sizing: border-box; }
+/* no padding on charts: the space is built into the figure (views/common.py: chart) */
 [data-testid="stDataFrame"], [data-testid="stTable"] { padding: 6px; box-sizing: border-box; }
 [class*="st-key-card"] { padding: 14px 18px; }
 /* a chart or table inside a card is part of that card, not a second card */

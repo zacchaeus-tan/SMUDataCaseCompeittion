@@ -72,7 +72,7 @@ def growth():
         m = g.pivot(index="country", columns="product", values="unit_growth").reindex(c.COUNTRY_ORDER)
         fig = px.imshow(m, text_auto="+.0%", color_continuous_scale=DIVERGING, zmin=-0.3, zmax=0.3, aspect="auto",
                         labels=dict(color="YoY", x="Product", y=""))
-        fig.update_layout(height=row_h, margin=dict(l=0, r=0, t=10, b=0), coloraxis_showscale=False)
+        fig.update_layout(height=row_h - 16, margin=dict(l=0, r=0, t=10, b=0), coloraxis_showscale=False)
         c.chart(fig)
     with right:
         st.markdown("##### By country and product")
@@ -134,7 +134,7 @@ def _country_focus():
             # label each line at its end: the product colours alone are hard to tell apart for colour-blind readers
             fig.add_annotation(x=one.month.iloc[-1], y=one.quantity.iloc[-1], text=f"<b>{p}</b>", showarrow=False,
                                xanchor="left", xshift=8, font=dict(color=COLORS[p], size=13))
-        fig.update_layout(height=c.table_height(10), margin=dict(l=0, r=24, t=10, b=0), yaxis_title="units",
+        fig.update_layout(height=c.table_height(10) - 16, margin=dict(l=0, r=24, t=10, b=0), yaxis_title="units",
                           xaxis_title="", showlegend=False, hovermode="x unified")
         c.chart(fig)
     with right:
@@ -341,8 +341,9 @@ def _forecast_one(f, country, prod, show_ma6):
                         line=dict(color="#aaa", dash="dash"))
     fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model, next 6 months", mode="lines+markers",
                     line=dict(color=COLORS[prod], dash="dash"))
-    fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units",
-                      legend=dict(orientation="h", y=-0.2))
+    # legend pinned to the bottom of the figure, in the space left under the month labels, so it can't cover them
+    fig.update_layout(height=440, margin=dict(l=0, r=0, t=10, b=70), yaxis_title="units",
+                      legend=dict(orientation="h", x=0, y=0, yanchor="bottom", yref="container"))
     c.chart(fig)
     row = acc[(acc.country == country) & (acc["product"] == prod)].iloc[0]
     st.caption(f"{COUNTRIES[country]}, product {prod}: the 6-month average's error is {row['MA6 error']:.1%}, "
