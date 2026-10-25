@@ -1,0 +1,23 @@
+Title,ListName,SortOrder,Active,Details
+A,ProductFamily,10,Yes,IVD reagents and rapid tests
+B,ProductFamily,20,Yes,Lab consumables
+C,ProductFamily,30,Yes,Medical and lab equipment
+SG,Country,10,Yes,
+MY,Country,20,Yes,
+TH,Country,30,Yes,
+ID,Country,40,Yes,
+VN,Country,50,Yes,
+Hospital,Segment,10,Yes,
+Laboratory,Segment,20,Yes,
+Clinic,Segment,30,Yes,
+Kit,UnitOfMeasure,10,Yes,
+Box,UnitOfMeasure,20,Yes,
+Pack,UnitOfMeasure,30,Yes,
+Unit,UnitOfMeasure,40,Yes,
+Set,UnitOfMeasure,50,Yes,
+Sales,Department,10,Yes,
+Marketing,Department,20,Yes,
+Regulatory Affairs,Department,30,Yes,
+Service,Department,40,Yes,
+Finance,Department,50,Yes,
+Warehouse,Department,60,Yes,

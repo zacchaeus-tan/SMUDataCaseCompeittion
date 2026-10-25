@@ -19,9 +19,12 @@ App:
           RequiredFields,
           {RequestType: RequestType, FieldName: FieldName, DisplayLabel: DisplayLabel, Required: Required,
             ConditionField: ConditionField, ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText,
-            Check: Check}
+            Check: Check, Title: Title}
       );
       TypeRules = Filter(FieldRules, RequestType = SelectedType);
+      
+      // Dropdown options (ChoiceOptions list, edited on the Rules screen), loaded once like the field rules
+      ChoiceRows = ForAll(ChoiceOptions, {List: ListName, Value: Title, Order: SortOrder, Active: Active, Details: Details});
       
       // What the requestor has entered so far, keyed by the FieldName used in the RequiredFields list.
       FieldValues = Table(
@@ -53,10 +56,13 @@ App:
           {F: "BudgetYear", V: txtBudgetYear.Text}
       );
       
-      // A field shows (and is required) when its rule is "Always", or when its condition is met.
+      // A field shows (and is required) when its rule is "Always", or when its condition is met: the other field has one
+      // of the listed values ("A;D" = A or D; case and spaces ignored, as for approval steps).
       VisibleFields = Filter(
           TypeRules,
-          Required <> "Conditional" || LookUp(FieldValues, F = ConditionField).V = ConditionValue
+          Required <> "Conditional" ||
+          Lower(Substitute(Coalesce(LookUp(FieldValues, F = ConditionField).V, "-"), " ", "")) in
+              Split(Lower(Substitute(Substitute(Coalesce(ConditionValue, ""), " ", ""), ",", ";")), ";")
       );
       MissingFields = Filter(VisibleFields, IsBlank(Trim(LookUp(FieldValues, F = FieldName).V)));
       
@@ -332,7 +338,8 @@ App:
       );
       
       // ---- My requests screen
-      RolesRows = ForAll(Roles, {Role: Role, Entity: Entity, Name: PersonName, Email: Lower(PersonEmail)});
+      RolesRows = ForAll(Roles, {ID: ID, Role: Role, Entity: Entity, Name: PersonName, Email: Lower(PersonEmail),
+                                   EscalateTo: EscalateTo, TimeZone: TimeZone});
       IsMDM = !IsBlank(LookUp(RolesRows, Role = "MDM Analyst" && Email = Lower(User().Email)));
       ShowAllRequests = IsMDM && tglShowAll.Value;
       StatusFilter = ddStatusFilter.Selected.Value;
@@ -465,8 +472,19 @@ App:
       // ---- Who will approve: the same rules the Route and approve flow reads (RoutingRules + Roles)
       RuleRows = ForAll(
           RoutingRules,
-          {RequestType: RequestType, Entity: Entity, ConditionField: ConditionField, Role: ApproverRole,
-           Stage: Stage, Active: Active}
+          {Rule: Title, RequestType: RequestType, Entity: Entity, ConditionField: ConditionField,
+           ConditionValue: ConditionValue, Role: ApproverRole, Stage: Stage, SLADays: SLADays, Active: Active}
+      );
+      // The request's values for the "Only if" conditions, matched like the flow does: lower case, no spaces, blank = "-",
+      // regulated "Not sure" counts as Yes (it is saved as Yes and goes to Quality/Regulatory). A field that isn't on this
+      // request type isn't saved, so it counts as blank (a Yes/No field as No), even if its hidden control still holds a value.
+      RouteFields = ["Country", "ProductFamily", "IsRegulated", "SuppliesRegulatedGoods", "Segment", "UnitOfMeasure", "Department"];
+      RouteFacts = ForAll(
+          Filter(FieldValues, F in RouteFields) As fv,
+          {F: fv.F,
+           V: With({yn: fv.F in ["IsRegulated", "SuppliesRegulatedGoods"], onType: fv.F in TypeRules.FieldName},
+               With({v: If(!onType, If(yn, "No", ""), fv.F = "IsRegulated", If(fv.V in ["Yes", "Not sure"], "Yes", "No"), fv.V)},
+                    If(IsBlank(Trim(v)), "-", Lower(Substitute(v, " ", "")))))}
       );
       // Like the flow: the first Roles row for the role and entity (or Any); no "@" in its email = nobody set up.
       ApproverPreview = ForAll(
@@ -474,8 +492,9 @@ App:
               x.Active && (x.RequestType = SelectedType || x.RequestType = "Any") &&
               (x.Entity = SelectedEntity || x.Entity = "Any") &&
               (IsBlank(x.ConditionField) ||
-               (x.ConditionField = "IsRegulated" && SelectedType = "Item" && ddIsRegulated.Selected.Value in ["Yes", "Not sure"]) ||
-               (x.ConditionField = "SuppliesRegulatedGoods" && SelectedType = "Vendor" && tglSuppliesRegulatedGoods.Value))
+               (!IsBlank(x.ConditionValue) &&
+                Coalesce(LookUp(RouteFacts, F = x.ConditionField).V, "-") in
+                    Split(Lower(Substitute(Substitute(x.ConditionValue, " ", ""), ",", ";")), ";")))
           ) As r,
           With(
               {p:LookUp(RolesRows, Role = r.Role && (Entity = SelectedEntity || Entity = "Any"))},
@@ -511,5 +530,58 @@ App:
               b.Title & ": nobody set up as " & g.Value & Char(10)
           )
       );
+      // Active approval steps whose "Only if" can never match: an unknown field, or no value to compare with
+      RuleProblemText = Concat(
+          Filter(RuleRows, Active && !IsBlank(ConditionField) && (!(ConditionField in RouteFields) || IsBlank(ConditionValue))),
+          "Approval step " & Rule & ": " &
+          If(ConditionField in RouteFields, "'Only if " & ConditionField & "' has no value after 'is', so it never applies",
+             "'" & ConditionField & "' isn't a field approval steps can depend on, so it never applies") & Char(10)
+      );
+      
+      // ---- Rules screen: plain names for fields, the fields a rule can depend on, and the business choices
+      FieldLabels = Table(
+          {F: "CustomerName", L: "Customer name"},
+          {F: "Country", L: "Country"},
+          {F: "RegistrationNo", L: "Registration no."},
+          {F: "BillingAddress", L: "Billing address"},
+          {F: "ContactEmail", L: "Contact email"},
+          {F: "Segment", L: "Segment"},
+          {F: "PaymentTerms", L: "Payment terms"},
+          {F: "CreditLimit", L: "Credit limit"},
+          {F: "ItemDescription", L: "Item description"},
+          {F: "ManufacturerPartNo", L: "Manufacturer part no."},
+          {F: "ProductFamily", L: "Product family"},
+          {F: "UnitOfMeasure", L: "Unit of measure"},
+          {F: "HSCode", L: "HS code"},
+          {F: "IsRegulated", L: "Regulated"},
+          {F: "RegulatoryLicenceNo", L: "Regulatory licence no."},
+          {F: "ShelfLifeMonths", L: "Shelf life (months)"},
+          {F: "VendorName", L: "Vendor name"},
+          {F: "TaxID", L: "Tax ID"},
+          {F: "SuppliesRegulatedGoods", L: "Supplies regulated goods"},
+          {F: "ISO13485CertNo", L: "ISO 13485 certificate no."},
+          {F: "BankName", L: "Bank name"},
+          {F: "BankAccount", L: "Bank account"},
+          {F: "CostCenterName", L: "Cost centre name"},
+          {F: "Department", L: "Department"},
+          {F: "Owner", L: "Owner"},
+          {F: "BudgetYear", L: "Budget year"}
+      );
+      TypeFields = Table(
+          {Type: "Customer", F: "Country", L: "Country"},
+          {Type: "Customer", F: "Segment", L: "Segment"},
+          {Type: "Item", F: "ProductFamily", L: "Product family"},
+          {Type: "Item", F: "IsRegulated", L: "Regulated"},
+          {Type: "Item", F: "UnitOfMeasure", L: "Unit of measure"},
+          {Type: "Vendor", F: "SuppliesRegulatedGoods", L: "Supplies regulated goods"},
+          {Type: "Cost Center", F: "Department", L: "Department"}
+      );
+      BusinessChoices = With(
+          {bus: ForAll(Sort(Filter(BusinessUnits, Active = true), Title), {Value: BusinessUnitName, Code: Title})},
+          ForAll(Sequence(CountRows(bus) + 1),
+              If(Value = 1, {Value: "All businesses", Code: "Any"},
+                 {Value: Index(bus, Value - 1).Value, Code: Index(bus, Value - 1).Code}))
+      );
+      ApproverRoles = Sort(Distinct(Filter(RolesRows, Role <> "Requestor" && Role <> "MDM Analyst"), Role), Value);
     StartScreen: =If(IsBlank(Param("requestId")), NewRequestScreen, MyRequestsScreen)
     Theme: =PowerAppsTheme

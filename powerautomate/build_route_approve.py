@@ -47,6 +47,32 @@ NAME_EXPR = f"coalesce({t('CustomerName')}, {t('ItemDescription')}, {t('VendorNa
 
 QA_ROLE = "Quality/Regulatory"
 RESPONSES = ["Approve", "Request changes", "Reject"]
+
+# Request fields an approval step can depend on (RoutingRules "Only if" = ConditionField, "is" = ConditionValue,
+# one value or several separated by ";", any of them matches). The Rules screen offers exactly these, and the app's
+# approver preview mirrors the matching (gen_form.py ROUTE_FIELDS): change them together.
+ROUTE_FIELDS = ["Country", "ProductFamily", "IsRegulated", "SuppliesRegulatedGoods", "Segment", "UnitOfMeasure",
+                "Department"]
+YES_NO = {"IsRegulated", "SuppliesRegulatedGoods"}  # Yes/No columns; "Not sure" is saved as Yes, so it matches Yes
+
+
+def norm(expr):
+    """Lower case, no spaces, so 'Regulatory Affairs' matches 'regulatory affairs'. Blank-safe: flow expressions
+    evaluate every argument of if / and / or, so nothing here may fail on a blank value."""
+    return f"toLower(replace(string(coalesce({expr}, '')), ' ', ''))"
+
+
+def route_facts():
+    """The request's value for each routing field, normalised; a blank field is '-' so it never matches a rule."""
+    return {f.lower(): (f"@if(equals({t(f)}, true), 'yes', 'no')" if f in YES_NO
+                        else f"@if(empty({t(f)}), '-', {norm(t(f))})") for f in ROUTE_FIELDS}
+
+
+def condition_met(rule):
+    """True when the rule has no condition, or the request's value is one of the rule's values."""
+    cf, cv = f"{rule}?['{RULE['ConditionField']}']", f"{rule}?['{RULE['ConditionValue']}']"
+    return (f"or(empty({cf}), and(not(empty({cv})), contains(split({norm(f'replace(string(coalesce({cv}, {chr(39)}{chr(39)})), {chr(39)},{chr(39)}, {chr(39)};{chr(39)})')}, ';'), "
+            f"coalesce(outputs('Route_facts')?[{norm(cf)}], '-'))))")
 WAIT_FOR_EDIT = "P14D"  # how long a sent-back request waits for the requestor before it is closed
 
 
@@ -138,9 +164,7 @@ def stage_loop(stage):
         f"@and(equals(item()?['{RULE['Active']}'], true), {stage_test}, "
         f"or(equals(item()?['{RULE['RequestType']}'], {t('RequestType')}), equals(item()?['{RULE['RequestType']}'], 'Any')), "
         f"or(equals(item()?['{RULE['Entity']}'], 'Any'), equals(item()?['{RULE['Entity']}'], {t('Entity')})), "
-        f"or(empty(item()?['{RULE['ConditionField']}']), "
-        f"and(equals(item()?['{RULE['ConditionField']}'], 'IsRegulated'), equals({t('IsRegulated')}, true)), "
-        f"and(equals(item()?['{RULE['ConditionField']}'], 'SuppliesRegulatedGoods'), equals({t('SuppliesRegulatedGoods')}, true))))"
+        f"{condition_met('item()')})"
     )
     role = f"items('{loop}')?['{RULE['ApproverRole']}']"
     escalated = f"Escalated_approval_{stage}"  # stage 1 only: the card re-sent to approver + EscalateTo
@@ -239,6 +263,9 @@ def stage_loop(stage):
                         f"@{{if(empty({cur('DupReason')}), '', concat('**Requestor says it is not a duplicate:** ', "
                         f"{cur('DupReason')}))}}\n\n"
                         f"**Your check:** @{{{role}}} (stage {stage})\n\n"
+                        f"@{{if(empty(items('{loop}')?['{RULE['ConditionField']}']), '', concat('**Why this check:** "
+                        f"the step applies when ', items('{loop}')?['{RULE['ConditionField']}'], ' is ', "
+                        f"items('{loop}')?['{RULE['ConditionValue']}'], '.'))}}\n\n"
                         f"@{{if(equals({t('RequestType')}, 'Item'), concat('**Regulated (requestor answer):** ', "
                         f"coalesce({cur('RegulatedAnswer')}, if(equals({cur('IsRegulated')}, true), 'Yes', 'No'))), '')}}\n\n"
                         f"@{{if(and(equals({role}, '{QA_ROLE}'), equals({cur('RegulatedAnswer')}, 'Not sure')), "
@@ -477,6 +504,7 @@ actions["Init_master_row_id"] = {"type": "InitializeVariable", "runAfter": {}, "
 actions["Get_routing_rules"] = after(sp("GetItems", "RoutingRules"), "Init_master_row_id")
 actions["Get_roles"] = after(sp("GetItems", "Roles"), "Get_routing_rules")
 
+ROUTE_FACTS = route_facts()  # built here, while t() still reads the submitted request
 s1 = stage_loop(1)
 actions["Find_MDM_analyst"] = after({"type": "Query", "inputs": {
     "from": "@outputs('Get_roles')?['body/value']",
@@ -501,7 +529,9 @@ actions["Get_request_as_submitted"] = after(sp("GetItem", "Requests", id="@trigg
 actions["Init_pinned_version"] = after({"type": "InitializeVariable", "inputs": {"variables": [{
     "name": "Pinned", "type": "string",
     "value": f"@{fingerprint('Get_request_as_submitted', 'Get_sensitive_item')}"}]}}, "Get_request_as_submitted")
-actions["Filter_stage_1_rules"] = after(s1["Filter_stage_1_rules"], "Init_pinned_version")
+# The request's values for the "Only if" conditions on approval steps (read by both stages' rule filters)
+actions["Route_facts"] = after({"type": "Compose", "inputs": ROUTE_FACTS}, "Init_pinned_version")
+actions["Filter_stage_1_rules"] = after(s1["Filter_stage_1_rules"], "Route_facts")
 actions["Mark_stage_1"] = update_request(
     ["Filter_stage_1_rules"], Status="Pending approval",
     CurrentStage="Stage 1: waiting for @{length(body('Filter_stage_1_rules'))} approvers in parallel")

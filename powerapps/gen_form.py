@@ -75,6 +75,13 @@ CHOICES = {
     # No default: the requestor has to answer. "Not sure" sends the item to Quality/Regulatory to decide.
     "IsRegulated": ["Yes", "No", "Not sure"],
 }
+# Dropdowns whose options come from the ChoiceOptions list (MDM edits them on the Rules screen; "Country" is the
+# customer country). Payment terms stay fixed here: Finance owns them. The values above seed sharepoint/ChoiceOptions.csv.
+EDITABLE_CHOICES = {"ProductFamily": CHOICES["ProductFamily"], "Country": COUNTRIES, "Segment": CHOICES["Segment"],
+                    "UnitOfMeasure": CHOICES["UnitOfMeasure"], "Department": CHOICES["Department"]}
+# Request fields an approval step can depend on. Must match ROUTE_FIELDS in powerautomate/build_route_approve.py.
+ROUTE_FIELDS = ["Country", "ProductFamily", "IsRegulated", "SuppliesRegulatedGoods", "Segment", "UnitOfMeasure",
+                "Department"]
 
 # (request type, FieldName in RequiredFields, control name, kind, extra)
 # kind: text | number | email | choice | country | toggle
@@ -390,19 +397,25 @@ FieldRules = ForAll(
     RequiredFields,
     {{RequestType: RequestType, FieldName: FieldName, DisplayLabel: DisplayLabel, Required: Required,
       ConditionField: ConditionField, ConditionValue: ConditionValue, Sensitive: Sensitive, HelpText: HelpText,
-      Check: Check}}
+      Check: Check, Title: Title}}
 );
 TypeRules = Filter(FieldRules, RequestType = SelectedType);
+
+// Dropdown options (ChoiceOptions list, edited on the Rules screen), loaded once like the field rules
+ChoiceRows = ForAll(ChoiceOptions, {{List: ListName, Value: Title, Order: SortOrder, Active: Active, Details: Details}});
 
 // What the requestor has entered so far, keyed by the FieldName used in the RequiredFields list.
 FieldValues = Table(
 {field_value_rows()}
 );
 
-// A field shows (and is required) when its rule is "Always", or when its condition is met.
+// A field shows (and is required) when its rule is "Always", or when its condition is met: the other field has one
+// of the listed values ("A;D" = A or D; case and spaces ignored, as for approval steps).
 VisibleFields = Filter(
     TypeRules,
-    Required <> "Conditional" || LookUp(FieldValues, F = ConditionField).V = ConditionValue
+    Required <> "Conditional" ||
+    Lower(Substitute(Coalesce(LookUp(FieldValues, F = ConditionField).V, "-"), " ", "")) in
+        Split(Lower(Substitute(Substitute(Coalesce(ConditionValue, ""), " ", ""), ",", ";")), ";")
 );
 MissingFields = Filter(VisibleFields, IsBlank(Trim(LookUp(FieldValues, F = FieldName).V)));
 
@@ -483,7 +496,8 @@ ChangesText = If(
 {DUP_FX}
 
 // ---- My requests screen
-RolesRows = ForAll(Roles, {{Role: Role, Entity: Entity, Name: PersonName, Email: Lower(PersonEmail)}});
+RolesRows = ForAll(Roles, {{ID: ID, Role: Role, Entity: Entity, Name: PersonName, Email: Lower(PersonEmail),
+                             EscalateTo: EscalateTo, TimeZone: TimeZone}});
 IsMDM = !IsBlank(LookUp(RolesRows, Role = "MDM Analyst" && Email = Lower(User().Email)));
 ShowAllRequests = IsMDM && tglShowAll.Value;
 StatusFilter = ddStatusFilter.Selected.Value;
@@ -614,7 +628,7 @@ SensitiveText = If(
 );"""
 
 TIME_ZONES = ["Asia/Singapore", "Asia/Kuala_Lumpur", "Asia/Bangkok", "Asia/Jakarta", "Asia/Ho_Chi_Minh"]
-CONDITIONS = ["IsRegulated", "SuppliesRegulatedGoods"]  # the conditions the Route and approve flow understands
+CONDITIONS = ROUTE_FIELDS  # the "Only if" fields the Route and approve flow understands
 
 # Plain string (not an f-string), so Power Fx braces stay single.
 FORMULAS += """
@@ -622,8 +636,19 @@ FORMULAS += """
 // ---- Who will approve: the same rules the Route and approve flow reads (RoutingRules + Roles)
 RuleRows = ForAll(
     RoutingRules,
-    {RequestType: RequestType, Entity: Entity, ConditionField: ConditionField, Role: ApproverRole,
-     Stage: Stage, Active: Active}
+    {Rule: Title, RequestType: RequestType, Entity: Entity, ConditionField: ConditionField,
+     ConditionValue: ConditionValue, Role: ApproverRole, Stage: Stage, SLADays: SLADays, Active: Active}
+);
+// The request's values for the "Only if" conditions, matched like the flow does: lower case, no spaces, blank = "-",
+// regulated "Not sure" counts as Yes (it is saved as Yes and goes to Quality/Regulatory). A field that isn't on this
+// request type isn't saved, so it counts as blank (a Yes/No field as No), even if its hidden control still holds a value.
+RouteFields = ROUTE_FIELDS_FX;
+RouteFacts = ForAll(
+    Filter(FieldValues, F in RouteFields) As fv,
+    {F: fv.F,
+     V: With({yn: fv.F in ["IsRegulated", "SuppliesRegulatedGoods"], onType: fv.F in TypeRules.FieldName},
+         With({v: If(!onType, If(yn, "No", ""), fv.F = "IsRegulated", If(fv.V in ["Yes", "Not sure"], "Yes", "No"), fv.V)},
+              If(IsBlank(Trim(v)), "-", Lower(Substitute(v, " ", "")))))}
 );
 // Like the flow: the first Roles row for the role and entity (or Any); no "@" in its email = nobody set up.
 ApproverPreview = ForAll(
@@ -631,8 +656,9 @@ ApproverPreview = ForAll(
         x.Active && (x.RequestType = SelectedType || x.RequestType = "Any") &&
         (x.Entity = SelectedEntity || x.Entity = "Any") &&
         (IsBlank(x.ConditionField) ||
-         (x.ConditionField = "IsRegulated" && SelectedType = "Item" && ddIsRegulated.Selected.Value in ["Yes", "Not sure"]) ||
-         (x.ConditionField = "SuppliesRegulatedGoods" && SelectedType = "Vendor" && tglSuppliesRegulatedGoods.Value))
+         (!IsBlank(x.ConditionValue) &&
+          Coalesce(LookUp(RouteFacts, F = x.ConditionField).V, "-") in
+              Split(Lower(Substitute(Substitute(x.ConditionValue, " ", ""), ",", ";")), ";")))
     ) As r,
     With(
         {p:LookUp(RolesRows, Role = r.Role && (Entity = SelectedEntity || Entity = "Any"))},
@@ -667,7 +693,37 @@ RuleGapText = Concat(
         ) As g,
         b.Title & ": nobody set up as " & g.Value & Char(10)
     )
+);
+// Active approval steps whose "Only if" can never match: an unknown field, or no value to compare with
+RuleProblemText = Concat(
+    Filter(RuleRows, Active && !IsBlank(ConditionField) && (!(ConditionField in RouteFields) || IsBlank(ConditionValue))),
+    "Approval step " & Rule & ": " &
+    If(ConditionField in RouteFields, "'Only if " & ConditionField & "' has no value after 'is', so it never applies",
+       "'" & ConditionField & "' isn't a field approval steps can depend on, so it never applies") & Char(10)
 );"""
+FORMULAS = FORMULAS.replace("ROUTE_FIELDS_FX", fx_list(ROUTE_FIELDS))
+
+# Fields a step or a form field can depend on, per request type (dropdowns or Yes/No only; vendor country is free
+# text and payment terms belong to Finance, so neither is offered)
+TYPE_FIELDS = [("Customer", "Country"), ("Customer", "Segment"), ("Item", "ProductFamily"), ("Item", "IsRegulated"),
+               ("Item", "UnitOfMeasure"), ("Vendor", "SuppliesRegulatedGoods"), ("Cost Center", "Department")]
+PLAIN = dict(LABELS, IsRegulated="Regulated", ProductFamily="Product family")
+FORMULAS += f"""
+
+// ---- Rules screen: plain names for fields, the fields a rule can depend on, and the business choices
+FieldLabels = Table(
+{",\n".join(f'    {{F: "{k}", L: "{v}"}}' for k, v in PLAIN.items())}
+);
+TypeFields = Table(
+{",\n".join(f'    {{Type: "{t}", F: "{f}", L: "{PLAIN[f]}"}}' for t, f in TYPE_FIELDS)}
+);
+BusinessChoices = With(
+    {{bus: ForAll(Sort(Filter(BusinessUnits, Active = true), Title), {{Value: BusinessUnitName, Code: Title}})}},
+    ForAll(Sequence(CountRows(bus) + 1),
+        If(Value = 1, {{Value: "All businesses", Code: "Any"}},
+           {{Value: Index(bus, Value - 1).Value, Code: Index(bus, Value - 1).Code}}))
+);
+ApproverRoles = Sort(Distinct(Filter(RolesRows, Role <> "Requestor" && Role <> "MDM Analyst"), Role), Value);"""
 
 
 def q(v):
@@ -700,7 +756,9 @@ def emit(name, control, props, children=None, variant=None, indent=0):
 
 
 def ctl(name, control, props, children=None, variant=None):
-    return lambda indent: emit(name, control, props, children, variant, indent)
+    build = lambda indent: emit(name, control, props, children, variant, indent)
+    build.name = name  # so a parent can add up its children's heights
+    return build
 
 
 def label(name, text, **extra):
@@ -741,8 +799,9 @@ def input_for(f):
             p["BorderColor"] = "If(EmailInvalid, RGBA(209, 52, 56, 1), RGBA(200, 198, 196, 1))"
         return ctl(c, "Classic/TextInput@2.3.2", p)
     if kind in ("choice", "country"):
-        items = COUNTRIES if kind == "country" else CHOICES[name]
-        p = dict(DROPDOWN, **base, Items=fx_list(items), AllowEmptySelection="true", Default=default, Size="12")
+        items = (f'ForAll(Sort(Filter(ChoiceRows, List = "{name}" && Active), Order), {{Value: Value}})'
+                 if name in EDITABLE_CHOICES else fx_list(COUNTRIES if kind == "country" else CHOICES[name]))
+        p = dict(DROPDOWN, **base, Items=items, AllowEmptySelection="true", Default=default, Size="12")
         return ctl(c, "Classic/DropDown@2.3.1", p)
     if kind == "toggle":
         p = dict(TOGGLE, **base, Default=f"If(Editing, EditRec.{name}, false)", TrueText='"Yes"', FalseText='"No"', Size="12",
@@ -1197,33 +1256,6 @@ def text_in(name, hint=""):
                                                      Default='""', HintText=f'"{hint}"'))
 
 
-NEW_BU_INPUTS = ["txtNewBUCode", "txtNewBUName", "txtNewBUProducts", "txtNewBUHeadName", "txtNewBUHeadEmail",
-                 "txtNewBUEscalate", "ddNewBUTimeZone"]
-ADD_BU = """With(
-    {code: Upper(Trim(txtNewBUCode.Text)), email: Lower(Trim(txtNewBUHeadEmail.Text)),
-     esc: Lower(Trim(txtNewBUEscalate.Text)), head: Trim(txtNewBUHeadName.Text)},
-    If(
-        IsBlank(code) || IsBlank(Trim(txtNewBUName.Text)) || IsBlank(head),
-            Notify("Fill in the code, the name and the BU Head.", NotificationType.Warning),
-        !IsMatch(email, Match.Email) || (!IsBlank(esc) && !IsMatch(esc, Match.Email)),
-            Notify("Check the email addresses.", NotificationType.Warning),
-        !IsBlank(LookUp(BusinessUnits, Title = code)),
-            Notify(code & " already exists. Change it under Business units below.", NotificationType.Warning),
-        IfError(
-            Patch(BusinessUnits, Defaults(BusinessUnits),
-                {Title: code, BusinessUnitName: Trim(txtNewBUName.Text), Products: Trim(txtNewBUProducts.Text),
-                 Active: true});
-            Patch(Roles, Defaults(Roles),
-                {Title: "BU Head - " & code, Role: "BU Head", Entity: code, PersonName: head, PersonEmail: email,
-                 EscalateTo: esc, TimeZone: ddNewBUTimeZone.Selected.Value});
-            Notify(code & " added. It is on the request form now, and its BU Head approvals go to " & head & ".",
-                   NotificationType.Success);
-""" + ";\n".join(f"            Reset({c})" for c in NEW_BU_INPUTS) + """,
-            Notify("Couldn't add the business unit: " & FirstError.Message, NotificationType.Error)
-        )
-    )
-)"""
-
 # One list + edit panel per rule list. A wide table didn't fit: the Teams tab gives the app ~700 px, and
 # Power Apps pushes controls that overflow a gallery row back inside it, so they piled on top of each other.
 # (key, menu name, list, gallery items, help text, row summary ({r} = the row), fields, extra Patch fields,
@@ -1237,13 +1269,16 @@ GRIDS = [
      [], '{Title: "NEW", BusinessUnitName: "New business unit", Active: false}'),
     ("RR", "Approval steps", "RoutingRules", "Sort(RoutingRules, Title)",
      "Who approves what. Stage 1 steps run at the same time, then stage 2 (the MDM final check). "
-     "'Only if' limits a step to regulated items or vendors. New steps start switched off.",
+     "'Only if' + 'is' limits a step to requests with that value, e.g. Product family is D, or Country is ID;VN "
+     "(any of them). Vendor country is typed in full, e.g. Indonesia. New steps start switched off.",
      '{r}.Title & "  |  " & {r}.RequestType & "  |  " & {r}.Entity & "  |  " & {r}.ApproverRole & '
-     'If(IsBlank({r}.ConditionField), "", "  |  only if " & {r}.ConditionField) & "  |  stage " & {r}.Stage & '
+     'If(IsBlank({r}.ConditionField), "", "  |  only if " & {r}.ConditionField & " is " & {r}.ConditionValue) & '
+     '"  |  stage " & {r}.Stage & '
      'If({r}.Active, "", "  |  OFF")',
      [("Title", "Rule", "text"), ("Active", "Active", "bool"), ("RequestType", "Request type", "choice"),
       ("Entity", "Entity (code or Any)", "text"), ("ApproverRole", "Approver role", "text"),
-      ("ConditionField", "Only if", "choice"), ("Stage", "Stage (1 or 2)", "num"),
+      ("ConditionField", "Only if", "choice"), ("ConditionValue", "is (several: separate with ;)", "text"),
+      ("Stage", "Stage (1 or 2)", "num"),
       ("SLADays", "Remind after (days)", "num"), ("EscalateAfterDays", "Escalate after (days)", "num")],
      [], '{Title: "R" & Text(Coalesce(First(Sort(RoutingRules, ID, SortOrder.Descending)).ID, 0) + 1, "00"), '
          'RequestType: "Any", Entity: "Any", Stage: 1, SLADays: 2, EscalateAfterDays: 4, Active: false}'),
@@ -1275,10 +1310,19 @@ GRIDS = [
      [("Title", "Name people type (lower case)", "lower"), ("RecordID", "SAP record", "text"),
       ("CanonicalName", "Official name", "text")],
      [], '{Title: "(new)"}'),
+    ("CO", "Dropdown options", "ChoiceOptions", 'Sort(ChoiceOptions, ListName & Text(SortOrder, "000"))',
+     "The choices in the request form's dropdowns (Country = customer country). A new product line: add it here, "
+     "then its fields under Form fields (Only when field ProductFamily equals D) and any extra approval under "
+     "Approval steps. Switch Active off to retire an option; earlier requests keep their value.",
+     '{r}.ListName & "  |  " & {r}.Title & "  |  order " & {r}.SortOrder & If({r}.Active, "", "  |  OFF")',
+     [("ListName", "Dropdown", "choice"), ("Title", "Option", "text"), ("SortOrder", "Order", "num"),
+      ("Active", "Active", "bool")],
+     [], '{Title: "New option", ListName: "ProductFamily", SortOrder: 99, Active: false}'),
 ]
 CHOICE_ITEMS = {("RR", "RequestType"): TYPES + ["Any"], ("RR", "ConditionField"): CONDITIONS,
                 ("RF", "RequestType"): TYPES, ("RF", "Required"): ["Always", "Conditional"],
-                ("RF", "Sensitive"): ["Yes", "No"], ("RF", "Check"): CHECKS, ("RO", "TimeZone"): TIME_ZONES}
+                ("RF", "Sensitive"): ["Yes", "No"], ("RF", "Check"): CHECKS, ("RO", "TimeZone"): TIME_ZONES,
+                ("CO", "ListName"): list(EDITABLE_CHOICES)}
 GAL_H, ROW_H = 240, 66
 
 
@@ -1356,46 +1400,571 @@ def grid(key, menu, lst, items, help_text, summary, cols, extra, new_row):
     ], variant="AutoLayout")
 
 
-admin_body = ctl("AdminBody", "GroupContainer@1.5.0", dict(
-    CARD, FillPortions="1", Visible="IsMDM", LayoutDirection="LayoutDirection.Vertical",
-    LayoutAlignItems="LayoutAlignItems.Stretch", LayoutOverflowY="LayoutOverflow.Scroll", LayoutGap="10",
-    PaddingLeft="20", PaddingRight="20", PaddingTop="16", PaddingBottom="16"), [
-    label("lblCheckHead", '"Rules check"', Size="14", FontWeight="FontWeight.Semibold", FillPortions="0",
-          Height="30", PaddingLeft="0"),
-    label("lblCheckBody",
-          'If(IsBlank(RuleGapText), "Every active business unit has someone set up for every approval step.", '
-          'RuleGapText & "Until this is fixed, those steps go to the MDM team. Add the person under People, '
-          'or use Add a business unit.")',
+# ---- Rules screen, redesigned: one tab per request type showing its whole process in plain words (form fields, then
+# approval chain), plus Businesses and people, Product lines and Advanced (the raw list editor). Every change is made
+# in a panel with dropdowns and tick-chips, which replaces the view while it's open and reads the rule back as a
+# sentence. Screen state lives in context variables: locTab (tab), locPanel ("" or step / field / person / bu /
+# line), locStep / locField / locPerson (the row being changed; blank = adding), and the chip collections colPick,
+# colPickF, colPickBU, colLineFields.
+
+TAB = 'Coalesce(locTab, "Customer")'
+TYPE_TABS = [("Customer", "Customer"), ("Item", "Item"), ("Vendor", "Vendor"), ("Cost Center", "Cost centre")]
+OTHER_TABS = [("People", "Businesses and people"), ("Lines", "Product lines"), ("Advanced", "Advanced")]
+ON_TYPE_TAB = f"{TAB} in {fx_list(TYPES)}"
+BLUE, WHITE, AMBER = "RGBA(0, 120, 212, 1)", "RGBA(255, 255, 255, 1)", "RGBA(157, 93, 0, 1)"
+NEXT_RULE = '"R" & Text(Coalesce(First(Sort(RoutingRules, ID, SortOrder.Descending)).ID, 0) + 1, "00")'
+
+
+def btn(name, text, onselect, primary=False, width=150, height=36, **extra):
+    style = dict(BUTTON, Text=text, FillPortions="0", Width=str(width), Height=str(height), Size="11",
+                 OnSelect=onselect, **extra)
+    return ctl(name, "Classic/Button@2.2.0", style if primary else outline(style))
+
+
+def vbox(name, children, visible="true", gap="8", **extra):
+    """A white card stacking its children; height follows the children (inside a scrolling body)."""
+    height = (f"24 + " + " + ".join(f"If({c.name}.Visible, {c.name}.Height + {gap}, 0)" for c in children)
+              + f" - {gap}")
+    props = dict(CARD, FillPortions="0", LayoutDirection="LayoutDirection.Vertical",
+                 LayoutAlignItems="LayoutAlignItems.Stretch", LayoutGap=gap, PaddingLeft="16", PaddingRight="16",
+                 PaddingTop="12", PaddingBottom="12", Visible=visible, Height=height)
+    props.update(extra)
+    return ctl(name, "GroupContainer@1.5.0", props, children, variant="AutoLayout")
+
+
+def head(name, text, size="13", **extra):
+    p = dict(Size=size, FontWeight="FontWeight.Semibold", FillPortions="0", Height="28", PaddingLeft="0")
+    p.update(extra)
+    return label(name, text, **p)
+
+
+def note(name, text, height="36", color=GREY, **extra):
+    p = dict(Size="10", Wrap="true", FillPortions="0", Height=height, PaddingLeft="0", Color=color)
+    p.update(extra)
+    return label(name, text, **p)
+
+
+def field(name, title, input_ctl, visible="true"):
+    """Label on the left, input on the right (one line)."""
+    return ctl(name, "GroupContainer@1.5.0", {
+        "Fill": WHITE, "FillPortions": "0", "Height": "44", "LayoutMinHeight": "16", "LayoutMinWidth": "16",
+        "LayoutDirection": "LayoutDirection.Horizontal", "LayoutAlignItems": "LayoutAlignItems.Center",
+        "LayoutGap": "12", "DropShadow": "DropShadow.None", "Visible": visible}, [
+        label(name.replace("fld", "lblF"), title, FillPortions="0", Width="140", Height="36", Size="11",
+              PaddingLeft="0", Color=GREY),
+        input_ctl], variant="AutoLayout")
+
+
+def dd(name, items, default='""', empty=True, **extra):
+    return ctl(name, "Classic/DropDown@2.3.1", dict(DROPDOWN, Items=items, Default=default, FillPortions="1",
+                                                    Height="36", Size="11",
+                                                    AllowEmptySelection="true" if empty else "false", **extra))
+
+
+def tin(name, default='""', hint="", **extra):
+    return ctl(name, "Classic/TextInput@2.3.2", dict(TEXTINPUT, Default=default, HintText=f'"{hint}"',
+                                                     FillPortions="1", Height="36", Size="11", **extra))
+
+
+def options(f, not_sure=False):
+    """The values a field can take: Yes/No (Not sure too for the form's regulated question) or its dropdown options."""
+    yes_no = 'Table({Value: "Yes"}, {Value: "No"})'
+    reg = 'Table({Value: "Yes"}, {Value: "No"}, {Value: "Not sure"})' if not_sure else yes_no
+    return (f'Switch({f}, "IsRegulated", {reg}, "SuppliesRegulatedGoods", {yes_no}, '
+            f'ForAll(Sort(Filter(ChoiceRows, List = {f} && Active), Order), {{Value: Value}}))')
+
+
+def chips(name, items, coll, key="Value", text="ThisItem.Value", per_row=5, visible="true", record=None):
+    """Tick-chips: a wrapping gallery of buttons that add or remove their value in a collection."""
+    picked = f"!IsBlank(LookUp({coll}, Lower({key}) = Lower(ThisItem.{key})))"
+    toggle = (f"If({picked}, RemoveIf({coll}, Lower({key}) = Lower(ThisItem.{key})), "
+              f"Collect({coll}, {record or '{' + key + ': ThisItem.' + key + '}'}))")
+    return ctl(name, "Gallery@2.15.0", {
+        "Items": items, "WrapCount": str(per_row), "TemplateSize": "40", "TemplatePadding": "0",
+        "FillPortions": "0", "Height": f"40 * RoundUp(CountRows({items}) / {per_row}, 0) + 4",
+        "BorderThickness": "0", "ShowScrollbar": "false", "LayoutMinHeight": "16", "LayoutMinWidth": "16",
+        "Visible": visible}, [
+        ctl(name.replace("gal", "btn"), "Classic/Button@2.2.0", dict(
+            BUTTON, Text=text, X="2", Y="4", Width="Parent.TemplateWidth - 8", Height="32", Size="11",
+            Fill=f"If({picked}, {BLUE}, {WHITE})", Color=f"If({picked}, {WHITE}, {BLUE})",
+            HoverFill=f"If({picked}, RGBA(16, 110, 190, 1), RGBA(243, 242, 241, 1))",
+            HoverColor=f"If({picked}, {WHITE}, {BLUE})", BorderColor=BLUE, BorderStyle="BorderStyle.Solid",
+            BorderThickness="1", OnSelect=toggle)),
+    ], variant="BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0")
+
+
+def list_gallery(name, items, size, children):
+    """A plain list that shows every row (no inner scrolling)."""
+    return ctl(name, "Gallery@2.15.0", {
+        "Items": items, "TemplateSize": str(size), "TemplatePadding": "0", "FillPortions": "0",
+        "Height": f"{size} * CountRows({items}) + 2", "BorderColor": "RGBA(237, 235, 233, 1)",
+        "BorderThickness": "1", "ShowScrollbar": "false", "LayoutMinHeight": "16", "LayoutMinWidth": "16"},
+        children + [ctl(f"rect{name[3:]}", "Rectangle@2.3.0", {
+            "Fill": "RGBA(237, 235, 233, 1)", "BorderColor": "RGBA(0, 0, 0, 0)", "X": "0",
+            "Y": "Parent.TemplateHeight - 1", "Width": "Parent.TemplateWidth", "Height": "1"})],
+        variant="BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0")
+
+
+def cell(name, text, x, width, y="0", height="Parent.TemplateHeight - 1", **extra):
+    p = dict(X=x, Y=y, Width=width, Height=height, Size="11", Wrap="true", VerticalAlign="VerticalAlign.Middle")
+    p.update(extra)
+    return label(name, text, **p)
+
+
+def row_btn(name, text, onselect, right, width=76, **extra):
+    return ctl(name, "Classic/Button@2.2.0", outline(dict(
+        BUTTON, Text=text, X=f"Parent.TemplateWidth - {right}", Y="(Parent.TemplateHeight - 30) / 2",
+        Width=str(width), Height="30", Size="10", OnSelect=onselect, **extra)))
+
+
+def picked(coll, opts):
+    """The ticked values that the chosen field still offers (ticks left over from another field don't count)."""
+    return f"Filter({coll}, Lower(Value) in ForAll({opts}, {{V: Lower(Value)}}).V)"
+
+
+def readback(cond_field, coll, word="is"):
+    return (f'"only when " & Coalesce(LookUp(FieldLabels, F = {cond_field}).L, {cond_field}) & " {word} " & '
+            f'Concat({coll}, Value, " or ")')
+
+
+def when_text(cf, cv, always='"always"'):
+    return (f'If(IsBlank({cf}), {always}, "only when " & Coalesce(LookUp(FieldLabels, F = {cf}).L, {cf}) & '
+            f'" is " & Substitute({cv}, ";", " or "))')
+
+
+def buttons(name, cancel, save, save_text='"Save"'):
+    return row(name, [
+        label(f"lbl{name}Gap", '""', FillPortions="1", Height="36"),
+        btn(f"btn{name}Cancel", '"Cancel"', cancel, width=110),
+        btn(f"btn{name}Save", save_text, save, primary=True, width=150),
+    ], 44, align="LayoutAlignItems.Center")
+
+
+CLOSE = 'UpdateContext({locPanel: ""})'
+
+# ---- tab bar
+def tab_btn(key, text, width):
+    on = f'{TAB} = "{key}"'
+    style = dict(BUTTON, Text=f'"{text}"', FillPortions="0", Width=str(width), Height="34", Size="11",
+                 OnSelect=f'UpdateContext({{locTab: "{key}", locPanel: ""}})',
+                 Fill=f"If({on}, {BLUE}, {WHITE})", Color=f"If({on}, {WHITE}, {BLUE})",
+                 HoverFill=f"If({on}, RGBA(16, 110, 190, 1), RGBA(243, 242, 241, 1))",
+                 HoverColor=f"If({on}, {WHITE}, {BLUE})", BorderColor=BLUE, BorderStyle="BorderStyle.Solid",
+                 BorderThickness="1")
+    return ctl(f"btnTab{key.replace(' ', '')}", "Classic/Button@2.2.0", style)
+
+
+tab_bar = vbox("RulesTabs", [
+    row("rowTabs1", [label("lblTabs1", '"Request types"', FillPortions="0", Width="110", Height="34", Size="10",
+                           Color=GREY, PaddingLeft="0")]
+        + [tab_btn(k, t, 110) for k, t in TYPE_TABS], 40, gap="8", align="LayoutAlignItems.Center"),
+    row("rowTabs2", [label("lblTabs2", '"Set-up"', FillPortions="0", Width="110", Height="34", Size="10",
+                           Color=GREY, PaddingLeft="0")]
+        + [tab_btn(k, t, w) for (k, t), w in zip(OTHER_TABS, (190, 140, 110))], 40, gap="8",
+        align="LayoutAlignItems.Center"),
+], gap="4")
+
+check_banner = vbox("RulesCheck", [
+    head("lblCheckHead", '"Needs attention"'),
+    label("lblCheckBody", 'RuleGapText & RuleProblemText & "Until a missing person is added, their steps go to the '
+                          'MDM team (Businesses and people)."',
           Size="11", Wrap="true", AutoHeight="true", FillPortions="0", Height="30", PaddingLeft="0",
-          VerticalAlign="VerticalAlign.Top",
-          Color="If(IsBlank(RuleGapText), RGBA(16, 124, 16, 1), RGBA(164, 38, 44, 1))"),
-    label("lblAddHead", '"Add a business unit"', Size="14", FontWeight="FontWeight.Semibold", FillPortions="0",
-          Height="30", PaddingLeft="0"),
-    label("lblAddHelp", '"Creates the business unit and its BU Head in one step. The request form and the approval '
-                        'flow use them on the next request. The rules check above shows anything else it needs."',
-          Size="10", Wrap="true", FillPortions="0", Height="36", PaddingLeft="0", Color=GREY),
-    row("rowNewBU1", [
-        small_block("blkNewBUCode", "Code", text_in("txtNewBUCode", "e.g. LGD")),
-        small_block("blkNewBUProducts", "Products", text_in("txtNewBUProducts", "e.g. A")),
-    ], ROW_H),
-    row("rowNewBU2", [
-        small_block("blkNewBUName", "Name", text_in("txtNewBUName", "e.g. LGD (molecular diagnostics)")),
-    ], ROW_H),
-    row("rowNewBU3", [
-        small_block("blkNewBUHeadName", "BU Head name", text_in("txtNewBUHeadName")),
-        small_block("blkNewBUTimeZone", "BU Head time zone", ctl("ddNewBUTimeZone", "Classic/DropDown@2.3.1", dict(
-            DROPDOWN, Items=fx_list(TIME_ZONES), Default='"Asia/Singapore"', FillPortions="0", Height="36",
-            Size="11"))),
-    ], ROW_H),
-    row("rowNewBU4", [
-        small_block("blkNewBUHeadEmail", "BU Head email", text_in("txtNewBUHeadEmail", "their Lives Group email")),
-        small_block("blkNewBUEscalate", "Escalate to (optional)", text_in("txtNewBUEscalate", "email")),
-    ], ROW_H),
-    ctl("btnAddBU", "Classic/Button@2.2.0", dict(
-        BUTTON, Text='"Add business unit"', FillPortions="0", Width="200", Height="40", Size="12",
-        AlignInContainer="AlignInContainer.Start", OnSelect=ADD_BU)),
-    label("lblListsHead", '"Rule lists"', Size="14", FontWeight="FontWeight.Semibold", FillPortions="0",
-          Height="30", PaddingLeft="0"),
+          VerticalAlign="VerticalAlign.Top", Color="RGBA(164, 38, 44, 1)"),
+], visible="!IsBlank(RuleGapText & RuleProblemText)", Fill="RGBA(253, 231, 233, 1)", gap="2")
+
+# ---- process view (one request type)
+FIELD_ROWS = f"Filter(FieldRules, RequestType = {TAB})"
+OPEN_FIELD = ("UpdateContext({locPanel: \"field\", locField: LookUp(RequiredFields, Title = ThisItem.Title)});\n"
+              + ";\n".join(f"Reset({c})" for c in ["txtFieldLabel", "txtFieldHelp", "ddFieldWhen", "ddFieldCond"])
+              + ";\nClearCollect(colPickF, ForAll(Filter(Split(Coalesce(ThisItem.ConditionValue, \"\"), \";\"), "
+              "!IsBlank(Trim(Value))), {Value: Trim(Value)}))")
+fields_card = vbox("FormCard", [
+    head("lblFormHead", f'"The " & Lower(Substitute({TAB}, "Cost Center", "cost centre")) & " request form asks for"'),
+    list_gallery("galPFields", FIELD_ROWS, 40, [
+        cell("lblPFName", 'ThisItem.DisplayLabel & If(ThisItem.Sensitive = "Yes", "  (restricted)", "")', "8",
+             "Parent.TemplateWidth - 340", OnSelect="Select(Parent)"),
+        cell("lblPFWhen", when_text('If(ThisItem.Required = "Conditional", ThisItem.ConditionField, "")',
+                                    "ThisItem.ConditionValue"),
+             "Parent.TemplateWidth - 330", "240", Size="10", Align="Align.Right",
+             Color=f'If(ThisItem.Required = "Conditional", {AMBER}, {GREY})'),
+        row_btn("btnPFEdit", '"Change"', OPEN_FIELD, 84),
+    ]),
+    note("lblFormNote", '"Change makes a field always asked or only asked for some requests, and edits its label '
+                        'and help text. A field the form doesn\'t have yet needs an app change."'),
+], visible=f'{ON_TYPE_TAB} && IsBlank(locPanel)')
+
+STEP_ROWS = (f'Filter(RuleRows, Stage < 1.5 && (RequestType = {TAB} || RequestType = "Any") && '
+             f'(ddPreviewBU.Selected.Code = "Any" || Entity = "Any" || Entity = ddPreviewBU.Selected.Code))')
+PERSON = ('With({code: ddPreviewBU.Selected.Code, role: ThisItem.Role}, If(code = "Any", '
+          'With({ps: Filter(RolesRows, Role = role)}, If(CountRows(ps) = 0, "nobody set up", CountRows(ps) = 1, '
+          'First(ps).Name, "set per business")), Coalesce(LookUp(RolesRows, Role = role && Entity = code).Name, '
+          'LookUp(RolesRows, Role = role && Entity = "Any").Name, "nobody set up, so MDM")))')
+OPEN_STEP_ADD = ("UpdateContext({locPanel: \"step\", locStep: Blank()});\nClear(colPick);\n"
+                 + ";\n".join(f"Reset({c})" for c in ["ddStepRole", "ddStepFor", "ddStepWhen", "ddStepField",
+                                                       "txtStepRemind"]))
+OPEN_STEP_EDIT = ("UpdateContext({locPanel: \"step\", locStep: LookUp(RoutingRules, Title = ThisItem.Rule)});\n"
+                  + ";\n".join(f"Reset({c})" for c in ["ddStepRole", "ddStepFor", "ddStepWhen", "ddStepField",
+                                                        "txtStepRemind"])
+                  + ";\nClearCollect(colPick, ForAll(Filter(Split(Coalesce(ThisItem.ConditionValue, \"\"), \";\"), "
+                  "!IsBlank(Trim(Value))), {Value: Trim(Value)}))")
+STAGE2 = (f'Concat(Filter(RuleRows, Active && Stage >= 1.5 && (RequestType = {TAB} || RequestType = "Any")) As s, '
+          's.Role & " (" & Coalesce(LookUp(RolesRows, Role = s.Role).Name, "nobody set up") & ")", ", ")')
+chain_card = vbox("ChainCard", [
+    row("rowChainHead", [
+        head("lblChainHead", '"Then it\'s approved by"', FillPortions="1"),
+        label("lblPreview", '"Show for"', FillPortions="0", Width="70", Height="34", Size="10", Color=GREY),
+        ctl("ddPreviewBU", "Classic/DropDown@2.3.1", dict(DROPDOWN, Items="BusinessChoices", Default='"All businesses"',
+                                                          FillPortions="0", Width="230", Height="34", Size="11")),
+    ], 40, align="LayoutAlignItems.Center"),
+    note("lblStage1", '"Step 1: everyone below at the same time"', height="22"),
+    list_gallery("galPSteps", STEP_ROWS, 48, [
+        cell("lblPSRole", f'ThisItem.Role & " (" & {PERSON} & ")" & If(ThisItem.Entity = "Any", "", "  -  " & '
+                          'ThisItem.Entity & " only")', "8", "Parent.TemplateWidth - 420",
+             Color=f"If(ThisItem.Active, RGBA(50, 49, 48, 1), {GREY})", OnSelect="Select(Parent)"),
+        cell("lblPSWhen", f'If(!ThisItem.Active, "turned off", {when_text("ThisItem.ConditionField", "ThisItem.ConditionValue")})',
+             "Parent.TemplateWidth - 410", "220", Size="10", Align="Align.Right",
+             Color=f'If(!ThisItem.Active || IsBlank(ThisItem.ConditionField), {GREY}, {AMBER})'),
+        row_btn("btnPSEdit", '"Change"', OPEN_STEP_EDIT, 180),
+        row_btn("btnPSToggle", 'If(ThisItem.Active, "Turn off", "Turn on")',
+                "IfError(Patch(RoutingRules, LookUp(RoutingRules, Title = ThisItem.Rule), {Active: !ThisItem.Active}), "
+                "Notify(\"Couldn't change it: \" & FirstError.Message, NotificationType.Error))", 96, width=88),
+    ]),
+    note("lblStage2", f'"Step 2: " & {STAGE2} & ", the final check. Then the SAP import file is made."', height="40"),
+    row("rowAddStep", [label("lblAddStepGap", '""', FillPortions="1", Height="36"),
+                       btn("btnAddStep", '"Add an approval step"', OPEN_STEP_ADD, primary=True, width=200)],
+        44, align="LayoutAlignItems.Center"),
+], visible=f'{ON_TYPE_TAB} && IsBlank(locPanel)')
+
+# ---- panel: add or change an approval step
+ONLY = 'ddStepWhen.Selected.Value <> "Every request"'
+STEP_OPTS = options("ddStepField.Selected.F")
+STEP_PICKED = picked("colPick", STEP_OPTS)
+STEP_SENTENCE = (f'Coalesce(ddStepRole.Selected.Value, "(who?)") & " approves " & Lower(Substitute(Coalesce(locStep.RequestType, {TAB}), "Cost Center", "cost centre")) & '
+                 f'" requests for " & If(Coalesce(ddStepFor.Selected.Code, "Any") = "Any", "all businesses", ddStepFor.Selected.Code) & ", " & If({ONLY}, '
+                 f'{readback("ddStepField.Selected.F", STEP_PICKED)}, "every time") & "."')
+SAVE_STEP = f"""With(
+    {{only: {ONLY}, role: ddStepRole.Selected.Value, code: Coalesce(ddStepFor.Selected.Code, "Any"),
+     days: Value(txtStepRemind.Text)}},
+    If(
+        IsBlank(role), Notify("Choose who approves.", NotificationType.Warning),
+        only && IsBlank(ddStepField.Selected.F), Notify("Choose which field the step depends on.", NotificationType.Warning),
+        only && CountRows({STEP_PICKED}) = 0, Notify("Tick at least one value.", NotificationType.Warning),
+        IfError(
+            Patch(RoutingRules, If(IsBlank(locStep), Defaults(RoutingRules), locStep), {{
+                Title: If(IsBlank(locStep), {NEXT_RULE}, locStep.Title),
+                RequestType: If(IsBlank(locStep), {TAB}, locStep.RequestType),
+                Entity: code, ApproverRole: role,
+                ConditionField: If(only, ddStepField.Selected.F, ""),
+                ConditionValue: If(only, Concat({STEP_PICKED}, Value, ";"), ""),
+                Stage: If(IsBlank(locStep), 1, locStep.Stage), SLADays: Coalesce(days, 2),
+                EscalateAfterDays: If(IsBlank(locStep), 4, locStep.EscalateAfterDays),
+                Active: If(IsBlank(locStep), true, locStep.Active)
+            }});
+            Notify("Saved. It applies from the next request.", NotificationType.Success);
+            {CLOSE},
+            Notify("Couldn't save: " & FirstError.Message, NotificationType.Error)
+        )
+    )
+)"""
+STEP_GAP = ('With({role: ddStepRole.Selected.Value, code: Coalesce(ddStepFor.Selected.Code, "Any")}, '
+            'If(IsBlank(role), "", code = "Any", If(CountRows(Filter(RolesRows, Role = role)) = 0, '
+            '"Nobody is set up as " & role & " yet, so these approvals go to the MDM team. Add the person under '
+            'Businesses and people.", ""), IsBlank(LookUp(RolesRows, Role = role && (Entity = code || Entity = "Any"))), '
+            '"Nobody is set up as " & role & " for " & code & " yet, so these approvals go to the MDM team.", ""))')
+step_panel = vbox("StepPanel", [
+    head("lblStepHead", f'If(IsBlank(locStep), "Add an approval step to " & Lower(Substitute({TAB}, "Cost Center", "cost centre")) & " requests", '
+                        '"Change approval step " & locStep.Title)', size="14"),
+    field("fldStepRole", '"Who approves"', dd("ddStepRole", "ApproverRoles",
+                                                'If(IsBlank(locStep), "", locStep.ApproverRole)')),
+    note("lblStepRoleHelp", '"Not in the list? Add the person under Businesses and people first."', height="22"),
+    field("fldStepFor", '"For"', dd("ddStepFor", "BusinessChoices",
+                                    'If(IsBlank(locStep) || locStep.Entity = "Any", "All businesses", '
+                                    'LookUp(BusinessUnits, Title = locStep.Entity).BusinessUnitName)', empty=False)),
+    field("fldStepWhen", '"When"', dd("ddStepWhen", fx_list(["Every request", "Only when a field has a value"]),
+                                      'If(IsBlank(locStep.ConditionField), "Every request", "Only when a field has a value")',
+                                      empty=False)),
+    field("fldStepField", '"Field"', dd("ddStepField",
+                                        f"ForAll(Filter(TypeFields, Type = Coalesce(locStep.RequestType, {TAB})), {{Value: L, F: F}})",
+                                        "LookUp(TypeFields, F = locStep.ConditionField).L"),
+          visible=ONLY),
+    note("lblStepValsHelp", '"Tick every value it applies to:"', height="22", Visible=ONLY),
+    chips("galStepVals", STEP_OPTS, "colPick", visible=ONLY),
+    field("fldStepRemind", '"Remind after (days)"', tin("txtStepRemind", 'If(IsBlank(locStep), "2", Text(locStep.SLADays))',
+                                                        Format="TextFormat.Number")),
+    label("lblStepSentence", STEP_SENTENCE, Size="12", Wrap="true", AutoHeight="true", FillPortions="0",
+          Height="30", PaddingLeft="8", Fill="RGBA(239, 246, 252, 1)", FontWeight="FontWeight.Semibold"),
+    note("lblStepGap", STEP_GAP, color=AMBER, Visible=f"!IsBlank({STEP_GAP})"),
+    buttons("StepBtns", CLOSE, SAVE_STEP, 'If(IsBlank(locStep), "Add step", "Save changes")'),
+], visible='locPanel = "step"')
+
+# ---- panel: change a form field
+FONLY = 'ddFieldWhen.Selected.Value <> "Always asked"'
+FIELD_OPTS = options("ddFieldCond.Selected.F", not_sure=True)
+FIELD_PICKED = picked("colPickF", FIELD_OPTS)
+FIELD_SENTENCE = (f'"The form asks for " & Coalesce(Trim(txtFieldLabel.Text), "this field") & " " & If({FONLY}, '
+                  f'{readback("ddFieldCond.Selected.F", FIELD_PICKED)}, "on every " & Lower(Substitute(locField.RequestType, "Cost Center", "cost centre")) & " request") & "."')
+SAVE_FIELD = f"""With(
+    {{only: {FONLY}}},
+    If(
+        IsBlank(Trim(txtFieldLabel.Text)), Notify("Enter a label.", NotificationType.Warning),
+        only && IsBlank(ddFieldCond.Selected.F), Notify("Choose which field it depends on.", NotificationType.Warning),
+        only && CountRows({FIELD_PICKED}) = 0, Notify("Tick at least one value.", NotificationType.Warning),
+        IfError(
+            Patch(RequiredFields, locField, {{
+                DisplayLabel: Trim(txtFieldLabel.Text), HelpText: Trim(txtFieldHelp.Text),
+                Required: If(only, "Conditional", "Always"),
+                ConditionField: If(only, ddFieldCond.Selected.F, ""),
+                ConditionValue: If(only, Concat({FIELD_PICKED}, Value, ";"), "")
+            }});
+            Notify("Saved. The form shows it from now on.", NotificationType.Success);
+            {CLOSE},
+            Notify("Couldn't save: " & FirstError.Message, NotificationType.Error)
+        )
+    )
+)"""
+field_panel = vbox("FieldPanel", [
+    head("lblFieldHead", '"Change the field: " & locField.DisplayLabel', size="14"),
+    field("fldFieldLabel", '"Label"', tin("txtFieldLabel", "locField.DisplayLabel")),
+    field("fldFieldHelp", '"Help text"', tin("txtFieldHelp", "locField.HelpText", "Shown under the field")),
+    field("fldFieldWhen", '"Asked"', dd("ddFieldWhen", fx_list(["Always asked", "Only when another field has a value"]),
+                                        'If(locField.Required = "Conditional", "Only when another field has a value", '
+                                        '"Always asked")', empty=False)),
+    field("fldFieldCond", '"Field"', dd("ddFieldCond",
+                                        "ForAll(Filter(TypeFields, Type = locField.RequestType && F <> locField.FieldName), "
+                                        "{Value: L, F: F})", "LookUp(TypeFields, F = locField.ConditionField).L",
+                                        ), visible=FONLY),
+    note("lblFieldValsHelp", '"Tick every value it applies to:"', height="22", Visible=FONLY),
+    chips("galFieldVals", FIELD_OPTS, "colPickF", visible=FONLY),
+    label("lblFieldSentence", FIELD_SENTENCE, Size="12", Wrap="true", AutoHeight="true", FillPortions="0",
+          Height="30", PaddingLeft="8", Fill="RGBA(239, 246, 252, 1)", FontWeight="FontWeight.Semibold"),
+    note("lblFieldNote", '"A field that is shown is always required. Format checks are under Advanced > Form fields."',
+         height="22"),
+    buttons("FieldBtns", CLOSE, SAVE_FIELD),
+], visible='locPanel = "field"')
+
+# ---- Businesses and people
+BIZ = "galBiz.Selected.Title"
+PEOPLE_ROWS = f'Sort(Filter(RolesRows, Role <> "Requestor" && (Entity = {BIZ} || Entity = "Any")), Role)'
+MISSING = (f'Concat(Filter(Distinct(Filter(RuleRows As x, x.Active && (x.Entity = {BIZ} || x.Entity = "Any")), Role) As r, '
+           f'!("@" in LookUp(RolesRows, Role = r.Value && (Entity = {BIZ} || Entity = "Any")).Email)), Value, ", ")')
+PERSON_INPUTS = ["ddPersonRole", "txtPersonNewRole", "ddPersonScope", "txtPersonName", "txtPersonEmail",
+                 "txtPersonEscalate", "ddPersonTZ"]
+OPEN_PERSON_ADD = ('UpdateContext({locPanel: "person", locPerson: Blank()});\n'
+                   + ";\n".join(f"Reset({c})" for c in PERSON_INPUTS))
+OPEN_PERSON_EDIT = ('UpdateContext({locPanel: "person", locPerson: LookUp(Roles, ID = ThisItem.ID)});\n'
+                    + ";\n".join(f"Reset({c})" for c in PERSON_INPUTS))
+BU_INPUTS = ["txtNewBUCode", "txtNewBUName", "txtNewBUHeadName", "txtNewBUHeadEmail", "txtNewBUEscalate",
+             "ddNewBUTimeZone"]
+OPEN_BU = 'UpdateContext({locPanel: "bu"});\nClear(colPickBU);\n' + ";\n".join(f"Reset({c})" for c in BU_INPUTS)
+people_card = vbox("PeopleCard", [
+    row("rowBizHead", [head("lblBizHead", '"Businesses"', FillPortions="1"),
+                       btn("btnAddBU", '"Add a business unit"', OPEN_BU, primary=True, width=190)],
+        40, align="LayoutAlignItems.Center"),
+    list_gallery("galBiz", "Sort(BusinessUnits, Title)", 44, [
+        cell("lblBizName", 'ThisItem.Title & "  -  " & ThisItem.BusinessUnitName', "8", "Parent.TemplateWidth - 330",
+             FontWeight="If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)",
+             Color=f"If(ThisItem.Active, RGBA(50, 49, 48, 1), {GREY})", OnSelect="Select(Parent)"),
+        cell("lblBizProducts", 'If(ThisItem.Active, "Product lines " & Coalesce(ThisItem.Products, "none"), "turned off")',
+             "Parent.TemplateWidth - 320", "210", Size="10", Align="Align.Right", Color=GREY, OnSelect="Select(Parent)"),
+        row_btn("btnBizToggle", 'If(ThisItem.Active, "Turn off", "Turn on")',
+                "IfError(Patch(BusinessUnits, ThisItem, {Active: !ThisItem.Active}), "
+                "Notify(\"Couldn't change it: \" & FirstError.Message, NotificationType.Error))", 96, width=88),
+    ]),
+    note("lblBizHelp", '"Select a business to see who approves for it. A business that is turned off disappears '
+                       'from the request form; its past requests are kept."', height="30"),
+    row("rowPeopleHead", [head("lblPeopleHead", '"Who approves for " & ' + BIZ, FillPortions="1"),
+                          btn("btnAddPerson", '"Add a person"', OPEN_PERSON_ADD, width=150)],
+        40, align="LayoutAlignItems.Center"),
+    list_gallery("galPeople", PEOPLE_ROWS, 48, [
+        cell("lblPersonRole", 'ThisItem.Role & ": " & ThisItem.Name', "8", "Parent.TemplateWidth - 300",
+             FontWeight="FontWeight.Semibold", Height="24", Y="4"),
+        cell("lblPersonEmail", 'ThisItem.Email & If(IsBlank(ThisItem.EscalateTo), "", "  |  escalates to " & ThisItem.EscalateTo)',
+             "8", "Parent.TemplateWidth - 300", Height="20", Y="26", Size="10", Color=GREY, Wrap="false"),
+        cell("lblPersonScope", 'If(ThisItem.Entity = "Any", "all businesses", "this business only")',
+             "Parent.TemplateWidth - 280", "180", Size="10", Align="Align.Right", Color=GREY),
+        row_btn("btnPersonEdit", '"Change"', OPEN_PERSON_EDIT, 92),
+    ]),
+    note("lblMissing", f'"Nobody set up for " & {BIZ} & " as: " & {MISSING} & ". Those approvals go to the MDM team '
+                       f'until you add someone."', color="RGBA(164, 38, 44, 1)", Visible=f"!IsBlank({MISSING})"),
+], visible=f'{TAB} = "People" && IsBlank(locPanel)')
+
+PERSON_ROLE = 'Coalesce(Trim(txtPersonNewRole.Text), ddPersonRole.Selected.Value)'
+PERSON_ENTITY = f'If(!IsBlank(locPerson), locPerson.Entity, ddPersonScope.Selected.Value = "All businesses", "Any", {BIZ})'
+SAVE_PERSON = f"""With(
+    {{role: If(IsBlank(locPerson), {PERSON_ROLE}, locPerson.Role), entity: {PERSON_ENTITY},
+     email: Lower(Trim(txtPersonEmail.Text)), esc: Lower(Trim(txtPersonEscalate.Text))}},
+    If(
+        IsBlank(role), Notify("Choose or type the role.", NotificationType.Warning),
+        IsBlank(Trim(txtPersonName.Text)), Notify("Enter the person's name.", NotificationType.Warning),
+        !IsMatch(email, Match.Email) || (!IsBlank(esc) && !IsMatch(esc, Match.Email)),
+            Notify("Check the email addresses.", NotificationType.Warning),
+        IsBlank(locPerson) && !IsBlank(LookUp(RolesRows, Role = role && Entity = entity)),
+            Notify("Someone is already set up as " & role & " for " & If(entity = "Any", "all businesses", entity) &
+                   ". Change that person instead.", NotificationType.Warning),
+        IfError(
+            Patch(Roles, If(IsBlank(locPerson), Defaults(Roles), locPerson), {{
+                Title: role & " - " & entity, Role: role, Entity: entity, PersonName: Trim(txtPersonName.Text),
+                PersonEmail: email, EscalateTo: esc, TimeZone: ddPersonTZ.Selected.Value
+            }});
+            Notify("Saved. New approvals go to " & Trim(txtPersonName.Text) & ".", NotificationType.Success);
+            {CLOSE},
+            Notify("Couldn't save: " & FirstError.Message, NotificationType.Error)
+        )
+    )
+)"""
+person_panel = vbox("PersonPanel", [
+    head("lblPersonHead", f'If(IsBlank(locPerson), "Add a person for " & {BIZ}, "Change " & locPerson.Role & '
+                          '" (" & If(locPerson.Entity = "Any", "all businesses", locPerson.Entity) & ")")', size="14"),
+    field("fldPersonRole", '"Role"', dd("ddPersonRole", "Sort(Distinct(RuleRows, Role), Value)"),
+          visible="IsBlank(locPerson)"),
+    field("fldPersonNewRole", '"or a new role"', tin("txtPersonNewRole", hint="e.g. BPOM Specialist"),
+          visible="IsBlank(locPerson)"),
+    field("fldPersonScope", '"Approves for"', dd("ddPersonScope",
+                                                 f'["This business only (" & {BIZ} & ")", "All businesses"]',
+                                                 f'"This business only (" & {BIZ} & ")"', empty=False),
+          visible="IsBlank(locPerson)"),
+    field("fldPersonName", '"Name"', tin("txtPersonName", "locPerson.PersonName")),
+    field("fldPersonEmail", '"Email"', tin("txtPersonEmail", "locPerson.PersonEmail", "their Lives Group email")),
+    field("fldPersonEscalate", '"Escalate to"', tin("txtPersonEscalate", "locPerson.EscalateTo",
+                                                    "their manager's email (optional)")),
+    field("fldPersonTZ", '"Time zone"', dd("ddPersonTZ", fx_list(TIME_ZONES),
+                                          'Coalesce(locPerson.TimeZone, "Asia/Singapore")', empty=False)),
+    note("lblPersonNote", 'If(!IsBlank(locPerson) && locPerson.Entity = "Any", "This person approves for every '
+                          'business. To use someone else for one business, add a person for that business instead.", '
+                          '"Reminders go out at 9 AM in their time zone. Escalations go to the escalation contact.")'),
+    buttons("PersonBtns", CLOSE, SAVE_PERSON),
+], visible='locPanel = "person"')
+
+SAVE_BU = """With(
+    {code: Upper(Trim(txtNewBUCode.Text)), email: Lower(Trim(txtNewBUHeadEmail.Text)),
+     esc: Lower(Trim(txtNewBUEscalate.Text)), head: Trim(txtNewBUHeadName.Text)},
+    If(
+        !IsMatch(code, "^[A-Z0-9]{2,6}$"), Notify("Enter a code of 2 to 6 letters or digits, e.g. LGD.", NotificationType.Warning),
+        IsBlank(Trim(txtNewBUName.Text)) || IsBlank(head), Notify("Fill in the name and the BU Head.", NotificationType.Warning),
+        !IsMatch(email, Match.Email) || (!IsBlank(esc) && !IsMatch(esc, Match.Email)),
+            Notify("Check the email addresses.", NotificationType.Warning),
+        !IsBlank(LookUp(BusinessUnits, Title = code)), Notify(code & " already exists.", NotificationType.Warning),
+        IfError(
+            Patch(BusinessUnits, Defaults(BusinessUnits),
+                {Title: code, BusinessUnitName: Trim(txtNewBUName.Text), Products: Concat(colPickBU, Value, ", "),
+                 Active: true});
+            Patch(Roles, Defaults(Roles),
+                {Title: "BU Head - " & code, Role: "BU Head", Entity: code, PersonName: head, PersonEmail: email,
+                 EscalateTo: esc, TimeZone: ddNewBUTimeZone.Selected.Value});
+            Notify(code & " added. It's on the request form now, and its BU Head approvals go to " & head & ".",
+                   NotificationType.Success);
+            UpdateContext({locPanel: ""}),
+            Notify("Couldn't add the business unit: " & FirstError.Message, NotificationType.Error)
+        )
+    )
+)"""
+SHARED_STEPS = ('Concat(Distinct(Filter(RuleRows, Active && Entity = "Any" && Role <> "BU Head"), Role) As r, '
+                'r.Value & " (" & Coalesce(LookUp(RolesRows, Role = r.Value && Entity = "Any").Name, "nobody set up") & ")", ", ")')
+bu_panel = vbox("BUPanel", [
+    head("lblBUHead", '"Add a business unit"', size="14"),
+    field("fldNewBUCode", '"Code"', tin("txtNewBUCode", hint="e.g. LGD")),
+    field("fldNewBUName", '"Name"', tin("txtNewBUName", hint="e.g. LGD (molecular diagnostics)")),
+    note("lblNewBUProd", '"Product lines it sells:"', height="22"),
+    chips("galNewBUProd", 'ForAll(Sort(Filter(ChoiceRows, List = "ProductFamily" && Active), Order), {Value: Value})',
+          "colPickBU"),
+    field("fldNewBUHeadName", '"BU Head"', tin("txtNewBUHeadName", hint="Full name")),
+    field("fldNewBUHeadEmail", '"BU Head email"', tin("txtNewBUHeadEmail", hint="their Lives Group email")),
+    field("fldNewBUEscalate", '"Escalate to"', tin("txtNewBUEscalate", hint="their manager's email (optional)")),
+    field("fldNewBUTimeZone", '"Time zone"', dd("ddNewBUTimeZone", fx_list(TIME_ZONES), '"Asia/Singapore"', empty=False)),
+    label("lblBUSentence", f'"Its requests go to its BU Head, plus the checks every business shares: " & {SHARED_STEPS} & '
+                           '". It appears on the request form straight away."',
+          Size="11", Wrap="true", AutoHeight="true", FillPortions="0", Height="30", PaddingLeft="8",
+          Fill="RGBA(239, 246, 252, 1)"),
+    buttons("BUBtns", CLOSE, SAVE_BU, '"Add business unit"'),
+], visible='locPanel = "bu"')
+
+# ---- Product lines
+LINE_ROWS = 'Sort(Filter(ChoiceRows, List = "ProductFamily"), Order)'
+IN_LIST = 'Lower(code) in Split(Lower(Substitute(Coalesce({v}, ""), " ", "")), ";")'
+LINE_INFO = ('With({code: ThisItem.Value}, '
+             '"Sold by " & Coalesce(Concat(Filter(BusinessUnits As b, Upper(code) in Split(Upper(Substitute(Coalesce(b.Products, ""), " ", "")), ",")), Title, ", "), "no business yet") & '
+             '"  |  extra fields: " & Coalesce(Concat(Filter(FieldRules As r, r.RequestType = "Item" && r.ConditionField = "ProductFamily" && '
+             + IN_LIST.format(v="r.ConditionValue") + '), DisplayLabel, ", "), "none") & '
+             '"  |  extra approvals: " & Coalesce(Concat(Filter(RuleRows As s, s.Active && s.ConditionField = "ProductFamily" && '
+             + IN_LIST.format(v="s.ConditionValue") + '), Role, ", "), "none"))')
+LINE_INPUTS = ["txtLineCode", "txtLineName", "ddLineBU", "ddLineRole"]
+OPEN_LINE = 'UpdateContext({locPanel: "line"});\nClear(colLineFields);\n' + ";\n".join(f"Reset({c})" for c in LINE_INPUTS)
+lines_card = vbox("LinesCard", [
+    row("rowLinesHead", [head("lblLinesHead", '"Product lines"', FillPortions="1"),
+                         btn("btnAddLine", '"Add a product line"', OPEN_LINE, primary=True, width=180)],
+        40, align="LayoutAlignItems.Center"),
+    list_gallery("galLines", LINE_ROWS, 56, [
+        cell("lblLineName", 'ThisItem.Value & "  -  " & Coalesce(ThisItem.Details, "(no name)") & If(ThisItem.Active, "", "  (turned off)")',
+             "8", "Parent.TemplateWidth - 120", Height="24", Y="4", FontWeight="FontWeight.Semibold",
+             Color=f"If(ThisItem.Active, RGBA(50, 49, 48, 1), {GREY})"),
+        cell("lblLineInfo", LINE_INFO, "8", "Parent.TemplateWidth - 120", Height="24", Y="28", Size="10", Color=GREY,
+             Wrap="false"),
+        row_btn("btnLineToggle", 'If(ThisItem.Active, "Turn off", "Turn on")',
+                'IfError(Patch(ChoiceOptions, LookUp(ChoiceOptions, ListName = "ProductFamily" && Title = ThisItem.Value), '
+                '{Active: !ThisItem.Active}), Notify("Couldn\'t change it: " & FirstError.Message, NotificationType.Error))',
+                100, width=88),
+    ]),
+    note("lblLinesNote", '"A product line that is turned off disappears from the item form; its items and requests are '
+                         'kept. Countries, segments, units and departments are under Advanced > Dropdown options."'),
+], visible=f'{TAB} = "Lines" && IsBlank(locPanel)')
+
+LINE_FIELD_ROWS = 'Filter(FieldRules, RequestType = "Item" && Required = "Conditional" && ConditionField = "ProductFamily")'
+LINE_SENTENCE = ('"Item requests can choose " & Coalesce(Upper(Trim(txtLineCode.Text)), "the new line") & '
+                 'If(IsBlank(Trim(txtLineName.Text)), "", " (" & Trim(txtLineName.Text) & ")") & ". " & '
+                 'If(CountRows(colLineFields) = 0, "No extra fields", "They also ask for " & Concat(colLineFields, DisplayLabel, ", ")) & '
+                 'If(IsBlank(ddLineRole.Selected.Value), ", and the usual approvals.", ", and " & ddLineRole.Selected.Value & '
+                 '" approves them too.")')
+SAVE_LINE = f"""With(
+    {{code: Upper(Trim(txtLineCode.Text)), name: Trim(txtLineName.Text)}},
+    If(
+        !IsMatch(code, "^[A-Z0-9]{{1,5}}$"), Notify("Enter a code of 1 to 5 letters or digits, e.g. D.", NotificationType.Warning),
+        IsBlank(name), Notify("Enter a name for the product line.", NotificationType.Warning),
+        !IsBlank(LookUp(ChoiceRows, List = "ProductFamily" && Upper(Value) = code)),
+            Notify(code & " already exists. Turn it on under Product lines instead.", NotificationType.Warning),
+        IfError(
+            Patch(ChoiceOptions, Defaults(ChoiceOptions), {{Title: code, ListName: "ProductFamily", Details: name,
+                SortOrder: Coalesce(Max(Filter(ChoiceRows, List = "ProductFamily"), Order), 0) + 10, Active: true}});
+            ForAll(colLineFields As c,
+                With({{r: LookUp(RequiredFields, Title = c.Title)}},
+                    Patch(RequiredFields, r, {{ConditionValue: If(IsBlank(r.ConditionValue), code, r.ConditionValue & ";" & code)}})));
+            If(!IsBlank(ddLineBU.Selected.Code),
+                With({{b: LookUp(BusinessUnits, Title = ddLineBU.Selected.Code)}},
+                    Patch(BusinessUnits, b, {{Products: If(IsBlank(Trim(b.Products)), code, b.Products & ", " & code)}})));
+            If(!IsBlank(ddLineRole.Selected.Value),
+                Patch(RoutingRules, Defaults(RoutingRules), {{Title: {NEXT_RULE}, RequestType: "Item", Entity: "Any",
+                    ConditionField: "ProductFamily", ConditionValue: code, ApproverRole: ddLineRole.Selected.Value,
+                    Stage: 1, SLADays: 2, EscalateAfterDays: 4, Active: true}}));
+            Notify(code & " added. It's on the item form now.", NotificationType.Success);
+            {CLOSE},
+            Notify("Couldn't add the product line: " & FirstError.Message, NotificationType.Error)
+        )
+    )
+)"""
+line_panel = vbox("LinePanel", [
+    head("lblLineHead", '"Add a product line"', size="14"),
+    field("fldLineCode", '"Code"', tin("txtLineCode", hint="e.g. D (used in item codes, e.g. D-5012)")),
+    field("fldLineName", '"Name"', tin("txtLineName", hint="e.g. Molecular reagents")),
+    field("fldLineBU", '"Sold by"', dd("ddLineBU", 'ForAll(Sort(Filter(BusinessUnits, Active = true), Title), '
+                                                  '{Value: BusinessUnitName, Code: Title})')),
+    note("lblLineFieldsHelp", '"Every item already asks for " & Concat(Filter(FieldRules, RequestType = "Item" && '
+                              'Required <> "Conditional"), DisplayLabel, ", ") & ". Tick any of these it also needs:"',
+         height="44"),
+    chips("galLineFields", LINE_FIELD_ROWS, "colLineFields", key="Title", text="ThisItem.DisplayLabel", per_row=3,
+          record="{Title: ThisItem.Title, DisplayLabel: ThisItem.DisplayLabel}"),
+    field("fldLineRole", '"Extra approver"', dd("ddLineRole", "ApproverRoles")),
+    note("lblLineRoleHelp", '"Optional. Leave blank if it needs only the usual approvals. Not in the list? Add the '
+                            'person under Businesses and people first."', height="30"),
+    label("lblLineSentence", LINE_SENTENCE, Size="12", Wrap="true", AutoHeight="true", FillPortions="0",
+          Height="30", PaddingLeft="8", Fill="RGBA(239, 246, 252, 1)", FontWeight="FontWeight.Semibold"),
+    note("lblLineNewField", '"Needs a field the form doesn\'t have yet (e.g. calibration interval)? That\'s an app '
+                            'change: ask the OneRecord team."', height="30"),
+    buttons("LineBtns", CLOSE, SAVE_LINE, '"Add product line"'),
+], visible='locPanel = "line"')
+
+# ---- Advanced: the raw list editor (every column of every rule list)
+advanced_card = vbox("AdvancedCard", [
+    note("lblAdvHelp", '"Every rule list, column by column. Use the other tabs for everyday changes; this is for '
+                       'anything they don\'t cover (format checks, known names, dropdown options)."', height="30"),
     row("rowPickList", [
         label("lblPickList", '"Show"', FillPortions="0", Width="50", Height="36", Size="11", PaddingLeft="0"),
         ctl("ddRuleList", "Classic/DropDown@2.3.1", dict(
@@ -1404,7 +1973,15 @@ admin_body = ctl("AdminBody", "GroupContainer@1.5.0", dict(
         label("lblPickNote", '"Changes apply to the next request. SharePoint keeps every earlier version of '
                              'each row."', FillPortions="1", Height="36", Size="10", Color=GREY, Wrap="true"),
     ], 44, align="LayoutAlignItems.Center"),
-] + [grid(*g) for g in GRIDS], variant="AutoLayout")
+] + [grid(*g) for g in GRIDS], visible=f'{TAB} = "Advanced" && IsBlank(locPanel)')
+
+admin_body = ctl("AdminBody", "GroupContainer@1.5.0", {
+    "Fill": "RGBA(245, 245, 245, 1)", "FillPortions": "1", "Visible": "IsMDM", "LayoutMinHeight": "16",
+    "LayoutMinWidth": "16", "LayoutDirection": "LayoutDirection.Vertical",
+    "LayoutAlignItems": "LayoutAlignItems.Stretch", "LayoutOverflowY": "LayoutOverflow.Scroll", "LayoutGap": "12",
+    "DropShadow": "DropShadow.None"},
+    [tab_bar, check_banner, fields_card, chain_card, people_card, lines_card, advanced_card,
+     step_panel, field_panel, person_panel, bu_panel, line_panel], variant="AutoLayout")
 
 admin_screen = ctl("ScreenContainer3", "GroupContainer@1.5.0", {
     "Fill": "RGBA(245, 245, 245, 1)", "Height": "Parent.Height", "Width": "Parent.Width",

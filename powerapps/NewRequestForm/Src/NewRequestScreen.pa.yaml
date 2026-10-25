@@ -753,7 +753,8 @@ Screens:
                               HoverBorderColor: =RGBA(16, 110, 190, 1)
                               HoverColor: =RGBA(50, 49, 48, 1)
                               HoverFill: =RGBA(245, 245, 245, 1)
-                              Items: =["SG", "MY", "TH", "ID", "VN"]
+                              Items: |-
+                                =ForAll(Sort(Filter(ChoiceRows, List = "Country" && Active), Order), {Value: Value})
                               Items.Value: =Value
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
@@ -1085,7 +1086,8 @@ Screens:
                               HoverBorderColor: =RGBA(16, 110, 190, 1)
                               HoverColor: =RGBA(50, 49, 48, 1)
                               HoverFill: =RGBA(245, 245, 245, 1)
-                              Items: =["Hospital", "Laboratory", "Clinic"]
+                              Items: |-
+                                =ForAll(Sort(Filter(ChoiceRows, List = "Segment" && Active), Order), {Value: Value})
                               Items.Value: =Value
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
@@ -1508,7 +1510,8 @@ Screens:
                               HoverBorderColor: =RGBA(16, 110, 190, 1)
                               HoverColor: =RGBA(50, 49, 48, 1)
                               HoverFill: =RGBA(245, 245, 245, 1)
-                              Items: =["A", "B", "C"]
+                              Items: |-
+                                =ForAll(Sort(Filter(ChoiceRows, List = "ProductFamily" && Active), Order), {Value: Value})
                               Items.Value: =Value
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
@@ -1599,7 +1602,8 @@ Screens:
                               HoverBorderColor: =RGBA(16, 110, 190, 1)
                               HoverColor: =RGBA(50, 49, 48, 1)
                               HoverFill: =RGBA(245, 245, 245, 1)
-                              Items: =["Kit", "Box", "Pack", "Unit", "Set"]
+                              Items: |-
+                                =ForAll(Sort(Filter(ChoiceRows, List = "UnitOfMeasure" && Active), Order), {Value: Value})
                               Items.Value: =Value
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
@@ -2752,7 +2756,8 @@ Screens:
                               HoverBorderColor: =RGBA(16, 110, 190, 1)
                               HoverColor: =RGBA(50, 49, 48, 1)
                               HoverFill: =RGBA(245, 245, 245, 1)
-                              Items: =["Sales", "Marketing", "Regulatory Affairs", "Service", "Finance", "Warehouse"]
+                              Items: |-
+                                =ForAll(Sort(Filter(ChoiceRows, List = "Department" && Active), Order), {Value: Value})
                               Items.Value: =Value
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
