@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from onerecord import advisor, classify, process
-from onerecord.config import COUNTRIES, CURRENT, PRIOR_YEAR, PRODUCTS
+from onerecord.config import COUNTRIES, CURRENT, GROWTH_LABEL, PRIOR_YEAR, PRODUCTS
 
 from . import common as c
 from . import theme
@@ -90,6 +90,7 @@ def growth():
                "a lot. Treat them as a rough guide.")
 
     _country_focus()
+    _by_entity()
 
     st.markdown("##### Monthly units by country")
     prod = st.radio("Product", list(PRODUCTS), horizontal=True, format_func=lambda p: c.PRODUCT_LABEL[p])
@@ -113,6 +114,39 @@ def growth():
         f"accounts need follow-up from sales (see Customers).\n"
         f"- Singapore is a mature market: growth is in single digits and equipment sales are falling. Most new "
         f"growth there will come from selling more products to existing customers.")
+
+
+def _by_entity():
+    """SPD, QTS and QTG side by side, and how many customers buy from more than one of them."""
+    clean = c.regional()["clean"]
+    st.markdown("##### By business entity")
+    between = lambda w: clean[(clean.month >= w[0]) & (clean.month <= w[1])]
+    now, prev = between(CURRENT), between(PRIOR_YEAR)
+    t = now.groupby("entity").agg(products=("product", lambda s: ", ".join(c.PRODUCT_LABEL[p] for p in sorted(s.unique()))),
+                                  units=("quantity", "sum"), value=("line_value_sgd", "sum"),
+                                  customers=("customer_id", "nunique"), countries=("country", "nunique"))
+    t["growth"] = (t.units / prev.groupby("entity").quantity.sum().reindex(t.index) - 1) * 100
+    t["share"] = t.value / t.value.sum() * 100
+    t["value"] = t.value.round()
+    t = t.sort_values("value", ascending=False).reset_index()
+    t = t[["entity", "products", "units", "growth", "value", "share", "customers", "countries"]]
+    st.dataframe(t, hide_index=True, width="stretch", height=c.table_height(len(t)), column_config={
+        "entity": st.column_config.TextColumn("Entity"),
+        "products": st.column_config.TextColumn("Sells"),
+        "units": st.column_config.NumberColumn("Units", format="localized"),
+        "growth": st.column_config.NumberColumn("YoY", format="%+.0f%%"),
+        "value": st.column_config.NumberColumn("Value (SGD)", format="localized"),
+        "share": st.column_config.NumberColumn("Share of value", format="%.0f%%"),
+        "customers": st.column_config.NumberColumn("Customers"),
+        "countries": st.column_config.NumberColumn("Countries")})
+    n = now.groupby("customer_id").entity.nunique()
+    shared = n[n > 1].index
+    value_share = now[now.customer_id.isin(shared)].line_value_sgd.sum() / now.line_value_sgd.sum()
+    st.caption(f"Apr–Sep 2026, units {GROWTH_LABEL}. In this data each entity sells one product line, so an "
+               f"entity's growth is its product's growth. The entity view matters for customers: {len(shared)} of "
+               f"{len(n)} customers buy from more than one entity, and they make up {value_share:.0%} of order value. "
+               f"Merging duplicate records is what lets one hospital show up as one customer across SPD, QTS and "
+               f"QTG, which is where the cross-sell list on Customers comes from.")
 
 
 def _country_focus():
@@ -146,6 +180,7 @@ def _country_focus():
         top = top.nlargest(10, "value")
         before = prev.groupby("customer").line_value_sgd.sum().reindex(top.index)
         top["growth"] = (top.value / before - 1) * 100  # blank for customers with no orders a year earlier
+        top["value"] = top.value.round()
         st.dataframe(top.reset_index(), hide_index=True, width="stretch", height=c.table_height(10),
                      column_config={
                          "customer": st.column_config.TextColumn("Customer", width="large"),
