@@ -17,7 +17,7 @@ ALL = "ALL"  # "All countries" option in the forecast picker
 # one fixed colour per country on every chart (Okabe-Ito, readable with colour blindness)
 COUNTRY_COLORS = {"SG": "#0072B2", "MY": "#E69F00", "TH": "#009E73", "ID": "#CC79A7", "VN": "#56B4E9"}
 LABEL_COLORS = ["#1f4e79", "#7fa7d0", "#c9a227", "#8c6bb1"]
-SCENARIO_COLORS = {"Today (email)": "#9aa3ad", "New process": "#1f4e79"}
+SCENARIO_COLORS = {"Today (email)": "#9aa3ad", "OneRecord": "#1f4e79"}
 # orange = decline, blue = growth; replaces red-green, which colour-blind readers can't separate
 DIVERGING = [[0, "#c4571b"], [0.5, "#f4f1ec"], [1, "#2166ac"]]
 
@@ -600,15 +600,39 @@ def actions():
 
 # --------------------------------------------------------------------------- inbound
 REVIEW_COLS = {"message_id": "Message", "subject": "Subject", "body": "Body", "predicted": "Rules result",
-               "reason": "Reason", "true_label": "Correct label", "after_ai": "After AI step", "ai_reason": "AI reason"}
+               "reason": "Rules reason", "true_label": "Correct label", "after_ai": "After AI step",
+               "ai_reason": "AI reason"}
+
+
+def _after_ai(hold, ai):
+    """Each stress-test email's final label: the rules' label, else the AI's when it was sure, else a person."""
+    d = hold.merge(ai, on="message_id", how="left")
+    d["after_ai"] = d.ai_label.where(d.ai_confidence == "high", "review").where(d.predicted == "review",
+                                                                                d.predicted)
+    return d
+
+
+def _score(d):
+    """How one AI run did on the emails the rules passed on. Orders affected = a non-order counted as an order, or
+    an order missed: the mistakes that would change the regional view's order counts."""
+    q = d[d.predicted == "review"]
+    sure = q[q.after_ai != "review"]
+    as_order, is_order = sure.after_ai == "purchase_order", sure.true_label == "purchase_order"
+    return {"Sorted by AI": len(sure), "Correct": int((sure.after_ai == sure.true_label).sum()),
+            "Wrong": int((sure.after_ai != sure.true_label).sum()), "Left for a person": len(q) - len(sure),
+            "Orders affected": int((as_order != is_order).sum())}
 
 
 def inbound():
     t = c.triage()
     main, hold = t["main"], t["holdout"]
-    c.header("Orders vs enquiries", f"Rules sort {(main.predicted == main.true_label).mean():.0%} of the mailbox "
-                                    f"correctly and pass {(hold.predicted == 'review').sum()} of {len(hold)} messy "
-                                    f"emails to a person")
+    runs = c.ai_step_runs()
+    scores = {name: _score(_after_ai(hold, ai)) for name, ai in runs.items()}
+    no_order_errors = all(s["Orders affected"] == 0 for s in scores.values())
+    c.header("Orders vs enquiries",
+             f"Rules sort {(main.predicted == main.true_label).mean():.0%} of the mailbox correctly"
+             + (f"; on {len(hold)} messy emails, no AI run counted a non-order as an order or missed one"
+                if no_order_errors else ""))
     st.caption("The regional view counts orders only. This page shows how incoming emails are sorted.")
     with st.expander("How emails are sorted"):
         st.markdown("First by channel (a dedicated order inbox, and the form for setup requests), then by rules the "
@@ -625,33 +649,54 @@ def inbound():
     fig.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=0), legend_title="", xaxis_title="")
     c.chart(fig)
 
-    a, b = st.columns(2)
-    with a:
-        st.markdown("##### Accuracy on the mailbox sample (660 emails)")
-        acc = (main.predicted == main.true_label).mean()
-        c.kpi_row([c.kpi("Correct", acc * 100, suffix="%")])
-        st.caption("Likely optimistic, because the synthetic emails follow patterns the rules were written for.")
-    with b:
-        st.markdown("##### Stress test: 24 hand-written messy emails")
-        auto = hold[hold.predicted != "review"]
-        c.kpi_row([c.kpi("Labelled by rules", len(auto), suffix=f" of {len(hold)}",
-                         delta=f"{(auto.predicted == auto.true_label).mean():.0%} of those correct" if len(auto)
-                         else None)])
-        st.caption("The rules made no mistakes, but sent most of the messy emails to review. The AI step is "
-                   "meant to handle these.")
+    # the stress test, stage by stage: rules first, the AI step for what they pass on, a person for what's left
+    by_rules = hold[hold.predicted != "review"]
+    queued = len(hold) - len(by_rules)
+    st.markdown(f"##### Accuracy on the mailbox sample ({len(main)} emails) and a stress test of {len(hold)} "
+                f"hand-written messy emails")
+    run = st.radio("AI run shown", list(runs), horizontal=True, key="ai_run",
+                   help="Both runs used the same instructions (below) and got the emails without their correct labels")
+    s = scores[run]
+    c.kpi_row([
+        c.kpi("Mailbox sample, rules", (main.predicted == main.true_label).mean() * 100, suffix="% correct",
+              help="Likely optimistic: the synthetic emails follow patterns the rules were written for"),
+        c.kpi("Messy emails, rules", len(by_rules), suffix=f" of {len(hold)}", tone="good",
+              delta=f"{(by_rules.predicted == by_rules.true_label).mean():.0%} of those correct"),
+        c.kpi("Messy emails, AI step", s["Correct"], suffix=f" of {queued} correct", key="ai-correct",
+              delta=f"{s['Wrong']} wrong" if s["Wrong"] else "none wrong", tone="bad" if s["Wrong"] else "good",
+              help="The emails the rules passed on, sorted by the AI run picked above"),
+        c.kpi("Left for a person", s["Left for a person"], suffix=f" of {len(hold)}", key="ai-person",
+              help="The AI run marked these as unsure"),
+    ])
+    st.dataframe(pd.DataFrame(scores).T.rename_axis("AI run").reset_index(), hide_index=True, width="stretch",
+                 column_config={"Orders affected": st.column_config.NumberColumn(
+                     help="A non-order counted as an order, or an order missed: the mistakes that would change the "
+                          "regional view's order counts")})
+    st.caption(f"Rules sort the standard emails and pass anything unclear on. The AI step reads the rest, "
+               f"including Malay, Thai and Vietnamese. Both AI runs used the instructions below on the {queued} "
+               f"emails the rules passed on, without their correct labels. Their mistakes mixed up enquiries and "
+               f"follow-ups; neither counted a non-order as an order or missed an order, so the regional view's "
+               f"order counts would be right either way. The small API model never marked itself unsure, so in "
+               f"production a person should still spot-check its answers. In production this step runs on AI "
+               f"Builder in Power Automate, so re-check the score in the pilot. {len(hold)} emails is a small test."
+               if no_order_errors else
+               f"Rules sort the standard emails and pass anything unclear on. The AI step reads the rest. Both AI "
+               f"runs used the instructions below without the emails' correct labels. {len(hold)} emails is a small "
+               f"test; re-check the score in the pilot.")
+
     st.markdown("##### Review queue (stress test)")
-    cols = ["message_id", "subject", "body", "predicted", "reason", "true_label"]
-    view = hold[cols].copy()
-    if classify.ai_available():
-        if st.button("Run AI step on the review queue", type="primary"):
-            res = [classify.ai_classify(r.subject, r.body, r.attachment_name) if r.predicted == "review"
-                   else (r.predicted, r.confidence, r.reason) for r in hold.itertuples()]
-            st.session_state["ai_res"] = res
+    view = _after_ai(hold[["message_id", "subject", "body", "predicted", "reason", "true_label"]], runs[run])
+    if classify.ai_available():  # with a key, the AI step can be re-run live instead of showing the recorded run
+        if st.button("Re-run the AI step live", type="primary"):
+            st.session_state["ai_res"] = [
+                classify.ai_classify(r.subject, r.body, r.attachment_name) if r.predicted == "review"
+                else (r.predicted, r.confidence, r.reason) for r in hold.itertuples()]
         if "ai_res" in st.session_state:
             view["after_ai"], _, view["ai_reason"] = zip(*st.session_state["ai_res"])
-    else:
-        st.caption("The AI step needs an OPENAI_API_KEY on this machine. In production it is Power Automate's "
-                   "AI prompt action, using the same instructions.")
+    for col in ["predicted", "after_ai", "true_label"]:
+        view[col] = view[col].map(classify.LABELS)
+    # each stage's result side by side, with the correct label last to check them against
+    view = view[["message_id", "subject", "body", "predicted", "reason", "after_ai", "ai_reason", "true_label"]]
     st.dataframe(view.rename(columns=REVIEW_COLS), hide_index=True, width="stretch")
     with st.expander("AI instructions (the MDM team can edit these without retraining)"):
         st.code(classify.AI_PROMPT, language="text")
@@ -676,7 +721,7 @@ def _cycle_time():
                                                      f"from the email request history"),
     ])
     st.caption("Today's email process, measured from the request history. The workflow replaces these steps; "
-               "Business case simulates the same requests under the new process.")
+               "Business case simulates the same requests under OneRecord.")
 
     left, right = st.columns(2, gap="medium")
     with left:
@@ -868,7 +913,7 @@ def business_case():
                       xaxis_title="share of elapsed time")
     c.chart(fig)
 
-    st.markdown("##### With the new process (simulated on the same 150 requests)")
+    st.markdown("##### With OneRecord (simulated on the same 150 requests)")
     sim = process.simulate(d["requests"], d["steps"], bounce_avoided=bounce / 100, notice_cut=notice / 100,
                            escalate_after_days=esc)
     now_med, fut_med = sim.cycle_days.median(), sim.future_days.median()
@@ -881,7 +926,7 @@ def business_case():
         c.kpi("Faster", (1 - fut_med / now_med) * 100, suffix="%"),
     ])
     long = pd.concat([sim.assign(scenario="Today (email)", days=sim.cycle_days),
-                      sim.assign(scenario="New process", days=sim.future_days)])
+                      sim.assign(scenario="OneRecord", days=sim.future_days)])
     fig = px.histogram(long, x="days", color="scenario", barmode="overlay", nbins=40, opacity=0.7,
                        color_discrete_map=SCENARIO_COLORS)
     fig.update_layout(height=260, margin=dict(l=0, r=0, t=10, b=0), legend_title="")
@@ -941,8 +986,8 @@ ROADMAP = [
       "SAP B1 import file, so Priya stops retyping",
       "One-off clean-up: merge the 41 duplicate customers, review queue for look-alikes",
       "4-week pilot with SPD, then QTS and QTG"],
-     "Power Platform contractor ({dev} weeks); MDM team sets up rules and runs the pilot; IT does a one-off site, "
-     "permissions and Teams setup",
+     "Power Platform contractor ({dev} weeks); MDM team sets up rules and runs the pilot; IT, one-off: the Teams "
+     "site and permissions (about 2 days)",
      "Median time to SAP of 5 days or less in the pilot; at least 90% of requests through the form"),
     ("Phase 2: Use the clean data", "Months 3–6",
      ["Regional view in Power BI inside Teams",
@@ -950,7 +995,9 @@ ROADMAP = [
       "Drop-off and cross-sell lists to account managers each month",
       "Email sorting: rules, then an AI prompt, then a person",
       "Monthly AI action brief posted to the sales channel"],
-     "Data analyst ({da} weeks); IT enables AI Builder once; Sales ops owns the monthly review",
+     "Data analyst ({da} weeks) builds the Power BI report, then each month runs one script that refreshes the "
+     "forecast and customer lists and saves them to SharePoint, where Power BI reads them (no server to run); IT, "
+     "one-off: switch on AI Builder; Sales ops owns the monthly review",
      "Forecast beats the 6-month average 3 months running; top-10 drop-offs contacted within 2 weeks"),
     ("Phase 3: Connect and scale", "After month 6, only if Phase 1–2 targets are met",
      ["Direct SAP B1 connection (Service Layer) replaces the import file",
@@ -983,9 +1030,12 @@ NOT_IN_V1 = [
 def _roadmap(dev_weeks, da_weeks):
     st.markdown("##### Roadmap and scope")
     with st.expander("Roadmap"):
-        st.caption("Sized for a small team: one contractor and one analyst, with the MDM team owning the rules. Each "
-                   "phase starts only when the previous one hits its targets. The year-1 cost above covers Phases 1 "
-                   "and 2; Phase 3 is priced with an SAP partner once Phase 1–2 results are in.")
+        st.caption("Sized for a small team: one contractor and one analyst, with the MDM team owning the rules. No IT "
+                   "development team is needed: IT's part is one-off setup, and everything after that is run by the "
+                   "MDM team and the analyst. Each phase starts only when the previous one hits its targets. The "
+                   "year-1 cost above covers Phases 1 and 2; Phase 3 is priced with an SAP partner once Phase 1–2 "
+                   "results are in.")
+        c.assumption("the timings, team sizes and targets below are our estimates, to confirm with Lives Group.")
         for col, (title, when, items, who, gate) in zip(st.columns(3), ROADMAP):
             with col.container(border=True, height="stretch"):
                 st.markdown(f"**{title}**  \n*{when}*")

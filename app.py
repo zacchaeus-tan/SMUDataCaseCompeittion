@@ -1,5 +1,5 @@
 """
-Lives Group master data and regional dashboard prototype (SMU DSA Data Case Competition 2026).
+OneRecord prototype for the Lives Group MDM case (SMU DSA Data Case Competition 2026).
 
     streamlit run app.py
 
@@ -11,7 +11,7 @@ from pathlib import Path
 
 import streamlit as st
 
-st.set_page_config(page_title="Lives Group", page_icon=str(Path(__file__).parent / "assets" / "icon.svg"), layout="wide")
+st.set_page_config(page_title="OneRecord", page_icon=str(Path(__file__).parent / "assets" / "icon.svg"), layout="wide")
 
 from views import analytics_pages as ap  # noqa: E402
 from views import common  # noqa: E402
@@ -21,13 +21,16 @@ from views import workflow_pages as wp  # noqa: E402
 sections = {
     "": [st.Page(home.render, title="Overview", url_path="overview", icon=":material/space_dashboard:",
                  default=True)],
-    "Drill-down": [
+    # grouped by what each page is for: what's happening, what to do about it, and why trust or fund it
+    "Insights": [
         st.Page(ap.growth, title="Country deep-dive", url_path="growth", icon=":material/public:"),
         st.Page(ap.forecasting, title="Forecasting", url_path="forecast", icon=":material/show_chart:"),
+    ],
+    "Actions": [
         st.Page(ap.actions, title="Customers", url_path="actions", icon=":material/groups:"),
         st.Page(ap.quality, title="MDM ops", url_path="data-quality", icon=":material/fact_check:"),
     ],
-    "More": [
+    "Context": [
         st.Page(ap.inbound, title="Orders vs enquiries", url_path="inbound", icon=":material/inbox:"),
         st.Page(ap.business_case, title="Business case", url_path="business-case", icon=":material/payments:"),
     ],

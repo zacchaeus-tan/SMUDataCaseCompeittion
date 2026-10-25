@@ -1,0 +1,212 @@
+<!doctype html>
+<!-- Slide-ready process diagram (1920 x 1080). Rendered to docs/images/process_flow.png; edit this file and re-render.
+     Colours mirror views/theme.py. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Process flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #0f766e; --teal-soft: #e6f4f2; --navy: #0b2545; --text: #334155; --muted: #64748b;
+    --line: #cbd5e1; --page: #f7fafc; --amber: #b45309; --amber-soft: #fef3c7; --sap: #0b2545;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    width: 1920px; height: 1080px; padding: 44px 60px 36px; background: var(--page);
+    font-family: "Poppins", "Segoe UI", sans-serif; color: var(--text);
+    display: grid; grid-template-rows: auto 1fr auto 1fr auto auto; row-gap: 16px;
+  }
+  h1 { margin: 0; font-size: 34px; font-weight: 600; color: var(--navy); letter-spacing: -0.01em; }
+  h1 span { color: var(--teal); }
+  .sub { margin: 4px 0 0; font-size: 17px; color: var(--muted); }
+
+  .band { display: grid; grid-template-columns: 170px 1fr; gap: 18px; align-items: stretch; }
+  .band-label {
+    border-radius: 16px; padding: 18px 16px; display: flex; flex-direction: column; justify-content: center;
+    background: var(--teal); color: #fff; font-weight: 600; font-size: 21px; line-height: 1.25;
+  }
+  .band-label small { display: block; margin-top: 8px; font-size: 13px; font-weight: 400; opacity: 0.9; }
+  .band.out .band-label { background: var(--navy); }
+
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 38px; position: relative; }
+  .step {
+    position: relative; background: #fff; border-radius: 16px; padding: 18px 20px 16px;
+    box-shadow: 0 2px 14px rgba(11, 37, 69, 0.08);
+  }
+  .step:not(:last-child)::after {  /* arrow to the next step */
+    content: ""; position: absolute; right: -31px; top: 50%; width: 24px; height: 24px; transform: translateY(-50%);
+    background: no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12h14m-6-6 6 6-6 6' fill='none' stroke='%230f766e' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+  .band.out .step:not(:last-child)::after { filter: brightness(0.5); }
+  .num {
+    display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--teal-soft); color: var(--teal); font-weight: 700; font-size: 14px; margin-right: 8px;
+  }
+  .band.out .num { background: #e2e8f0; color: var(--navy); }
+  .step h2 { display: flex; align-items: center; margin: 0 0 4px; font-size: 21px; font-weight: 600; color: var(--navy); }
+  .who { font-size: 14.5px; font-weight: 500; color: var(--teal); margin-bottom: 8px; }
+  .band.out .who { color: var(--navy); }
+  .step ul { margin: 0; padding-left: 18px; font-size: 16px; line-height: 1.45; }
+  .step li { margin-bottom: 3px; }
+  .step li b { color: var(--navy); font-weight: 600; }
+  .tool {
+    display: inline-block; margin-top: 10px; padding: 3px 10px; border-radius: 999px; font-size: 12px;
+    font-weight: 600; background: var(--teal-soft); color: var(--teal);
+  }
+  .band.out .tool { background: #e2e8f0; color: var(--navy); }
+
+  /* SAP B1 sits between the two halves: records go in from above, orders come out below */
+  .sap-row { display: grid; grid-template-columns: 170px 1fr; gap: 18px; }
+  .sap {
+    position: relative; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    padding: 16px 28px; border-radius: 16px; background: var(--sap); color: #fff;
+  }
+  .sap .name { font-size: 22px; font-weight: 600; }
+  .sap .name small { display: block; font-size: 14px; font-weight: 400; opacity: 0.85; }
+  .sap .flows { display: flex; gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
+  .pill { padding: 6px 14px; border-radius: 999px; font-size: 14px; background: rgba(255, 255, 255, 0.12); }
+  .pill b { font-weight: 600; }
+
+  .gov { display: grid; grid-template-columns: 170px 1fr; gap: 18px; }
+  .gov-items { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .gov-item {
+    padding: 10px 14px; border-radius: 12px; background: #fff; border: 1px dashed var(--line);
+    font-size: 14.5px; line-height: 1.4;
+  }
+  .gov-item b { display: block; color: var(--navy); font-weight: 600; font-size: 15px; }
+  .gov-label { align-self: center; font-size: 14px; font-weight: 600; color: var(--muted); text-align: right; }
+
+  .foot { display: flex; justify-content: space-between; align-items: end; font-size: 14px; color: var(--muted); }
+  .foot .result { font-size: 17px; color: var(--navy); }
+  .foot .result b { color: var(--teal); }
+</style>
+</head>
+<body>
+  <header>
+    <h1>From request to <span>SAP Business One</span> to regional insight</h1>
+    <p class="sub">Clean records in at the front door, better decisions out the back: one process on Microsoft 365, in the
+      Teams and Outlook staff already use.</p>
+  </header>
+
+  <section class="band in">
+    <div class="band-label">Clean records in<small>Power Apps · Power Automate · Teams · Outlook · SharePoint</small></div>
+    <div class="steps">
+      <div class="step">
+        <h2><span class="num">1</span>Request raised</h2>
+        <div class="who">Amy, Product Manager · Marcus, Regional Sales</div>
+        <ul>
+          <li>A new item to sell, or a new hospital that wants to buy</li>
+          <li>Staff who email the MDM mailbox get an <b>auto-reply with the form link</b></li>
+        </ul>
+        <span class="tool">Outlook auto-reply</span>
+      </div>
+      <div class="step">
+        <h2><span class="num">2</span>Smart form</h2>
+        <div class="who">Requestor</div>
+        <ul>
+          <li>Only the fields that apply; <b>can't submit incomplete</b></li>
+          <li><b>Duplicate check while typing</b>: blocks a known ID, flags a similar name</li>
+          <li>"Regulated?" <b>Yes / No / Not sure</b></li>
+          <li>Shows <b>who will approve</b> before submitting</li>
+        </ul>
+        <span class="tool">Power Apps</span>
+      </div>
+      <div class="step">
+        <h2><span class="num">3</span>Parallel approvals</h2>
+        <div class="who">BU Head · Finance · Business Support · Quality/Reg.</div>
+        <ul>
+          <li><b>All at once</b>, not one after another: a card in <b>Teams and Outlook</b></li>
+          <li>Approve / <b>Request changes</b> / Reject</li>
+          <li>Reminder at 9 AM local time, then <b>escalation</b></li>
+          <li>Requestor sees who it's waiting on</li>
+        </ul>
+        <span class="tool">Power Automate · Teams · Outlook</span>
+      </div>
+      <div class="step">
+        <h2><span class="num">4</span>Final check, into SAP</h2>
+        <div class="who">Priya, MDM Analyst</div>
+        <ul>
+          <li>Approves last; the flow <b>writes the SAP import file</b> (DTW) with a proposed code</li>
+          <li>Priya loads it and marks it created</li>
+          <li>Requestor told in Teams: <b>record is live</b></li>
+        </ul>
+        <span class="tool">SAP Data Transfer Workbench</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sap-row">
+    <div></div>
+    <div class="sap">
+      <div class="name">SAP Business One<small>One clean record per customer and item, shared by SPD, QTS and QTG</small></div>
+      <div class="flows">
+        <span class="pill">▲ <b>new records</b> from step 4</span>
+        <span class="pill">▲ <b>duplicates frozen</b> from MDM ops</span>
+        <span class="pill">▼ <b>purchase orders</b> to the regional view</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="band out">
+    <div class="band-label">Better decisions out<small>Regional business view (Power BI in production)</small></div>
+    <div class="steps">
+      <div class="step">
+        <h2><span class="num">5</span>Orders, cleanly counted</h2>
+        <div class="who">Shared mailbox + SAP order history</div>
+        <ul>
+          <li><b>Orders counted</b>; enquiries and follow-ups left out</li>
+          <li>Setup requests routed to MDM, not counted as sales</li>
+          <li>41 duplicate customers merged first</li>
+        </ul>
+        <span class="tool">Email sorting: rules + AI + human check</span>
+      </div>
+      <div class="step">
+        <h2><span class="num">6</span>Regional view</h2>
+        <div class="who">Daniel, Regional Commercial Lead</div>
+        <ul>
+          <li>Volumes and <b>year-on-year growth</b>, A/B/C × 5 countries</li>
+          <li><b>AI calendar forecast</b> 6 months ahead: 11.1% error vs 13.7% for the 6-month average</li>
+        </ul>
+        <span class="tool">Overview · Country deep-dive · Forecasting</span>
+      </div>
+      <div class="step">
+        <h2><span class="num">7</span>Sales actions</h2>
+        <div class="who">Account managers</div>
+        <ul>
+          <li><b>Call list</b>: 27 customers dropping off, ~S$431k a quarter at risk</li>
+          <li><b>Early warning</b>: 5 larger customers gone quiet</li>
+          <li><b>Cross-sell</b>: 98 leads</li>
+        </ul>
+        <span class="tool">Customers</span>
+      </div>
+      <div class="step">
+        <h2><span class="num">8</span>Keep SAP clean</h2>
+        <div class="who">Priya, MDM Analyst</div>
+        <ul>
+          <li>Confirms duplicate groups already in SAP</li>
+          <li>Downloads DTW files that <b>freeze</b> them (history kept, never used again)</li>
+          <li>Old-to-new code list for finance</li>
+        </ul>
+        <span class="tool">MDM ops</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="gov">
+    <div class="gov-label">Built in throughout</div>
+    <div class="gov-items">
+      <div class="gov-item"><b>Audit trail</b>Every step is a row in ApprovalLog, only ever added to</div>
+      <div class="gov-item"><b>Sensitive fields</b>Bank details and credit terms in a restricted list; cards carry a link, never the values</div>
+      <div class="gov-item"><b>No IT for changes</b>MDM edits rule lists: business units, required fields, approval steps</div>
+      <div class="gov-item"><b>Nothing stalls</b>A business unit with no approver set up goes to MDM, who is told in Teams</div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="result">Median request to SAP: <b>18.8 days today → about 4–6 days</b> with OneRecord (simulated on the same 150 requests)</div>
+    <div>OneRecord prototype on synthetic data · Lives Group case, SMU DSA 2026</div>
+  </footer>
+</body>
+</html>
