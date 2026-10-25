@@ -64,7 +64,7 @@ def _kpis(clean, g, f, window, country):
               help=f"{window[0]} to {window[-1]}. Customer purchase orders only."),
         c.kpi("Growth, Apr–Sep 2026", growth * 100, prefix="+" if growth >= 0 else "", suffix="%", decimals=1,
               key="ov-growth",
-              delta=f"{mom:+.0%} in the last 3 months", tone=c.tone(mom),
+              delta=f"Jul–Sep alone: {mom:+.0%} YoY", tone=c.tone(mom),
               help=GROWTH_HELP + " The change underneath is the last 3 months on the same months a year earlier."),
         c.kpi("Forecast, Oct–Dec 2026", nq["units"], suffix=" units", key="ov-forecast",
               delta=f"{nq['change']:+.0%} on Oct–Dec 2025" if nq["change"] is not None else None,
@@ -72,7 +72,7 @@ def _kpis(clean, g, f, window, country):
               help="AI calendar model: each country and product's trend plus dengue season, the hospital "
                    "year-end budget spend, the January lull and public holidays."),
         c.kpi("Forecast error, AI model", acc["model"] * 100, suffix="%", decimals=1, key="ov-error",
-              delta=f"{acc['change']:+.0%} vs 6-month avg",
+              delta=f"{abs(acc['change']):.0%} {'lower' if acc['change'] <= 0 else 'higher'} than 6-month avg",
               tone=c.tone(acc["change"], up_is_good=False),
               help=f"Average miss as a share of actual units (WAPE), forecasting 1–3 months ahead from each "
                    f"month Apr–Sep 2026, Products A and B. Lower is better. Today's 6-month average misses by "

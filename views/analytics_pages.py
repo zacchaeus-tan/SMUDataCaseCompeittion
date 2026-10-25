@@ -50,14 +50,21 @@ def growth():
     val_now, val_prev = g.value_now.sum(), g.value_prev.sum()
     best = g.loc[g[g["product"] != "C"].unit_growth.idxmax()]
     units_chg, value_chg = tot_now / tot_prev - 1, val_now / val_prev - 1
+    clean = c.regional()["clean"]
+    active = lambda w: clean[(clean.month >= w[0]) & (clean.month <= w[1])].customer_id.nunique()
+    cust_now, cust_prev = active(CURRENT), active(PRIOR_YEAR)
+    vs = f"vs {c.period(PRIOR_YEAR)}"  # every change on these cards compares with the same months a year earlier
     c.kpi_row([
-        c.kpi("Units, Apr–Sep 2026", tot_now, delta=c.pct(units_chg), tone=c.tone(units_chg)),
-        c.kpi("Order value (SGD)", val_now / 1e6, decimals=2, suffix="M", delta=c.pct(value_chg),
-              tone=c.tone(value_chg)),
-        c.kpi("Active customers", c.regional()["clean"].query("month >= @CURRENT[0]").customer_id.nunique(),
-              help="Real customers after merging duplicate records"),
-        c.kpi("Fastest growing (A/B)", f"{best.country}, product {best['product']}", delta=c.pct(best.unit_growth),
-              tone=c.tone(best.unit_growth)),
+        c.kpi(f"Units, {c.period(CURRENT)}", tot_now, delta=f"{c.pct(units_chg)} {vs}", tone=c.tone(units_chg)),
+        c.kpi(f"Order value (SGD), {c.period(CURRENT)}", val_now / 1e6, decimals=2, suffix="M",
+              delta=f"{c.pct(value_chg)} {vs}", tone=c.tone(value_chg)),
+        c.kpi(f"Active customers, {c.period(CURRENT)}", cust_now, delta=f"{cust_now - cust_prev:+,} {vs}",
+              tone=c.tone(cust_now - cust_prev),
+              help="Customers who ordered at least once in the period, counted after merging duplicate records"),
+        c.kpi("Fastest growing (A/B)", f"{COUNTRIES[best.country]}, {best['product']}",
+              delta=f"{c.pct(best.unit_growth)} units {vs}", tone=c.tone(best.unit_growth),
+              help="The country and product (A or B) whose units grew most. Product C is left out: its volumes "
+                   "are too small for a fair comparison."),
     ])
     _definition()
 
@@ -244,7 +251,9 @@ def forecasting():
     c.kpi_row([
         c.kpi("Today: 6-month average", wape(ab, "baseline_ma6") * 100, decimals=1, suffix="% error"),
         c.kpi("AI calendar model", wape(ab, "calendar_model") * 100, decimals=1, suffix="% error",
-              delta=f"{-cut:+.0%}", tone=c.tone(-cut, up_is_good=False)),
+              delta=f"{cut:.0%} lower than 6-month avg", tone=c.tone(-cut, up_is_good=False),
+              help=f"{wape(ab, 'calendar_model'):.1%} vs {wape(ab, 'baseline_ma6'):.1%}: the model's misses are "
+                   f"{cut:.0%} smaller than today's 6-month average."),
         c.kpi("Series improved", (acc[acc["product"] != "C"].Improvement > 0).sum(), suffix=" of 10",
               help="Products A and B"),
         c.kpi("MAPE, AI model", mape_model * 100, decimals=1, suffix="%",
@@ -833,10 +842,10 @@ def business_case():
     now_med, fut_med = sim.cycle_days.median(), sim.future_days.median()
     slow_chg = sim.future_days.quantile(.9) - sim.cycle_days.quantile(.9)
     c.kpi_row([
-        c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days", delta=f"{fut_med - now_med:+.1f} days",
-              tone=c.tone(fut_med - now_med, up_is_good=False)),
-        c.kpi("Slowest 10%", sim.future_days.quantile(.9), decimals=1, suffix=" days", delta=f"{slow_chg:+.1f} days",
-              tone=c.tone(slow_chg, up_is_good=False)),
+        c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days",
+              delta=f"{fut_med - now_med:+.1f} days vs email today", tone=c.tone(fut_med - now_med, up_is_good=False)),
+        c.kpi("Slowest 10%", sim.future_days.quantile(.9), decimals=1, suffix=" days",
+              delta=f"{slow_chg:+.1f} days vs email today", tone=c.tone(slow_chg, up_is_good=False)),
         c.kpi("Faster", (1 - fut_med / now_med) * 100, suffix="%"),
     ])
     long = pd.concat([sim.assign(scenario="Today (email)", days=sim.cycle_days),
@@ -873,7 +882,8 @@ def business_case():
             c.kpi("Payback", 12 * co / b, decimals=1, suffix=" months") if b else c.kpi("Payback", "—"),
             c.kpi("Annual benefit", b, prefix="S$"),
             c.kpi("Year-1 cost", co, prefix="S$"),
-            c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days", delta=f"{fut_med - now_med:+.1f} days",
+            c.kpi("Median time to SAP", fut_med, decimals=1, suffix=" days",
+                  delta=f"{fut_med - now_med:+.1f} days vs email today",
                   tone=c.tone(fut_med - now_med, up_is_good=False)),
         ])
     c.assumption("sales-driven benefits are counted at gross margin rather than order value. Rates, hours, margin "

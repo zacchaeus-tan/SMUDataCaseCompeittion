@@ -313,6 +313,12 @@ def clock_events():
             st.toast(e)
 
 
+def period(window) -> str:
+    """("2026-04", "2026-09") -> "Apr–Sep 2026"; the year is repeated only when the window spans two."""
+    a, b = (pd.Timestamp(m + "-01") for m in window)
+    return f"{a:%b}–{b:%b %Y}" if a.year == b.year else f"{a:%b %Y}–{b:%b %Y}"
+
+
 def pct(x, signed=True):
     return f"{x:+.0%}" if signed else f"{x:.0%}"
 
