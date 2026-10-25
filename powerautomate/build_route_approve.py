@@ -56,6 +56,71 @@ def short(expr, n=240):
     return f"substring({text}, 0, min({n}, length({text})))"
 
 
+# Version pinning. Every approval counts only for the version of the request it was given: the fields the requestor
+# fills in plus the SensitiveDetails row (by its Modified time, so no bank or credit values are copied around). The
+# version under approval is kept in the "Pinned" variable. It moves only when the flow itself allows a change: an
+# Edit and resubmit after Request changes, or Quality/Regulatory deciding a "Not sure" item. Any other change (someone
+# editing the row in SharePoint) puts the request on hold, and the SAP file is only written if it still matches.
+CONTENT = ["RequestType", "Entity", "Country", "CustomerName", "RegistrationNo", "BillingAddress", "ContactEmail",
+           "Segment", "ItemDescription", "ProductFamily", "UnitOfMeasure", "HSCode", "IsRegulated", "RegulatedAnswer",
+           "RegulatoryLicenceNo", "ShelfLifeMonths", "ManufacturerPartNo", "VendorName", "TaxID",
+           "SuppliesRegulatedGoods", "ISO13485CertNo", "CostCenterName", "Department", "Owner", "BudgetYear",
+           "DuplicateCheck", "PossibleMatchID", "DupReason"]
+EDITING = "createArray('Changes requested', 'Resubmitted')"  # the requestor may change the request in these
+ON_HOLD = "On hold"
+
+
+def fingerprint(request_action, sensitive_action):
+    """The request's content as one text value, from a Get item on Requests and a Get items on SensitiveDetails."""
+    values = [f"outputs('{request_action}')?['body/{REQ[c]}']" for c in CONTENT]
+    values.append(f"first(outputs('{sensitive_action}')?['body/value'])?['Modified']")
+    return f"string(createArray({', '.join(values)}))"
+
+
+def get_sensitive():
+    """This request's SensitiveDetails row (none for Item / Cost Center requests)."""
+    return sp("GetItems", "SensitiveDetails", **{
+        "$filter": f"{SENS['RequestID']} eq '@{{triggerBody()?['Title']}}'", "$top": 1})
+
+
+def repin(name, prev, request_action=None, sensitive_action=None):
+    """Re-read the request (and its sensitive row) and make that the version under approval."""
+    req_a, sens_a = request_action or f"{name}_request", sensitive_action or f"{name}_sensitive"
+    out = {}
+    if not request_action:
+        out[req_a] = after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"), prev)
+        prev = req_a
+    if not sensitive_action:
+        out[sens_a] = after(get_sensitive(), prev)
+        prev = sens_a
+    out[name] = after({"type": "SetVariable", "inputs": {
+        "name": "Pinned", "value": f"@{fingerprint(req_a, sens_a)}"}}, prev)
+    return out
+
+
+def hold_request(stage_label, why, *prev):
+    """Stop a request whose content changed outside OneRecord: status On hold, log it, tell MDM and the requestor."""
+    key = re.sub(r"\W", "_", stage_label)
+    mdm = f"first(body('Find_MDM_analyst'))?['{ROLE['PersonEmail']}']"
+    return {
+        f"Mark_on_hold_{key}": update_request(
+            list(prev), Status=ON_HOLD, CurrentStage="On hold: changed outside OneRecord while it was being approved"),
+        f"Log_on_hold_{key}": after(log_row(
+            "@triggerBody()?['Title']", "OneRecord", "System", "Changed outside OneRecord", why),
+            f"Mark_on_hold_{key}"),
+        f"Tell_MDM_on_hold_{key}": after(teams_chat(
+            f"@{{{mdm}}}",
+            f"@{{triggerBody()?['Title']}} was put on hold: its details or its payment / bank details were changed "
+            f"directly in SharePoint, not through Edit and resubmit, so the approvals given no longer match what "
+            f"would go into SAP. Nothing was sent to SAP. Check the version history of the request, then ask the "
+            f"requestor to submit a new request.<br>{REQUEST_LINK}"), f"Log_on_hold_{key}"),
+        f"Tell_requestor_on_hold_{key}": after(teams_to_requestor(
+            f"Your request @{{triggerBody()?['Title']}} is on hold because it was changed outside OneRecord while it "
+            f"was being approved. The MDM team will contact you. To change a request, use Edit and resubmit when an "
+            f"approver asks for changes."), f"Tell_MDM_on_hold_{key}"),
+    }
+
+
 def stage_loop(stage):
     """Filter the active rules for this stage, then one parallel approval per rule.
 
@@ -143,8 +208,11 @@ def stage_loop(stage):
             f"Log_resubmitted_{stage}": log_row(
                 "@triggerBody()?['Title']", "@{triggerBody()?['Author']?['Email']}", "Requestor", "Resubmitted",
                 f"@{{{short(last_change)}}}"),
+            # The edited request is now the version under approval (pinned before it goes back to Pending, so no
+            # other card can see the new content while the old version is still pinned)
+            **repin(f"Pin_resubmitted_{stage}", f"Log_resubmitted_{stage}"),
             f"Back_to_pending_{stage}": update_request(
-                [f"Log_resubmitted_{stage}"], Status="Pending approval",
+                [f"Pin_resubmitted_{stage}"], Status="Pending approval",
                 CurrentStage=f"Resubmitted; back with @{{{role}}}"),
         }, {f"If_no_response_{stage}": condition(f"equals({status_now(poll)}, 'Changes requested')", no_reply)}),
         "runAfter": {f"Wait_for_resubmit_{stage}": ["Succeeded", "Failed", "TimedOut"]},
@@ -198,8 +266,34 @@ def stage_loop(stage):
             action["limit"] = {"timeout": timeout}
         return action
 
-    alive = (f"contains(createArray('Pending approval', 'Changes requested', 'Resubmitted'), "
-             f"coalesce(outputs('Status_now_{stage}')?['body/{REQ['Status']}'], ''))")
+    status_at_answer = f"coalesce(outputs('Status_now_{stage}')?['body/{REQ['Status']}'], '')"
+    alive = f"contains(createArray('Pending approval', 'Changes requested', 'Resubmitted'), {status_at_answer})"
+    # Version check when the card is answered. "outside": the request no longer matches the pinned version and nobody
+    # is editing it through the app, so it was changed in SharePoint. "stale": an Approve given on an older version
+    # (the card was sent before a resubmit) or while the requestor is editing; it doesn't count and is asked again.
+    integrity = f"outputs('Integrity_{stage}')"
+    counted = f"and({alive}, not(equals({integrity}, 'outside')))"  # the answer may change the request
+    version = f"outputs('Status_now_{stage}')?['body/{{VersionNumber}}']"
+    wait_poll = f"Poll_editing_{stage}"
+    not_counted = {
+        f"Log_not_counted_{stage}": log_row(
+            "@triggerBody()?['Title']", f"@{{coalesce({first_resp}?['responder/email'], 'OneRecord')}}",
+            f"@{{{role}}}", "Approval not counted",
+            f"Stage {stage}, round @{{{round_no}}}: the request was resubmitted after this card was sent, so the "
+            f"approval was for an older version. Asked again on the current version."),
+        # If the requestor is still editing, ask again only once they've resubmitted
+        f"If_still_editing_{stage}": after(condition(f"contains({EDITING}, {status_at_answer})", {
+            f"Wait_for_edit_{stage}": {
+                "type": "Until", "runAfter": {},
+                "expression": f"@not(contains({EDITING}, coalesce(outputs('{wait_poll}')?['body/{REQ['Status']}'], '')))",
+                "limit": {"count": 5000, "timeout": WAIT_FOR_EDIT},
+                "actions": {
+                    f"Wait_5_minutes_edit_{stage}": {"type": "Wait", "runAfter": {},
+                                                     "inputs": {"interval": {"count": 5, "unit": "Minute"}}},
+                    wait_poll: after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"),
+                                     f"Wait_5_minutes_edit_{stage}"),
+                }}}), f"Log_not_counted_{stage}"),
+    }
     if stage == 1:
         both = f"if(empty({esc_to}), outputs('{routing}')?['email'], concat(outputs('{routing}')?['email'], ';', {esc_to}))"
         waited = duration_text(ESCALATE_AFTER)
@@ -227,9 +321,13 @@ def stage_loop(stage):
 
     round_actions = {
         latest: sp("GetItem", "Requests", id="@triggerBody()?['ID']"),
+        # The version this card shows
+        f"Sensitive_seen_{stage}": after(get_sensitive(), latest),
+        f"Seen_{stage}": after({"type": "Compose", "inputs": f"@{fingerprint(latest, f'Sensitive_seen_{stage}')}"},
+                               f"Sensitive_seen_{stage}"),
         f"Log_stage_{stage}_assigned": after(log_row(
             "@triggerBody()?['Title']", approver_email, f"@{{{role}}}", "Assigned",
-            f"Stage {stage}, round @{{{round_no}}}"), latest),
+            f"Stage {stage}, round @{{{round_no}}}"), f"Seen_{stage}"),
         approval: after(card_action(approver_email, timeout=ESCALATE_AFTER if stage == 1 else None),
                         f"Log_stage_{stage}_assigned"),
         **escalation,
@@ -241,6 +339,13 @@ def stage_loop(stage):
         # A decision only changes the request while it is still open: once one approver has rejected it (or it was
         # cancelled or closed), later answers from the other parallel cards are logged but change nothing.
         f"Status_now_{stage}": after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"), f"Outcome_{stage}"),
+        f"Sensitive_now_{stage}": after(get_sensitive(), f"Status_now_{stage}"),
+        f"Integrity_{stage}": after({"type": "Compose", "inputs":
+            f"@if(and(not(equals({outcome}, 'Cancelled')), not(contains({EDITING}, {status_at_answer})), "
+            f"not(equals({fingerprint(f'Status_now_{stage}', f'Sensitive_now_{stage}')}, variables('Pinned')))), "
+            f"'outside', if(and(equals({outcome}, 'Approve'), or(contains({EDITING}, {status_at_answer}), "
+            f"not(equals(outputs('Seen_{stage}'), variables('Pinned'))))), 'stale', 'ok'))"},
+            f"Sensitive_now_{stage}"),
         # Answered by someone other than the assigned approver: the card was reassigned in Teams. Log the hand-off.
         f"If_stage_{stage}_reassigned": after(condition(
             f"and(not(equals({outcome}, 'Cancelled')), not(empty({first_resp}?['responder/email'])), "
@@ -249,7 +354,7 @@ def stage_loop(stage):
                 f"Log_reassigned_{stage}": log_row(
                     "@triggerBody()?['Title']", f"@{{{first_resp}?['responder/email']}}", f"@{{{role}}}", "Reassigned",
                     f"Stage {stage}, round @{{{round_no}}}: assigned to @{{outputs('{routing}')?['email']}}, "
-                    f"answered by @{{{first_resp}?['responder/displayName']}}")}), f"Status_now_{stage}"),
+                    f"answered by @{{{first_resp}?['responder/displayName']}}")}), f"Integrity_{stage}"),
         f"Log_stage_{stage}_decision": after(sp("PostItem", "ApprovalLog", **{
             "item/Title": "@triggerBody()?['Title']",
             f"item/{LOG['RequestID']}": "@triggerBody()?['Title']",
@@ -257,10 +362,22 @@ def stage_loop(stage):
             f"item/{LOG['Actor']}": f"@{{coalesce({first_resp}?['responder/displayName'], 'OneRecord')}}",
             f"item/{LOG['ActorRole']}": f"@{{{role}}}",
             f"item/{LOG['Action']}": f"@{{{outcome}}}",
-            f"item/{LOG['Detail']}": f"@{{{short(f'concat({chr(39)}Stage {stage}, round {chr(39)}, string({round_no}), {chr(39)}. {chr(39)}, coalesce({comments}, {chr(39)}{chr(39)}))')}}}",
+            # The SharePoint version of the request when it was answered, so the exact content can be looked up
+            # in the request's version history
+            f"item/{LOG['Detail']}": f"@{{{short(f'concat({chr(39)}Stage {stage}, round {chr(39)}, string({round_no}), {chr(39)} (request version {chr(39)}, string(coalesce({version}, {chr(39)}?{chr(39)})), {chr(39)}). {chr(39)}, coalesce({comments}, {chr(39)}{chr(39)}))')}}}",
         }), f"If_stage_{stage}_reassigned"),
+        # Changed in SharePoint outside the app: stop the request before anything reaches SAP
+        f"If_stage_{stage}_changed_outside": after(condition(
+            f"and({alive}, equals({integrity}, 'outside'))",
+            hold_request(f"stage_{stage}",
+                         f"Stage {stage}, round @{{{round_no}}}, answered by @{{{role}}}: the request (version "
+                         f"@{{{version}}}) or its payment / bank details no longer match the version under approval")),
+            f"Log_stage_{stage}_decision"),
+        # Approved an older version: not counted, asked again on the current one
+        f"If_stage_{stage}_not_counted": after(condition(f"and({alive}, equals({integrity}, 'stale'))", not_counted),
+                                               f"If_stage_{stage}_changed_outside"),
         # The card was cancelled (Cancel request in Teams): the request is withdrawn
-        f"If_stage_{stage}_cancelled": after(condition(f"and(equals({outcome}, 'Cancelled'), {alive})", {
+        f"If_stage_{stage}_cancelled": after(condition(f"and(equals({outcome}, 'Cancelled'), {counted})", {
             f"Mark_cancelled_stage_{stage}": update_request(
                 [], Status="Cancelled", CurrentStage=f"Cancelled at @{{{role}}} check (stage {stage})"),
             f"Tell_requestor_cancelled_{stage}": teams_to_requestor(
@@ -268,7 +385,7 @@ def stage_loop(stage):
                 f"Submit a new request if it's still needed.", f"Mark_cancelled_stage_{stage}"),
         }), f"Log_stage_{stage}_decision"),
         # A rejection reaches the requestor straight away, not after every parallel approver has answered
-        f"If_stage_{stage}_rejected": after(condition(f"and(equals({outcome}, 'Reject'), {alive})", {
+        f"If_stage_{stage}_rejected": after(condition(f"and(equals({outcome}, 'Reject'), {counted})", {
             f"Mark_rejected_stage_{stage}": update_request(
                 [], Status="Rejected", CurrentStage=f"Rejected at @{{{role}}} check (stage {stage})"),
             f"Tell_requestor_rejected_{stage}": teams_to_requestor(
@@ -277,15 +394,18 @@ def stage_loop(stage):
         }), f"If_stage_{stage}_cancelled"),
         # "Not sure" items: Quality/Regulatory approving means "not regulated", so record that
         f"If_stage_{stage}_regulated_decided": after(condition(
-            f"and(equals({outcome}, 'Approve'), equals({role}, '{QA_ROLE}'), equals({cur('RegulatedAnswer')}, 'Not sure'))", {
+            f"and(equals({outcome}, 'Approve'), equals({integrity}, 'ok'), {alive}, equals({role}, '{QA_ROLE}'), "
+            f"equals({cur('RegulatedAnswer')}, 'Not sure'))", {
                 f"Record_not_regulated_{stage}": update_request(
                     [], IsRegulated=False, RegulatedAnswer="No (decided by Quality/Regulatory)"),
                 f"Log_not_regulated_{stage}": after(log_row(
                     "@triggerBody()?['Title']", "OneRecord", "System", "Regulated decided",
                     f"Requestor was not sure; @{{{first_resp}?['responder/displayName']}} ({QA_ROLE}) approved, "
                     f"so it is recorded as not regulated"), f"Record_not_regulated_{stage}"),
+                # The flow changed the request itself, so the recorded answer is now the version under approval
+                **repin(f"Pin_regulated_{stage}", f"Log_not_regulated_{stage}", sensitive_action=f"Sensitive_now_{stage}"),
             }), f"If_stage_{stage}_rejected"),
-        f"If_stage_{stage}_changes_requested": after(condition(f"and(equals({outcome}, 'Request changes'), {alive})",
+        f"If_stage_{stage}_changes_requested": after(condition(f"and(equals({outcome}, 'Request changes'), {counted})",
                                                                sent_back),
                                                      f"If_stage_{stage}_regulated_decided"),
         f"Round_end_{stage}": after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"),
@@ -317,10 +437,12 @@ def stage_loop(stage):
                 [f"Log_routing_gap_{stage}"],
                 CurrentStage=f"@{{{role}}} missing for @{{{entity}}} in Roles; sent to MDM"),
         }), routing),
-        # Ask again after each resubmit; stop on Approve / Reject, or when the request has been closed
+        # Ask again after each resubmit or an approval that didn't count; stop on Approve / Reject, or when the
+        # request has been closed or put on hold
         rnd: after({"type": "Until",
-                    "expression": f"@or(not(equals({outcome}, 'Request changes')), "
-                                  f"contains(createArray('Rejected', 'Cancelled'), {status_now(f'Round_end_{stage}')}))",
+                    "expression": f"@or(not(or(equals({outcome}, 'Request changes'), equals({integrity}, 'stale'))), "
+                                  f"contains(createArray('Rejected', 'Cancelled', '{ON_HOLD}'), "
+                                  f"{status_now(f'Round_end_{stage}')}))",
                     "limit": {"count": 10, "timeout": "P30D"}, "actions": round_actions},
                    f"If_stage_{stage}_routing_gap"),
     }
@@ -333,14 +455,14 @@ def stage_loop(stage):
 
 
 def rejected_gate(stage, prev):
-    """After a stage: re-read the request; if it was rejected or closed, stop (the requestor was already told)."""
+    """After a stage: re-read the request; if it was rejected, closed or put on hold, stop (people were already told)."""
     check = f"Check_after_stage_{stage}"
     return {
         check: {**sp("GetItem", "Requests", id="@triggerBody()?['ID']"), "runAfter": {prev: ANY}},
         f"If_rejected_after_stage_{stage}": after({
             "type": "If",
-            "expression": {"or": [{"equals": [f"@outputs('{check}')?['body/{REQ['Status']}']", "Rejected"]},
-                                  {"equals": [f"@outputs('{check}')?['body/{REQ['Status']}']", "Cancelled"]}]},
+            "expression": {"or": [{"equals": [f"@outputs('{check}')?['body/{REQ['Status']}']", s]}
+                                  for s in ("Rejected", "Cancelled", ON_HOLD)]},
             "actions": {f"Stop_after_stage_{stage}": {"type": "Terminate", "runAfter": {},
                                                       "inputs": {"runStatus": "Succeeded"}}},
             "else": {"actions": {}},
@@ -374,7 +496,12 @@ actions["Get_sensitive_item"] = after(sp("GetItems", "SensitiveDetails", **{
     "$filter": f"{SENS['RequestID']} eq '@{{triggerBody()?['Title']}}'", "$top": 1}), "Sensitive_roles")
 actions["Sensitive_link"] = after({"type": "Compose", "inputs":
     "@{first(outputs('Get_sensitive_item')?['body/value'])?['{Link}']}"}, "Get_sensitive_item")
-actions["Filter_stage_1_rules"] = after(s1["Filter_stage_1_rules"], "Sensitive_link")
+# The version as submitted is the first version under approval
+actions["Get_request_as_submitted"] = after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"), "Sensitive_link")
+actions["Init_pinned_version"] = after({"type": "InitializeVariable", "inputs": {"variables": [{
+    "name": "Pinned", "type": "string",
+    "value": f"@{fingerprint('Get_request_as_submitted', 'Get_sensitive_item')}"}]}}, "Get_request_as_submitted")
+actions["Filter_stage_1_rules"] = after(s1["Filter_stage_1_rules"], "Init_pinned_version")
 actions["Mark_stage_1"] = update_request(
     ["Filter_stage_1_rules"], Status="Pending approval",
     CurrentStage="Stage 1: waiting for @{length(body('Filter_stage_1_rules'))} approvers in parallel")
@@ -399,7 +526,9 @@ def t(col):  # noqa: F811 - from here on, values come from the request as approv
     return f"outputs('Check_after_stage_2')?['body/{REQ[col]}']"
 
 
-sens = "first(outputs('Get_sensitive_item')?['body/value'])"
+# Payment and bank details are read again now, not reused from submission, so an edit made after a Request changes
+# (e.g. Finance asking for a lower credit limit) is what goes into SAP
+sens = "first(outputs('Get_sensitive_final')?['body/value'])"
 rid = "triggerBody()?['Title']"
 req_no = "triggerBody()?['ID']"
 
@@ -466,7 +595,22 @@ def dtw_body(cols):
             f"{row([c[2] for c in cols])}, {CRLF})")
 
 
-actions["SAP_code"] = after({"type": "Compose", "inputs": f"@{SAP_CODE}"}, "If_rejected_after_stage_2")
+# Last check before anything is written for SAP: the request and its sensitive row must still be exactly the version
+# every approval was given for. If not (edited in SharePoint after the last approval), no SAP file; on hold instead.
+actions["Get_sensitive_final"] = after(get_sensitive(), "If_rejected_after_stage_2")
+actions["If_changed_after_approval"] = after({
+    **condition(f"not(equals({fingerprint('Check_after_stage_2', 'Get_sensitive_final')}, variables('Pinned')))", {
+        **hold_request("final", "After the last approval: the request (version "
+                                "@{outputs('Check_after_stage_2')?['body/{VersionNumber}']}) or its payment / bank "
+                                "details no longer match the version that was approved. No SAP file was written."),
+        "Stop_changed_after_approval": after({"type": "Terminate", "inputs": {"runStatus": "Succeeded"}},
+                                             "Tell_requestor_on_hold_final"),
+    })}, "Get_sensitive_final")
+actions["Log_version_approved"] = after(log_row(
+    "@triggerBody()?['Title']", "OneRecord", "System", "Version check passed",
+    "The SAP file matches the version every approver approved (request version "
+    "@{outputs('Check_after_stage_2')?['body/{VersionNumber}']})"), "If_changed_after_approval")
+actions["SAP_code"] = after({"type": "Compose", "inputs": f"@{SAP_CODE}"}, "Log_version_approved")
 actions["SAP_file_name"] = after({"type": "Compose", "inputs":
     "@concat(triggerBody()?['Title'], '_', " + "".join(
         f"if(equals({t('RequestType')}, '{k}'), '{v[1]}', " for k, v in DTW.items()) + "'Record'"

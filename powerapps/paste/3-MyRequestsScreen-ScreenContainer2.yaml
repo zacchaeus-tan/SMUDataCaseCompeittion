@@ -235,7 +235,7 @@
                               HoverBorderColor: =RGBA(16, 110, 190, 1)
                               HoverColor: =RGBA(50, 49, 48, 1)
                               HoverFill: =RGBA(245, 245, 245, 1)
-                              Items: =["All", "Pending approval", "Changes requested", "Resubmitted", "Rejected", "Cancelled", "Ready for SAP import", "Created in SAP"]
+                              Items: =["All", "Pending approval", "Changes requested", "Resubmitted", "Rejected", "Cancelled", "On hold", "Ready for SAP import", "Created in SAP"]
                               Items.Value: =Value
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
@@ -393,7 +393,7 @@
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =Switch(ThisItem.Status, "Rejected", RGBA(164, 38, 44, 1), "Cancelled", RGBA(96, 94, 92, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), "Ready for SAP import", RGBA(92, 46, 145, 1), RGBA(0, 90, 158, 1))
+                              Color: =Switch(ThisItem.Status, "Rejected", RGBA(164, 38, 44, 1), "On hold", RGBA(164, 38, 44, 1), "Cancelled", RGBA(96, 94, 92, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), "Ready for SAP import", RGBA(92, 46, 145, 1), RGBA(0, 90, 158, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FocusedBorderThickness: =4
@@ -527,7 +527,7 @@
                         BorderColor: =RGBA(0, 0, 0, 0)
                         BorderStyle: =BorderStyle.None
                         BorderThickness: =2
-                        Color: =Switch(SelectedRequest.Status, "Rejected", RGBA(164, 38, 44, 1), "Cancelled", RGBA(96, 94, 92, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), "Ready for SAP import", RGBA(92, 46, 145, 1), RGBA(0, 90, 158, 1))
+                        Color: =Switch(SelectedRequest.Status, "Rejected", RGBA(164, 38, 44, 1), "On hold", RGBA(164, 38, 44, 1), "Cancelled", RGBA(96, 94, 92, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), "Ready for SAP import", RGBA(92, 46, 145, 1), RGBA(0, 90, 158, 1))
                         DisabledBorderColor: =RGBA(0, 0, 0, 0)
                         DisabledColor: =RGBA(161, 159, 157, 1)
                         FillPortions: =0

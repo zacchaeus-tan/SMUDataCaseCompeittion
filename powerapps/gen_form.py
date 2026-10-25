@@ -1016,7 +1016,8 @@ app_yaml = HEADER + "App:\n  Properties:\n    Formulas: |-\n" + indent("=" + FOR
     "\n    Theme: =PowerAppsTheme\n"
 
 # ---------------------------------------------------------------------------- My requests screen
-STATUS_COLOR = ('Switch({s}, "Rejected", RGBA(164, 38, 44, 1), "Cancelled", RGBA(96, 94, 92, 1), '
+STATUS_COLOR = ('Switch({s}, "Rejected", RGBA(164, 38, 44, 1), "On hold", RGBA(164, 38, 44, 1), '
+                '"Cancelled", RGBA(96, 94, 92, 1), '
                 '"Created in SAP", RGBA(16, 124, 16, 1), '
                 '"Changes requested", RGBA(157, 93, 0, 1), "Ready for SAP import", RGBA(92, 46, 145, 1), '
                 'RGBA(0, 90, 158, 1))')
@@ -1082,7 +1083,8 @@ list_panel = ctl("ListPanel", "GroupContainer@1.5.0", dict(
         "LayoutAlignItems": "LayoutAlignItems.Center", "LayoutGap": "12", "DropShadow": "DropShadow.None"}, [
         ctl("ddStatusFilter", "Classic/DropDown@2.3.1", dict(
             DROPDOWN, Items=fx_list(["All", "Pending approval", "Changes requested", "Resubmitted", "Rejected",
-                                     "Cancelled", "Ready for SAP import", "Created in SAP"]), Default='"All"',
+                                     "Cancelled", "On hold", "Ready for SAP import", "Created in SAP"]),
+            Default='"All"',
             FillPortions="0", Width="220", Height="36", Size="11")),
         ctl("tglShowAll", "Classic/Toggle@2.1.0", dict(
             TOGGLE, Default='IsMDM && !IsBlank(Param("requestId"))', Visible="IsMDM", FillPortions="1", Height="36", Size="11",
