@@ -129,6 +129,8 @@ The app and flows are generated from code in this repo. Rebuilding takes about a
 ### Limits we know about
 
 - While a request is sent back, the other approvers' cards stay open on the values they saw. Their decision still counts; the MDM final check shows what changed afterwards (ChangeNote). The approval steps are fixed at submission, so switching *regulated* from No to Yes during an edit doesn't add Quality/Regulatory; MDM sees that change.
+- *Cancel request* on an approval card (only the flow's owner sees it) withdraws the request: status *Cancelled*, the requestor is told, and it's logged. Any result other than Approve / Reject / Request changes counts as cancelled, so nothing slips through as approved. As with a rejection, the flow still waits for the other parallel cards before it finishes.
+- *Reassign* works, and Teams tells the new approver. The standard connectors don't report a reassignment until the card is answered, so the log records *Reassigned (from → to)* at that point, and reminders still go to the original approver (worded so they can ignore it). Following the card live would need the premium Dataverse connector.
 - The flow checks for a resubmit every 5 minutes, so a resubmitted request reaches the approver within about 5 minutes.
 - Format checks are deliberately simple patterns (no checksum). The MY check also accepts 14 digits, because the synthetic data uses 14-digit SSM numbers; real SSM numbers have 12.
 - Conditional routing understands two conditions (`IsRegulated`, `SuppliesRegulatedGoods`). A new kind of condition needs a flow change.

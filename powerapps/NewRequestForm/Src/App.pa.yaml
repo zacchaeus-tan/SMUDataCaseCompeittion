@@ -355,7 +355,7 @@ App:
       );
       // Still waiting: an approver can be asked again after a resubmit, so each Assigned row says its round
       // ("Stage 1, round 2"). A round is open while that role has made fewer decisions than its round number.
-      DecisionActions = ["Approve", "Reject", "Request changes"];
+      DecisionActions = ["Approve", "Reject", "Request changes", "Cancelled"];
       WaitingOn = Filter(
           SelectedLog As a,
           a.Action = "Assigned" &&

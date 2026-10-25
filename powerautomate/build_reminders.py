@@ -6,7 +6,7 @@ Usage: python3 powerautomate/build_reminders.py
 
 An approval is open when ApprovalLog has an "Assigned" row (written by the Route and approve flow) that has no
 decision yet. An approver can be asked again after "Request changes", so each Assigned row says its round
-("Stage 1, round 2"): round N is open while the role has N - 1 decisions (Approve / Reject / Request changes) on
+("Stage 1, round 2"): round N is open while the role has N - 1 decisions (Approve / Reject / Request changes / Cancelled) on
 that request. An approver who asked for changes is therefore not chased while the requestor edits.
 Days are calendar days since the Assigned row.
   * days >= EscalateAfterDays (and the role has an EscalateTo): message EscalateTo, log "Escalated"
@@ -43,7 +43,8 @@ def build(at_9am_only):
     actions["Get_assigned"] = sp("GetItems", "ApprovalLog",
                                  **{"$filter": f"{LOG['Action']} eq 'Assigned'", "$top": 5000})
     actions["Get_decisions"] = after(sp("GetItems", "ApprovalLog", **{
-        "$filter": f"{LOG['Action']} eq 'Approve' or {LOG['Action']} eq 'Reject' or {LOG['Action']} eq 'Request changes'",
+        "$filter": f"{LOG['Action']} eq 'Approve' or {LOG['Action']} eq 'Reject' or {LOG['Action']} eq 'Request changes' "
+                   f"or {LOG['Action']} eq 'Cancelled'",
         "$top": 5000}), "Get_assigned")
     actions["Get_requests"] = after(sp("GetItems", "Requests", **{"$top": 5000}), "Get_decisions")
     actions["Get_routing_rules"] = after(sp("GetItems", "RoutingRules"), "Get_requests")
@@ -111,7 +112,8 @@ def build(at_9am_only):
         "Message_approver": teams_chat(
             f"@{{{f}?['approver']}}",
             f"Reminder: your approval for {what} has been waiting @{{{f}?['daysWaiting']}} days "
-            f"(target: @{{{f}?['slaDays']}} days). Please respond in the Approvals app in Teams."),
+            f"(target: @{{{f}?['slaDays']}} days). Please respond in the Approvals app in Teams. If you've reassigned it, "
+            f"the new approver has it and you can ignore this."),
         "Log_reminder": after(log_row(
             f"@{{{f}?['requestId']}}", "OneRecord", "System", "Reminder sent",
             f"To @{{{f}?['approver']}}: @{{{f}?['role']}} approval waiting @{{{f}?['daysWaiting']}} days"),

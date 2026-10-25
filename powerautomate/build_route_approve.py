@@ -66,7 +66,10 @@ def stage_loop(stage):
     role = f"items('{loop}')?['{RULE['ApproverRole']}']"
     first_resp = f"first(outputs('{approval}')?['body/responses'])"
     comments = f"{first_resp}?['comments']"
-    outcome = f"outputs('{approval}')?['body/outcome']"
+    # The card's result. Anything other than Approve / Reject / Request changes (the sender pressed Cancel request,
+    # or the approval action failed) counts as "Cancelled", so it can never slip through as an approval.
+    outcome = f"outputs('Outcome_{stage}')"
+    raw_outcome = f"outputs('{approval}')?['body/outcome']"
     round_no = f"add(iterationIndexes('{rnd}'), 1)"
 
     def cur(col):
@@ -174,15 +177,36 @@ def stage_loop(stage):
             "host": {"apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
                      "connectionName": "shared_approvals", "operationId": "StartAndWaitForAnApproval"},
             "authentication": "@parameters('$authentication')"}}, f"Log_stage_{stage}_assigned"),
+        f"Outcome_{stage}": {"type": "Compose", "inputs":
+            f"@if(and(equals(actions('{approval}')?['status'], 'Succeeded'), "
+            f"contains(createArray('Approve', 'Reject', 'Request changes'), coalesce({raw_outcome}, ''))), "
+            f"{raw_outcome}, 'Cancelled')",
+            "runAfter": {approval: ["Succeeded", "Failed", "TimedOut", "Skipped"]}},
+        # Answered by someone other than the assigned approver: the card was reassigned in Teams. Log the hand-off.
+        f"If_stage_{stage}_reassigned": after(condition(
+            f"and(not(equals({outcome}, 'Cancelled')), not(empty({first_resp}?['responder/email'])), "
+            f"not(equals(toLower({first_resp}?['responder/email']), toLower(outputs('{routing}')?['email']))))", {
+                f"Log_reassigned_{stage}": log_row(
+                    "@triggerBody()?['Title']", f"@{{{first_resp}?['responder/email']}}", f"@{{{role}}}", "Reassigned",
+                    f"Stage {stage}, round @{{{round_no}}}: assigned to @{{outputs('{routing}')?['email']}}, "
+                    f"answered by @{{{first_resp}?['responder/displayName']}}")}), f"Outcome_{stage}"),
         f"Log_stage_{stage}_decision": after(sp("PostItem", "ApprovalLog", **{
             "item/Title": "@triggerBody()?['Title']",
             f"item/{LOG['RequestID']}": "@triggerBody()?['Title']",
             f"item/{LOG['Timestamp']}": "@utcNow()",
-            f"item/{LOG['Actor']}": f"@{{{first_resp}?['responder/displayName']}}",
+            f"item/{LOG['Actor']}": f"@{{coalesce({first_resp}?['responder/displayName'], 'OneRecord')}}",
             f"item/{LOG['ActorRole']}": f"@{{{role}}}",
             f"item/{LOG['Action']}": f"@{{{outcome}}}",
             f"item/{LOG['Detail']}": f"@{{{short(f'concat({chr(39)}Stage {stage}, round {chr(39)}, string({round_no}), {chr(39)}. {chr(39)}, coalesce({comments}, {chr(39)}{chr(39)}))')}}}",
-        }), approval),
+        }), f"If_stage_{stage}_reassigned"),
+        # The card was cancelled (Cancel request in Teams): the request is withdrawn
+        f"If_stage_{stage}_cancelled": after(condition(f"equals({outcome}, 'Cancelled')", {
+            f"Mark_cancelled_stage_{stage}": update_request(
+                [], Status="Cancelled", CurrentStage=f"Cancelled at @{{{role}}} check (stage {stage})"),
+            f"Tell_requestor_cancelled_{stage}": teams_to_requestor(
+                f"Your request @{{triggerBody()?['Title']}} was cancelled at the @{{{role}}} check. "
+                f"Submit a new request if it's still needed.", f"Mark_cancelled_stage_{stage}"),
+        }), f"Log_stage_{stage}_decision"),
         # A rejection reaches the requestor straight away, not after every parallel approver has answered
         f"If_stage_{stage}_rejected": after(condition(f"equals({outcome}, 'Reject')", {
             f"Mark_rejected_stage_{stage}": update_request(
@@ -190,7 +214,7 @@ def stage_loop(stage):
             f"Tell_requestor_rejected_{stage}": teams_to_requestor(
                 f"Your request @{{triggerBody()?['Title']}} was rejected by @{{{role}}}: "
                 f"@{{coalesce({comments}, '(no comment)')}}", f"Mark_rejected_stage_{stage}"),
-        }), f"Log_stage_{stage}_decision"),
+        }), f"If_stage_{stage}_cancelled"),
         # "Not sure" items: Quality/Regulatory approving means "not regulated", so record that
         f"If_stage_{stage}_regulated_decided": after(condition(
             f"and(equals({outcome}, 'Approve'), equals({role}, '{QA_ROLE}'), equals({cur('RegulatedAnswer')}, 'Not sure'))", {
@@ -234,7 +258,7 @@ def stage_loop(stage):
         # Ask again after each resubmit; stop on Approve / Reject, or when the request has been closed
         rnd: after({"type": "Until",
                     "expression": f"@or(not(equals({outcome}, 'Request changes')), "
-                                  f"equals({status_now(f'Round_end_{stage}')}, 'Rejected'))",
+                                  f"contains(createArray('Rejected', 'Cancelled'), {status_now(f'Round_end_{stage}')}))",
                     "limit": {"count": 10, "timeout": "P30D"}, "actions": round_actions},
                    f"If_stage_{stage}_routing_gap"),
     }
@@ -253,7 +277,8 @@ def rejected_gate(stage, prev):
         check: after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"), prev),
         f"If_rejected_after_stage_{stage}": after({
             "type": "If",
-            "expression": {"and": [{"equals": [f"@outputs('{check}')?['body/{REQ['Status']}']", "Rejected"]}]},
+            "expression": {"or": [{"equals": [f"@outputs('{check}')?['body/{REQ['Status']}']", "Rejected"]},
+                                  {"equals": [f"@outputs('{check}')?['body/{REQ['Status']}']", "Cancelled"]}]},
             "actions": {f"Stop_after_stage_{stage}": {"type": "Terminate", "runAfter": {},
                                                       "inputs": {"runStatus": "Succeeded"}}},
             "else": {"actions": {}},
