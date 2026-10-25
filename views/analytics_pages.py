@@ -17,7 +17,7 @@ ALL = "ALL"  # "All countries" option in the forecast picker
 # one fixed colour per country on every chart (Okabe-Ito, readable with colour blindness)
 COUNTRY_COLORS = {"SG": "#0072B2", "MY": "#E69F00", "TH": "#009E73", "ID": "#CC79A7", "VN": "#56B4E9"}
 LABEL_COLORS = ["#1f4e79", "#7fa7d0", "#c9a227", "#8c6bb1"]
-SCENARIO_COLORS = {"Today (email)": "#9aa3ad", "New process": "#1f4e79"}
+SCENARIO_COLORS = {"Today (email)": "#9aa3ad", "OneRecord": "#1f4e79"}
 # orange = decline, blue = growth; replaces red-green, which colour-blind readers can't separate
 DIVERGING = [[0, "#c4571b"], [0.5, "#f4f1ec"], [1, "#2166ac"]]
 
@@ -721,7 +721,7 @@ def _cycle_time():
                                                      f"from the email request history"),
     ])
     st.caption("Today's email process, measured from the request history. The workflow replaces these steps; "
-               "Business case simulates the same requests under the new process.")
+               "Business case simulates the same requests under OneRecord.")
 
     left, right = st.columns(2, gap="medium")
     with left:
@@ -913,7 +913,7 @@ def business_case():
                       xaxis_title="share of elapsed time")
     c.chart(fig)
 
-    st.markdown("##### With the new process (simulated on the same 150 requests)")
+    st.markdown("##### With OneRecord (simulated on the same 150 requests)")
     sim = process.simulate(d["requests"], d["steps"], bounce_avoided=bounce / 100, notice_cut=notice / 100,
                            escalate_after_days=esc)
     now_med, fut_med = sim.cycle_days.median(), sim.future_days.median()
@@ -926,7 +926,7 @@ def business_case():
         c.kpi("Faster", (1 - fut_med / now_med) * 100, suffix="%"),
     ])
     long = pd.concat([sim.assign(scenario="Today (email)", days=sim.cycle_days),
-                      sim.assign(scenario="New process", days=sim.future_days)])
+                      sim.assign(scenario="OneRecord", days=sim.future_days)])
     fig = px.histogram(long, x="days", color="scenario", barmode="overlay", nbins=40, opacity=0.7,
                        color_discrete_map=SCENARIO_COLORS)
     fig.update_layout(height=260, margin=dict(l=0, r=0, t=10, b=0), legend_title="")
@@ -986,8 +986,8 @@ ROADMAP = [
       "SAP B1 import file, so Priya stops retyping",
       "One-off clean-up: merge the 41 duplicate customers, review queue for look-alikes",
       "4-week pilot with SPD, then QTS and QTG"],
-     "Power Platform contractor ({dev} weeks); MDM team sets up rules and runs the pilot; IT does a one-off site, "
-     "permissions and Teams setup",
+     "Power Platform contractor ({dev} weeks); MDM team sets up rules and runs the pilot; IT, one-off: the Teams "
+     "site and permissions (about 2 days)",
      "Median time to SAP of 5 days or less in the pilot; at least 90% of requests through the form"),
     ("Phase 2: Use the clean data", "Months 3–6",
      ["Regional view in Power BI inside Teams",
@@ -995,7 +995,9 @@ ROADMAP = [
       "Drop-off and cross-sell lists to account managers each month",
       "Email sorting: rules, then an AI prompt, then a person",
       "Monthly AI action brief posted to the sales channel"],
-     "Data analyst ({da} weeks); IT enables AI Builder once; Sales ops owns the monthly review",
+     "Data analyst ({da} weeks) builds the Power BI report, then each month runs one script that refreshes the "
+     "forecast and customer lists and saves them to SharePoint, where Power BI reads them (no server to run); IT, "
+     "one-off: switch on AI Builder; Sales ops owns the monthly review",
      "Forecast beats the 6-month average 3 months running; top-10 drop-offs contacted within 2 weeks"),
     ("Phase 3: Connect and scale", "After month 6, only if Phase 1–2 targets are met",
      ["Direct SAP B1 connection (Service Layer) replaces the import file",
@@ -1028,9 +1030,12 @@ NOT_IN_V1 = [
 def _roadmap(dev_weeks, da_weeks):
     st.markdown("##### Roadmap and scope")
     with st.expander("Roadmap"):
-        st.caption("Sized for a small team: one contractor and one analyst, with the MDM team owning the rules. Each "
-                   "phase starts only when the previous one hits its targets. The year-1 cost above covers Phases 1 "
-                   "and 2; Phase 3 is priced with an SAP partner once Phase 1–2 results are in.")
+        st.caption("Sized for a small team: one contractor and one analyst, with the MDM team owning the rules. No IT "
+                   "development team is needed: IT's part is one-off setup, and everything after that is run by the "
+                   "MDM team and the analyst. Each phase starts only when the previous one hits its targets. The "
+                   "year-1 cost above covers Phases 1 and 2; Phase 3 is priced with an SAP partner once Phase 1–2 "
+                   "results are in.")
+        c.assumption("the timings, team sizes and targets below are our estimates, to confirm with Lives Group.")
         for col, (title, when, items, who, gate) in zip(st.columns(3), ROADMAP):
             with col.container(border=True, height="stretch"):
                 st.markdown(f"**{title}**  \n*{when}*")

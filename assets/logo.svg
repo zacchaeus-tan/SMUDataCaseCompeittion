@@ -4,5 +4,5 @@
   <rect x="10" y="22" width="16" height="4" rx="2" fill="#7fa7d0"/>
   <rect x="10" y="28" width="10" height="4" rx="2" fill="#7fa7d0"/>
   <text x="44" y="32" font-family="Source Sans 3, Source Sans Pro, Helvetica, Arial, sans-serif" font-size="22"
-        font-weight="700" fill="#1c2430">Lives <tspan fill="#1f4e79">Group</tspan></text>
+        font-weight="700" fill="#1c2430">One<tspan fill="#1f4e79">Record</tspan></text>
 </svg>
