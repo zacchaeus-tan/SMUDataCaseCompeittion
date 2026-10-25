@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from onerecord import advisor, classify, process
+from onerecord import advisor, classify, insights, process
 from onerecord.config import COUNTRIES, CURRENT, GROWTH_LABEL, PRIOR_YEAR, PRODUCTS
 
 from . import common as c
@@ -460,8 +460,9 @@ def actions():
     cmp = c.regional()["compare"]
     c.header("Customers", f"{len(cmp['clean_drop'])} customers are ordering much less, with about "
                               f"S${cmp['clean_drop'].value_at_risk_per_q.sum():,.0f} a quarter at risk")
-    raw = st.toggle("Show raw SAP records (before duplicates are merged)",
-                    help="Runs the same analysis on the customer records as they sit in SAP today")
+    raw = st.toggle("Data check: show raw SAP records (before duplicates are merged)",
+                    help="Runs the same analysis on the customer records as they sit in SAP today, to show what "
+                         "duplicate records do to the alerts. It checks the data; it isn't a business benchmark.")
     if raw:
         golden = c.data_quality()["clusters"].set_index("record_id").golden_id
         drop = _flag_false(cmp["raw_drop"], cmp["clean_drop"], golden)
@@ -470,24 +471,42 @@ def actions():
     else:
         drop, xsell = cmp["clean_drop"], cmp["clean_xsell"]
 
-    at_risk = c.kpi("Value at risk per quarter", drop.value_at_risk_per_q.sum(), prefix="S$")
+    at_risk = drop.value_at_risk_per_q.sum()
     if raw:
         c.kpi_row([
             c.kpi("Customer records in SAP", cmp["raw_customers"]),
             c.kpi("Drop-off alerts", len(drop), delta=f"{false_drop} not real", tone="bad"),
             c.kpi("Cross-sell leads", len(xsell), delta=f"{false_xsell} not real", tone="bad"),
-            at_risk])
+            c.kpi("Value at risk per quarter", at_risk, prefix="S$")])
     else:
+        # each card is compared with a business benchmark; what duplicates did to the numbers is the data check below
+        clean = c.regional()["clean"]
+        between = lambda w: clean[(clean.month >= w[0]) & (clean.month <= w[1])]
+        last_q = between(insights.RECENT)
+        year_ago = between(insights.RECENT_PRIOR).groupby("customer_id").quantity.sum()
+        established = int((year_ago >= insights.MIN_QUARTER_UNITS).sum())
+        conv = 0.10  # same conversion rate as the business case
         c.kpi_row([
-            c.kpi("Real customers", cmp["clean_customers"],
-                  delta=f"{cmp['clean_customers'] - cmp['raw_customers']} duplicates merged"),
-            c.kpi("Drop-off alerts", len(drop), delta=f"{len(drop) - len(cmp['raw_drop'])} vs raw records",
-                  tone="good", help="With duplicate records, a customer whose orders moved to a new record looks "
-                                    "like they stopped ordering."),
-            c.kpi("Cross-sell leads", len(xsell), delta=f"{len(xsell) - len(cmp['raw_xsell'])} vs raw records",
-                  tone="good", help="With duplicate records, one hospital can be split into an A-only and a B-only "
-                                    "record, which looks like a cross-sell gap."),
-            at_risk])
+            c.kpi("Customers, Apr 2025–Sep 2026", cmp["clean_customers"],
+                  delta=f"{cmp['raw_customers'] - cmp['clean_customers']} duplicate records merged",
+                  help="One hospital or lab counts once, however many SAP records SPD, QTS and QTG created for it."),
+            c.kpi("Drop-off alerts", len(drop), delta=f"{len(drop) / established:.0%} of established customers",
+                  tone="bad", help=f"Ordered at least 40% less in Jul–Sep 2026 than in Jul–Sep 2025 and than their own "
+                                   f"recent average. Established = at least {insights.MIN_QUARTER_UNITS} units in "
+                                   f"Jul–Sep 2025 ({established} customers)."),
+            c.kpi("Cross-sell leads", len(xsell),
+                  delta=f"S${xsell.est_value_sgd_per_year.sum() * conv:,.0f} a year at {conv:.0%} conversion",
+                  tone="good", help="Customers who buy A but not B (or B but not A), while most similar customers "
+                                    "buy both."),
+            c.kpi("Value at risk per quarter", at_risk, prefix="S$", tone="bad",
+                  delta=f"{at_risk / last_q.line_value_sgd.sum():.0%} of last quarter's order value"),
+        ])
+        st.caption(f"Data check: on the raw SAP records, before duplicates are merged, the same rules raise "
+                   f"{len(cmp['raw_drop'])} drop-off alerts and {len(cmp['raw_xsell'])} cross-sell leads. "
+                   f"{len(cmp['raw_drop']) - len(drop)} and {len(cmp['raw_xsell']) - len(xsell)} more than above: "
+                   f"a customer whose orders moved to a new record looks like they stopped ordering, and one hospital "
+                   f"split into an A-only and a B-only record looks like a cross-sell gap. Use the switch above to "
+                   f"see which ones.")
     if raw:
         st.warning(f"On raw records, {false_drop} of {len(drop)} drop-off alerts and {false_xsell} of {len(xsell)} "
                    f"cross-sell leads are false or counted twice, because the same customer has more than one record. "
