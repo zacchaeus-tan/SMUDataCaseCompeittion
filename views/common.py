@@ -167,7 +167,7 @@ def regional():
     d, q = raw(), data_quality()
     clean = insights.clean_orders(d["po"], q["clusters"], q["item_map"])
     return dict(clean=clean, growth=insights.growth_table(clean), monthly=insights.monthly(clean),
-                compare=insights.raw_vs_clean(clean, d["customers"]))
+                compare=insights.raw_vs_clean(clean, d["customers"]), quiet=insights.gone_quiet(clean))
 
 
 @st.cache_data(show_spinner="Back-testing forecasts…")

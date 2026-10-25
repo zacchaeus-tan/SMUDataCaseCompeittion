@@ -522,25 +522,57 @@ def actions():
                    f"Turn the switch off to see the cleaned view.")
 
     status = ["status"] if raw else []
-    t1, t2 = st.tabs(["Customers dropping off", "Cross-sell opportunities"])
+    quiet = c.regional()["quiet"]
+    t1, t0, t2 = st.tabs([f"Call list: dropping off ({len(drop)})", f"Early warning: gone quiet ({len(quiet)})",
+                          f"Cross-sell opportunities ({len(xsell)})"])
     with t1:
-        d = drop
+        # one ranked list to work down: biggest value at risk first, with the reason it was flagged in words
+        d = drop.reset_index(drop=True)
+        d.insert(0, "rank", d.index + 1)
+        d["why"] = [f"{now:,.0f} units in Jul–Sep vs {before:,.0f} a year earlier ({chg:+.0%})"
+                    for now, before, chg in zip(d.units_last_q, d.units_same_q_last_year, d.change)]
+        d["action"] = ["Call within 2 weeks" if r <= 10 else "Call this quarter" for r in d["rank"]]
         st.markdown(f"{len(d)} established customers ordered at least 40% less last quarter than in the same "
                     f"quarter last year, and than their own recent average. Value at risk is about "
-                    f"S${d.value_at_risk_per_q.sum():,.0f} per quarter.")
-        st.dataframe(d[status + ["name", "country", "units_last_q", "units_same_q_last_year", "change",
-                                 "value_at_risk_per_q", "last_order"]], hide_index=True, width="stretch",
+                    f"S${d.value_at_risk_per_q.sum():,.0f} per quarter. Ranked by value at risk: work down from #1.")
+        st.dataframe(d[["rank"] + status + ["name", "country", "why", "value_at_risk_per_q", "last_order",
+                                            "action"]], hide_index=True, width="stretch",
                      column_config={
+            "rank": st.column_config.NumberColumn("#", width="small"),
             "status": STATUS_COL,
             "name": st.column_config.TextColumn("Customer"),
             "country": COUNTRY_COL,
-            "units_last_q": st.column_config.NumberColumn("Units last quarter"),
-            "units_same_q_last_year": st.column_config.NumberColumn("Same quarter last year"),
-            "change": st.column_config.NumberColumn("YoY", format="percent"),
-            "value_at_risk_per_q": st.column_config.NumberColumn("At risk per quarter (SGD)", format="%.0f"),
-            "last_order": st.column_config.TextColumn("Last order")})
-        st.markdown("**Suggested next step:** account managers call the top 10 by value within two weeks and record "
-                    "the reason (competitor, budget, service issue), so patterns by country become visible.")
+            "why": st.column_config.TextColumn("Why flagged", width="large"),
+            "value_at_risk_per_q": st.column_config.NumberColumn("At risk per quarter (SGD)", format="localized"),
+            "last_order": st.column_config.TextColumn("Last order"),
+            "action": st.column_config.TextColumn("Next step")})
+        st.markdown("**Suggested next step:** account managers call the top 10 within two weeks and record the "
+                    "reason they hear (competitor, budget, service issue), so patterns by country become visible.")
+    with t0:
+        q = quiet.copy()
+        q.insert(0, "rank", q.index + 1)
+        q["why"] = [f"No order for {s} days; usually orders every {g} days"
+                    for s, g in zip(q.days_since, q.usual_gap)]
+        q["confirmed"] = q.id.isin(c.regional()["compare"]["clean_drop"].id).map({True: "Yes", False: ""})
+        st.markdown(f"{len(q)} larger customers have gone quiet: no order for longer than 9 in 10 of their own past "
+                    f"gaps between orders, and for at least 45 days. This can show up a month or two before a "
+                    f"customer counts as dropping off, which needs a full quarter of lower orders.")
+        st.dataframe(q[["rank", "name", "country", "why", "value_per_q", "last_order", "confirmed"]],
+                     hide_index=True, width="stretch", column_config={
+            "rank": st.column_config.NumberColumn("#", width="small"),
+            "name": st.column_config.TextColumn("Customer"),
+            "country": COUNTRY_COL,
+            "why": st.column_config.TextColumn("Why flagged", width="large"),
+            "value_per_q": st.column_config.NumberColumn("Usual order value per quarter (SGD)",
+                                                          format="localized"),
+            "last_order": st.column_config.TextColumn("Last order"),
+            "confirmed": st.column_config.TextColumn("Also on call list",
+                                                     help="Already dropping off on the quarter rule")})
+        st.markdown("**Suggested next step:** not a call about the missed order. The account manager makes their "
+                    "next routine check-in early (e.g. \"your usual kits are due, shall we hold stock?\") and "
+                    "notes anything they hear, such as a lost tender or a new supplier.")
+        c.assumption("only the top half of regular customers by order value is watched, so smaller buyers who "
+                     "order late don't create work. Calculated on merged customer records.")
     with t2:
         x = xsell
         st.markdown(f"{len(x)} customers buy only one of Products A and B, while most similar customers buy both. "

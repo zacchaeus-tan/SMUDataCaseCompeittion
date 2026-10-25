@@ -117,6 +117,29 @@ def cross_sell(df: pd.DataFrame, customers: pd.DataFrame, id_col="customer_id", 
     return pd.DataFrame(rows).sort_values("est_value_sgd_per_year", ascending=False) if rows else pd.DataFrame()
 
 
+def gone_quiet(df: pd.DataFrame, min_orders=6, min_days=45, gap_quantile=0.9) -> pd.DataFrame:
+    """Early warning, ahead of the quarter-based drop-off rule: regular customers with no order for longer than
+    9 in 10 of their own past gaps between orders, and for at least 45 days. Only the top half of regular
+    customers by order value is kept, so account managers aren't chasing every small buyer who orders late."""
+    d = df.assign(day=pd.to_datetime(df.po_date))
+    today = d.day.max()  # the end of the data stands in for today
+    value_per_q = _between(d, LOOKBACK_12M).groupby("customer_id").line_value_sgd.sum() / 4
+    rows = []
+    for cid, g in d.groupby("customer_id"):
+        days = g.day.drop_duplicates().sort_values()
+        if len(days) < min_orders:
+            continue
+        gaps = days.diff().dt.days.dropna()
+        rows.append(dict(id=cid, name=g.customer.iloc[0], country=g.country.iloc[0],
+                         usual_gap=int(gaps.median()), longest_normal_gap=gaps.quantile(gap_quantile),
+                         days_since=(today - days.iloc[-1]).days, last_order=days.iloc[-1].strftime("%Y-%m-%d"),
+                         value_per_q=round(value_per_q.get(cid, 0))))
+    t = pd.DataFrame(rows)
+    big = t.value_per_q >= t.value_per_q.median()
+    t = t[big & (t.days_since > t.longest_normal_gap) & (t.days_since >= min_days)]
+    return t.drop(columns="longest_normal_gap").sort_values("value_per_q", ascending=False).reset_index(drop=True)
+
+
 def raw_vs_clean(df: pd.DataFrame, customers: pd.DataFrame) -> dict:
     """What the same analyses say on the raw SAP records vs on the cleaned golden records."""
     raw = df.copy()
