@@ -32,6 +32,7 @@ python3 scripts/generate_data.py
 | `mdm_request_steps.csv` | ~900 | The same requests step by step, with waiting time vs working time |
 | `inbound_messages.csv` | 660 | Apr–Sep 2026 emails to the shared sales mailboxes: orders, enquiries, follow-ups and setup requests, mixed together and unlabelled |
 | `inbound_messages_holdout.csv` | 24 | Hand-written messy emails in styles the generator never uses ("same as last month pls", Thai/Vietnamese one-liners, tenders). A stress test for the email sorter; labels are in `answer_key/inbound_holdout_labels.csv` |
+| `ai_step_chatgpt.csv` | 21 | The AI step's answers on the 21 stress-test emails the rules passed to review. Recorded by hand on 25 Oct 2026: the generic prompt in `onerecord/classify.py` (`AI_PROMPT`) and the emails, without their labels, were pasted into ChatGPT (free web version). Not generated, and not part of the answer key |
 
 ## Planted patterns (what your analysis should find)
 

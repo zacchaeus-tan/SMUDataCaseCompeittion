@@ -202,6 +202,20 @@ def triage():
 
 
 @st.cache_data(show_spinner=False)
+def ai_step_runs():
+    """Recorded AI-step answers on the stress-test emails the rules passed on, by run, so the page shows them
+    without an API key: the app's own API call (scripts/run_ai_step.py) and a manual ChatGPT run."""
+    runs = {}
+    api = DATA / "ai_step_openai.csv"
+    if api.exists():
+        d = pd.read_csv(api, dtype=str)
+        runs[f"{d.model[0]} through the app's API call, {d.run_date[0]}"] = d
+    runs["ChatGPT free web version, pasted in by hand, 2026-10-25"] = pd.read_csv(DATA / "ai_step_chatgpt.csv",
+                                                                                 dtype=str)
+    return runs
+
+
+@st.cache_data(show_spinner=False)
 def process_baseline():
     d = raw()
     return process.breakdown(d["steps"])

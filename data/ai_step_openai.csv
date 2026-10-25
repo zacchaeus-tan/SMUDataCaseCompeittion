@@ -1,0 +1,22 @@
+message_id,ai_label,ai_confidence,ai_reason,model,run_date
+HOLD-01,purchase_order,high,"Customer requests the same quantity as last month for dengue kits, indicating a current purchase order.",gpt-5.4-nano,2026-10-25
+HOLD-02,purchase_order,high,"Customer requests a specific quantity (5 boxes) and asks for delivery by tomorrow, indicating a current purchase.",gpt-5.4-nano,2026-10-25
+HOLD-03,follow_up,high,"The sender indicates a purchase requisition (PR) has been approved and that an official purchase order will follow next week, referring to an order already in progress rather than a new inquiry.",gpt-5.4-nano,2026-10-25
+HOLD-04,purchase_order,high,"Email requests processing the attached requirement for this month, indicating an order/booking of supplies rather than just a question.",gpt-5.4-nano,2026-10-25
+HOLD-05,purchase_order,high,"Customer confirms quantity and approval to proceed with '200ul ones' and requests '20 boxes', indicating an active purchase.",gpt-5.4-nano,2026-10-25
+HOLD-06,enquiry,high,"The email is an invitation for suppliers to submit bids for a tender (upcoming, not an order or follow-up).",gpt-5.4-nano,2026-10-25
+HOLD-07,enquiry,high,"The sender is asking whether you still carry a specific product (100T CRP kit) or if it was discontinued, with no indication of an order being placed.",gpt-5.4-nano,2026-10-25
+HOLD-08,follow_up,high,Customer reports a short shipment on a previously placed order (8 of 10 kits received) and requests advice.,gpt-5.4-nano,2026-10-25
+HOLD-09,follow_up,high,"Asks when a credit note for previously damaged gloves will be issued, indicating follow-up on an existing order/claim rather than a new purchase or general enquiry.",gpt-5.4-nano,2026-10-25
+HOLD-10,follow_up,high,Request is to cancel an already placed purchase order (PO 41233) due to ordering the wrong size.,gpt-5.4-nano,2026-10-25
+HOLD-11,enquiry,high,The sender asks to be called back about their account but does not mention a specific order or buying now; it appears to be a general inquiry.,gpt-5.4-nano,2026-10-25
+HOLD-12,mdm_request,high,Request is to create an account/customer record for a new branch before ordering (master data management request).,gpt-5.4-nano,2026-10-25
+HOLD-13,mdm_request,high,"Email requests a change of the purchasing point of contact (PIC) effective 1 Oct, implying an update to customer/purchasing records.",gpt-5.4-nano,2026-10-25
+HOLD-14,mdm_request,high,"Email requests updating bank/payment details using an attached bank letter, which implies changing customer/vendor payment records rather than placing a new order or asking a question.",gpt-5.4-nano,2026-10-25
+HOLD-15,purchase_order,high,"The email (Indonesian) requests to send 30 boxes of size M gloves for this month, indicating a current purchase order.",gpt-5.4-nano,2026-10-25
+HOLD-16,enquiry,high,"Người gửi hỏi giá (""Hỏi giá máy ly tâm 24 vị trí"") và chưa nói đến việc đặt mua hay theo dõi đơn hàng.",gpt-5.4-nano,2026-10-25
+HOLD-17,purchase_order,high,ข้อความภาษาไทยระบุว่า “ต้องการสั่งซื้อ” และระบุจำนวน (ชุดตรวจไข้เลือดออก 40 กล่อง) จึงเป็นการสั่งซื้อสินค้าโดยตรง,gpt-5.4-nano,2026-10-25
+HOLD-18,enquiry,high,The sender is requesting a demo of the POC analyser next week and has not indicated an intention to place an order.,gpt-5.4-nano,2026-10-25
+HOLD-19,follow_up,high,"The subject references a PO (41877) and the message confirms receipt in good order, indicating status on an already placed order.",gpt-5.4-nano,2026-10-25
+HOLD-22,enquiry,high,Customer is asking a question about product shelf life/expiry and whether it is normal; no explicit order placement or reference to an existing PO.,gpt-5.4-nano,2026-10-25
+HOLD-24,purchase_order,high,"The customer states they have accepted the quotation and ask to proceed, indicating commitment to purchase.",gpt-5.4-nano,2026-10-25

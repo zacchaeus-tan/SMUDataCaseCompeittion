@@ -63,16 +63,18 @@ def classify_all(msgs: pd.DataFrame) -> pd.DataFrame:
 # --------------------------------------------------------------------------- optional AI step (stage 2)
 # Only messages the rules could not decide are sent. Prototype uses OpenAI; production would run the same
 # plain-English prompt through Power Automate's AI prompt action. No training, no model to maintain.
-AI_PROMPT = """You sort emails arriving in the shared sales mailbox of a medical-supplies distributor in
-Southeast Asia (emails may be in English, Malay, Bahasa Indonesia, Thai or Vietnamese).
-Classify the email into exactly one label:
-- purchase_order: the customer is committing to buy now (items and/or quantities, "same as last month",
-  accepting a quotation, an attached order or requirement list)
-- enquiry: asking about price, stock, products, demos, tenders, or planning a future purchase
-- follow_up: about an order already placed (delivery, invoice, short shipment, cancellation, expiry, complaint)
-- mdm_request: asking to create or change master data (new account or branch, contact, address, bank details,
-  item codes)
-If it is genuinely ambiguous, use confidence "low"."""
+# Kept generic on purpose: no examples taken from the stress-test emails, so testing on them is a fair test.
+# This exact wording was used for the recorded runs in data/ai_step_openai.csv and data/ai_step_chatgpt.csv.
+AI_PROMPT = """You sort emails arriving in the shared sales mailbox of a medical-supplies distributor in Southeast Asia.
+Emails may be in English, Malay, Bahasa Indonesia, Thai or Vietnamese.
+
+Give each email exactly one label:
+- purchase_order: the customer is buying now
+- enquiry: the customer is asking a question or not yet committing to buy
+- follow_up: about an order that was already placed
+- mdm_request: asking to create or change customer, supplier or product records
+
+Also give a confidence: high, or low if you are genuinely unsure."""
 
 AI_SCHEMA = {
     "type": "object",

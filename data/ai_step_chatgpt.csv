@@ -1,0 +1,22 @@
+message_id,ai_label,ai_confidence,ai_reason
+HOLD-01,purchase_order,high,Requests same dengue kit quantity as last month
+HOLD-02,purchase_order,high,Requests 5 boxes urgently for delivery tomorrow
+HOLD-03,enquiry,high,Internal PR approved; official PO not yet issued
+HOLD-04,purchase_order,high,Attached spreadsheet specifies this month's requirements
+HOLD-05,purchase_order,high,Confirms 20 boxes of 200ul items
+HOLD-06,enquiry,high,Invites suppliers to bid for upcoming tender
+HOLD-07,enquiry,high,Asks whether 100T CRP kit is still available
+HOLD-08,follow_up,high,Reports short shipment on previous order
+HOLD-09,follow_up,high,Asks when credit note for damaged gloves will be issued
+HOLD-10,follow_up,high,Requests cancellation of existing PO 41233
+HOLD-11,enquiry,low,Requests callback regarding account; purpose unclear
+HOLD-12,mdm_request,high,Requests account creation for new branch
+HOLD-13,mdm_request,high,Notifies change of purchasing contact
+HOLD-14,mdm_request,high,Requests update to customer bank details
+HOLD-15,purchase_order,high,Requests 30 boxes of medium-sized gloves
+HOLD-16,enquiry,high,Asks price of a 24-position centrifuge
+HOLD-17,purchase_order,high,Requests 40 boxes of dengue test kits
+HOLD-18,enquiry,high,"Requests a product demonstration, not a purchase"
+HOLD-19,follow_up,high,Confirms receipt of existing order in good condition
+HOLD-22,follow_up,high,Queries expiry dates of kits already received
+HOLD-24,purchase_order,high,Accepts quotation and instructs supplier to proceed

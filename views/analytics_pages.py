@@ -600,15 +600,39 @@ def actions():
 
 # --------------------------------------------------------------------------- inbound
 REVIEW_COLS = {"message_id": "Message", "subject": "Subject", "body": "Body", "predicted": "Rules result",
-               "reason": "Reason", "true_label": "Correct label", "after_ai": "After AI step", "ai_reason": "AI reason"}
+               "reason": "Rules reason", "true_label": "Correct label", "after_ai": "After AI step",
+               "ai_reason": "AI reason"}
+
+
+def _after_ai(hold, ai):
+    """Each stress-test email's final label: the rules' label, else the AI's when it was sure, else a person."""
+    d = hold.merge(ai, on="message_id", how="left")
+    d["after_ai"] = d.ai_label.where(d.ai_confidence == "high", "review").where(d.predicted == "review",
+                                                                                d.predicted)
+    return d
+
+
+def _score(d):
+    """How one AI run did on the emails the rules passed on. Orders affected = a non-order counted as an order, or
+    an order missed: the mistakes that would change the regional view's order counts."""
+    q = d[d.predicted == "review"]
+    sure = q[q.after_ai != "review"]
+    as_order, is_order = sure.after_ai == "purchase_order", sure.true_label == "purchase_order"
+    return {"Sorted by AI": len(sure), "Correct": int((sure.after_ai == sure.true_label).sum()),
+            "Wrong": int((sure.after_ai != sure.true_label).sum()), "Left for a person": len(q) - len(sure),
+            "Orders affected": int((as_order != is_order).sum())}
 
 
 def inbound():
     t = c.triage()
     main, hold = t["main"], t["holdout"]
-    c.header("Orders vs enquiries", f"Rules sort {(main.predicted == main.true_label).mean():.0%} of the mailbox "
-                                    f"correctly and pass {(hold.predicted == 'review').sum()} of {len(hold)} messy "
-                                    f"emails to a person")
+    runs = c.ai_step_runs()
+    scores = {name: _score(_after_ai(hold, ai)) for name, ai in runs.items()}
+    no_order_errors = all(s["Orders affected"] == 0 for s in scores.values())
+    c.header("Orders vs enquiries",
+             f"Rules sort {(main.predicted == main.true_label).mean():.0%} of the mailbox correctly"
+             + (f"; on {len(hold)} messy emails, no AI run counted a non-order as an order or missed one"
+                if no_order_errors else ""))
     st.caption("The regional view counts orders only. This page shows how incoming emails are sorted.")
     with st.expander("How emails are sorted"):
         st.markdown("First by channel (a dedicated order inbox, and the form for setup requests), then by rules the "
@@ -625,33 +649,54 @@ def inbound():
     fig.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=0), legend_title="", xaxis_title="")
     c.chart(fig)
 
-    a, b = st.columns(2)
-    with a:
-        st.markdown("##### Accuracy on the mailbox sample (660 emails)")
-        acc = (main.predicted == main.true_label).mean()
-        c.kpi_row([c.kpi("Correct", acc * 100, suffix="%")])
-        st.caption("Likely optimistic, because the synthetic emails follow patterns the rules were written for.")
-    with b:
-        st.markdown("##### Stress test: 24 hand-written messy emails")
-        auto = hold[hold.predicted != "review"]
-        c.kpi_row([c.kpi("Labelled by rules", len(auto), suffix=f" of {len(hold)}",
-                         delta=f"{(auto.predicted == auto.true_label).mean():.0%} of those correct" if len(auto)
-                         else None)])
-        st.caption("The rules made no mistakes, but sent most of the messy emails to review. The AI step is "
-                   "meant to handle these.")
+    # the stress test, stage by stage: rules first, the AI step for what they pass on, a person for what's left
+    by_rules = hold[hold.predicted != "review"]
+    queued = len(hold) - len(by_rules)
+    st.markdown(f"##### Accuracy on the mailbox sample ({len(main)} emails) and a stress test of {len(hold)} "
+                f"hand-written messy emails")
+    run = st.radio("AI run shown", list(runs), horizontal=True, key="ai_run",
+                   help="Both runs used the same instructions (below) and got the emails without their correct labels")
+    s = scores[run]
+    c.kpi_row([
+        c.kpi("Mailbox sample, rules", (main.predicted == main.true_label).mean() * 100, suffix="% correct",
+              help="Likely optimistic: the synthetic emails follow patterns the rules were written for"),
+        c.kpi("Messy emails, rules", len(by_rules), suffix=f" of {len(hold)}", tone="good",
+              delta=f"{(by_rules.predicted == by_rules.true_label).mean():.0%} of those correct"),
+        c.kpi("Messy emails, AI step", s["Correct"], suffix=f" of {queued} correct", key="ai-correct",
+              delta=f"{s['Wrong']} wrong" if s["Wrong"] else "none wrong", tone="bad" if s["Wrong"] else "good",
+              help="The emails the rules passed on, sorted by the AI run picked above"),
+        c.kpi("Left for a person", s["Left for a person"], suffix=f" of {len(hold)}", key="ai-person",
+              help="The AI run marked these as unsure"),
+    ])
+    st.dataframe(pd.DataFrame(scores).T.rename_axis("AI run").reset_index(), hide_index=True, width="stretch",
+                 column_config={"Orders affected": st.column_config.NumberColumn(
+                     help="A non-order counted as an order, or an order missed: the mistakes that would change the "
+                          "regional view's order counts")})
+    st.caption(f"Rules sort the standard emails and pass anything unclear on. The AI step reads the rest, "
+               f"including Malay, Thai and Vietnamese. Both AI runs used the instructions below on the {queued} "
+               f"emails the rules passed on, without their correct labels. Their mistakes mixed up enquiries and "
+               f"follow-ups; neither counted a non-order as an order or missed an order, so the regional view's "
+               f"order counts would be right either way. The small API model never marked itself unsure, so in "
+               f"production a person should still spot-check its answers. In production this step runs on AI "
+               f"Builder in Power Automate, so re-check the score in the pilot. {len(hold)} emails is a small test."
+               if no_order_errors else
+               f"Rules sort the standard emails and pass anything unclear on. The AI step reads the rest. Both AI "
+               f"runs used the instructions below without the emails' correct labels. {len(hold)} emails is a small "
+               f"test; re-check the score in the pilot.")
+
     st.markdown("##### Review queue (stress test)")
-    cols = ["message_id", "subject", "body", "predicted", "reason", "true_label"]
-    view = hold[cols].copy()
-    if classify.ai_available():
-        if st.button("Run AI step on the review queue", type="primary"):
-            res = [classify.ai_classify(r.subject, r.body, r.attachment_name) if r.predicted == "review"
-                   else (r.predicted, r.confidence, r.reason) for r in hold.itertuples()]
-            st.session_state["ai_res"] = res
+    view = _after_ai(hold[["message_id", "subject", "body", "predicted", "reason", "true_label"]], runs[run])
+    if classify.ai_available():  # with a key, the AI step can be re-run live instead of showing the recorded run
+        if st.button("Re-run the AI step live", type="primary"):
+            st.session_state["ai_res"] = [
+                classify.ai_classify(r.subject, r.body, r.attachment_name) if r.predicted == "review"
+                else (r.predicted, r.confidence, r.reason) for r in hold.itertuples()]
         if "ai_res" in st.session_state:
             view["after_ai"], _, view["ai_reason"] = zip(*st.session_state["ai_res"])
-    else:
-        st.caption("The AI step needs an OPENAI_API_KEY on this machine. In production it is Power Automate's "
-                   "AI prompt action, using the same instructions.")
+    for col in ["predicted", "after_ai", "true_label"]:
+        view[col] = view[col].map(classify.LABELS)
+    # each stage's result side by side, with the correct label last to check them against
+    view = view[["message_id", "subject", "body", "predicted", "reason", "after_ai", "ai_reason", "true_label"]]
     st.dataframe(view.rename(columns=REVIEW_COLS), hide_index=True, width="stretch")
     with st.expander("AI instructions (the MDM team can edit these without retraining)"):
         st.code(classify.AI_PROMPT, language="text")
