@@ -33,8 +33,18 @@ and the working Microsoft 365 build itself (see [Microsoft 365 build](#microsoft
   only asks for a reason. *Cleaning up old ones:* the bulk matcher finds the 41 duplicate records among 246 (17%),
   100% precision and recall on the synthetic answer key, with look-alikes sent to human review. Both figures are on
   data we generated, so validate them in a pilot.
-- **Forecasting:** 11.1% error vs 13.7% for today's 6-month average (WAPE, Products A/B, forecasting 1–3 months ahead, tested on data the model hadn't seen).
-- **Sales signals:** 27 customers dropping off (catching 18 of the 19 real cases), compared with 56 alerts on raw records. 98 cross-sell leads with no false gaps.
+- **Forecasting:** 11.1% error vs 13.7% for today's 6-month average (WAPE, Products A/B, forecasting 1–3 months ahead,
+  tested on data the model hadn't seen); MAPE 12.3% vs 15.3%. The dashboard forecasts **6 months ahead**: tested from
+  each month Jan–Sep 2026, the model's error is 10.5% one month ahead and 13.0% six months ahead, against 13.7% and 14.9%
+  for the 6-month average. 7–12 months ahead can't be checked yet with 18 months of history.
+- **Sales signals:** 27 customers dropping off (catching 18 of the 19 real cases), compared with 56 alerts on raw
+  records, worth about S$431k a quarter. They form a **call list** ranked by value at risk, with the reason in plain
+  words; the top 10 are called within two weeks. An **early warning** flags 5 larger customers who have gone quiet (no
+  order for longer than 9 in 10 of their own past gaps, and at least 45 days) before a full quarter of lower orders
+  shows; 4 of them are already dropping off. 98 cross-sell leads with no false gaps.
+- **One customer across entities:** after merging duplicates, 124 of the 204 customers active in Apr–Sep 2026 buy from
+  more than one of SPD, QTS and QTG, and they make up 79% of order value. In this data each entity sells one product
+  line (SPD: A, QTS: B, QTG: C).
 - **Email sorting:** the rules never mislabelled anything, but sent most messy, hand-written emails to review. That gap is
   why the design adds an AI step and a human check.
 
