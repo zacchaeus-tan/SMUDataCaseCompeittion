@@ -23,6 +23,8 @@ approvals, SharePoint lists for data and rules, Power BI for the dashboard. The 
 automatically. **This repository** contains a working Python prototype of the same design, plus the analysis engine,
 and the working Microsoft 365 build itself (see [Microsoft 365 build](#microsoft-365-build)).
 
+**Process flow, person by person, from request to SAP B1 to the regional view:** [docs/PROCESS_FLOW.md](docs/PROCESS_FLOW.md).
+
 ## Results (on synthetic data, see *Assumptions*)
 
 - **Request → SAP:** median 18.8 → about 4 days, and the slowest 10% go from 28 → about 6 days. This is simulated on the same 150 requests.
@@ -171,6 +173,7 @@ The request workflow is demoed in the Microsoft 365 build; the older Streamlit m
 
 | Path | What |
 |---|---|
+| `docs/PROCESS_FLOW.md` | The end-to-end process with a diagram: request, parallel approvals, SAP B1 import, regional view |
 | `app.py`, `views/` | Streamlit prototype: workflow mock-up + regional business view |
 | `onerecord/dedup.py` | Duplicate matching across SPD/QTS/QTG (deterministic rules, nothing to retrain) |
 | `onerecord/forecast.py` | 6-month average baseline vs business-calendar model, tested on held-back months |
