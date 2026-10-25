@@ -220,7 +220,8 @@ def forecasting():
     st.caption("Error is measured as WAPE: total absolute error divided by actual units. MAPE is the average of "
                "each month's % miss, so small months count as much as big ones and it runs higher. Both cover "
                "Products A and B, forecasting 1–3 months ahead from each month Apr–Sep 2026, using only the data "
-               "available at the time.")
+               "available at the time. The charts below forecast 6 months ahead; see how far ahead it holds at the "
+               "bottom of the page.")
 
     with st.expander("How the model works", expanded=False):
         st.markdown(
@@ -242,6 +243,8 @@ def forecasting():
         _forecast_all(f, prod)
     else:
         _forecast_one(f, country, prod, show_ma6)
+
+    _horizon(f["backtest_long"])
 
     st.markdown("##### Accuracy by series")
     st.dataframe(acc, hide_index=True, width="stretch", column_config={
@@ -278,6 +281,30 @@ def forecasting():
     _ai_brief(plan)
 
 
+def _horizon(bt):
+    """Error by how many months ahead the forecast was made, Products A and B."""
+    from onerecord.forecast import wape
+    st.markdown("##### How far ahead the forecast holds")
+    ab = bt[bt["product"] != "C"]
+    h = ab.groupby("horizon").apply(lambda g: pd.Series({"model": wape(g, "calendar_model"),
+                                                         "ma6": wape(g, "baseline_ma6"),
+                                                         "tests": g.origin.nunique()}), include_groups=False)
+    fig = go.Figure()
+    fig.add_scatter(x=h.index, y=h.ma6, name="6-month average (today)", mode="lines+markers",
+                    line=dict(color=theme.BASELINE, width=2, dash="dot"),
+                    hovertemplate="%{y:.1%} error<extra>6-month average</extra>")
+    fig.add_scatter(x=h.index, y=h.model, name="AI calendar model", mode="lines+markers",
+                    line=dict(color=theme.FORECAST, width=2.5), customdata=h.tests,
+                    hovertemplate="%{y:.1%} error, %{customdata} starting months<extra>AI model</extra>")
+    fig.update_layout(height=260, margin=dict(l=0, r=0, t=10, b=0), yaxis=dict(tickformat=".0%", rangemode="tozero"),
+                      xaxis=dict(title="months ahead", dtick=1), legend=dict(orientation="h", y=1.12))
+    c.chart(fig)
+    st.caption(f"Each point is the error (WAPE) of forecasts made that many months ahead, starting from each month "
+               f"Jan–Sep 2026 that still has actual orders to check against: {int(h.tests.iloc[0])} starting months "
+               f"for 1 month ahead, {int(h.tests.iloc[-1])} for 6 months ahead. With 18 months of history, 7–12 "
+               f"months ahead can't be checked yet, so the forecast stops at 6.")
+
+
 def _seasonality(effects):
     st.markdown("##### Seasonality the model learned")
     eff = pd.Series(effects).sort_values()
@@ -293,7 +320,7 @@ def _seasonality(effects):
 
 
 def _forecast_one(f, country, prod, show_ma6):
-    """One country: actual orders, the back-test, and the next 3 months with a likely range."""
+    """One country: actual orders, the back-test, and the next 6 months with a likely range."""
     bt, acc = f["backtest"], f["accuracy"]
     hist = f["Y"].loc[(country, prod)]
     one = bt[(bt.country == country) & (bt["product"] == prod) & (bt.horizon == 1)]
@@ -310,9 +337,9 @@ def _forecast_one(f, country, prod, show_ma6):
     fig.add_scatter(x=ahead.month, y=ahead.low, name="Likely range (8 in 10 months)", mode="lines",
                     line=dict(width=0), fill="tonexty", fillcolor="rgba(120,120,120,0.18)")
     if show_ma6:
-        fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average, next 3 months", mode="lines",
+        fig.add_scatter(x=ahead.month, y=ahead.baseline_ma6, name="6-month average, next 6 months", mode="lines",
                         line=dict(color="#aaa", dash="dash"))
-    fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model, next 3 months", mode="lines+markers",
+    fig.add_scatter(x=ahead.month, y=ahead.calendar_model, name="Calendar model, next 6 months", mode="lines+markers",
                     line=dict(color=COLORS[prod], dash="dash"))
     fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units",
                       legend=dict(orientation="h", y=-0.2))
@@ -323,7 +350,7 @@ def _forecast_one(f, country, prod, show_ma6):
 
 
 def _forecast_all(f, prod):
-    """Every country on one chart: actual orders solid, the next 3 months' forecast dashed in the same colour."""
+    """Every country on one chart: actual orders solid, the next 6 months' forecast dashed in the same colour."""
     from onerecord.forecast import wape
     fig = go.Figure()
     for k in c.COUNTRY_ORDER:
@@ -338,7 +365,7 @@ def _forecast_all(f, prod):
     fig.update_layout(height=380, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="units")
     c.chart(fig)
     bt = f["backtest"][f["backtest"]["product"] == prod]
-    st.caption(f"Solid lines are actual orders; dashed lines are the calendar model's forecast for the next 3 months. "
+    st.caption(f"Solid lines are actual orders; dashed lines are the calendar model's forecast for the next 6 months. "
                f"Across all five countries, product {prod}: the 6-month average's error is "
                f"{wape(bt, 'baseline_ma6'):.1%}, the model's is {wape(bt, 'calendar_model'):.1%}. Pick a single "
                f"country to see the likely range and the back-test.")

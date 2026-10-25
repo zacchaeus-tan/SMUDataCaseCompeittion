@@ -164,10 +164,13 @@ def regional():
 def forecasts():
     Y = forecast.series(regional()["clean"])
     bt = forecast.backtest(Y)
+    # 4-6 months ahead needs earlier starting points to have enough months to check against
+    bt_long = forecast.backtest(Y, first_origin="2026-01", horizon=6)
     acc = forecast.accuracy_table(bt)
     ahead, effects = forecast.forecast_ahead(Y)
-    ahead = forecast.with_range(ahead, forecast.error_bands(bt))
-    return dict(Y=Y, backtest=bt, accuracy=acc, ahead=ahead, effects=effects,
+    bands = pd.concat([forecast.error_bands(bt), forecast.error_bands(bt_long).query("horizon > 3")])
+    ahead = forecast.with_range(ahead, bands)
+    return dict(Y=Y, backtest=bt, backtest_long=bt_long, accuracy=acc, ahead=ahead, effects=effects,
                 plan=forecast.stock_plan(Y, ahead, acc))
 
 
