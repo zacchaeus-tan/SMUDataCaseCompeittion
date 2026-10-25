@@ -93,8 +93,9 @@ def _heatmap(g, country):
     if country:
         row = c.COUNTRY_ORDER.index(country)
         fig.add_shape(type="rect", x0=-0.5, x1=2.5, y0=row - 0.5, y1=row + 0.5, line=dict(color=theme.NAVY, width=2.5))
-    # top margin leaves room for the column labels (drawn above the grid) under the card heading
-    fig.update_layout(height=226, margin=dict(l=0, r=0, t=26, b=0), yaxis=dict(autorange="reversed", showgrid=False),
+    # top margin leaves room for the column labels (drawn above the grid) under the card heading; the left margin is
+    # fixed because Plotly sizes it for narrower text than Poppins draws, which clipped the country names
+    fig.update_layout(height=226, margin=dict(l=72, r=0, t=26, b=0), yaxis=dict(autorange="reversed", showgrid=False),
                       xaxis=dict(side="top", showgrid=False, ticks="", tickfont=dict(size=12.5, color=theme.TEXT)))
     c.chart(fig, pad=False)
     st.caption(f"Units {GROWTH_LABEL}. Equipment (C) volumes are small: read as directional.", help=GROWTH_HELP)

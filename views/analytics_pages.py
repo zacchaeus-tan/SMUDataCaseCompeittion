@@ -504,7 +504,7 @@ def actions():
                                    f"recent average. Established = at least {insights.MIN_QUARTER_UNITS} units in "
                                    f"Jul–Sep 2025 ({established} customers)."),
             c.kpi("Cross-sell leads", len(xsell),
-                  delta=f"S${xsell.est_value_sgd_per_year.sum() * conv:,.0f} a year at {conv:.0%} conversion",
+                  delta=f"S${xsell.est_value_sgd_per_year.sum() * conv / 1000:,.0f}k a year if {conv:.0%} convert",
                   tone="good", help="Customers who buy A but not B (or B but not A), while most similar customers "
                                     "buy both."),
             c.kpi("Value at risk per quarter", at_risk, prefix="S$", tone="bad",

@@ -42,6 +42,25 @@
 </style>
 <div class="row">__CARDS__</div>
 <script>
+  // Fit the cards to the frame's width: all in one row when each gets at least MIN_CARD px, otherwise two per row
+  // (when they pair up evenly), otherwise one. Then grow the frame, and Streamlit's slot around it, to the rows used.
+  const row = document.querySelector(".row"), MIN_CARD = 230, GAP = 16;
+  const fit = () => {
+    const n = row.children.length, w = row.clientWidth;
+    const cols = [n, n % 2 === 0 ? n / 2 : 0, 1].find((c) => c && (w - GAP * (c - 1)) / c >= MIN_CARD) || 1;
+    row.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+    const frame = window.frameElement, h = row.offsetHeight + "px";
+    if (!frame) return;
+    for (const el of [frame, frame.closest('[data-testid="stElementContainer"]')]) {
+      if (el && el.style.height !== h) {
+        el.style.setProperty("height", h, "important");
+        el.style.setProperty("flex-basis", h, "important");
+      }
+    }
+  };
+  fit();
+  window.addEventListener("resize", fit);  // the frame resizes with the page
+
   // Number Ticker: count each number up, easing out. On a rerun it counts from the value it last showed, so moving
   // an assumption slider animates the change instead of restarting from zero.
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
