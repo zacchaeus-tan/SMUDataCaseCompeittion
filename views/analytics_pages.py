@@ -44,7 +44,7 @@ def growth():
     headline = f"{lead[0]} and {lead[1]} lead growth"
     if worst.unit_growth < 0:
         headline += f", while {COUNTRIES[worst.country]} product {worst['product']} is down {-worst.unit_growth:.0%}"
-    c.header("Five-country growth", headline)
+    c.header("Country deep-dive", headline)
 
     tot_now, tot_prev = g.units_now.sum(), g.units_prev.sum()
     val_now, val_prev = g.value_now.sum(), g.value_prev.sum()
@@ -89,7 +89,9 @@ def growth():
     st.caption("Product C (equipment) sells only 30–50 units per country each half-year, so its growth figures swing "
                "a lot. Treat them as a rough guide.")
 
-    st.markdown("##### Monthly units")
+    _country_focus()
+
+    st.markdown("##### Monthly units by country")
     prod = st.radio("Product", list(PRODUCTS), horizontal=True, format_func=lambda p: c.PRODUCT_LABEL[p])
     mm = c.regional()["monthly"].query("product == @prod")
     fig = px.line(mm, x="month", y="quantity", color="country", markers=True,
@@ -108,9 +110,53 @@ def growth():
         f"from January to April.\n"
         f"- Vietnam Product B is down {abs(vn_b.unit_growth):.0%} while the market is still growing. Most of the "
         f"drop comes from a few large labs ordering much less, worth about S${vn_drop_val:,.0f} a quarter. These "
-        f"accounts need follow-up from sales (see Sales actions).\n"
+        f"accounts need follow-up from sales (see Customers).\n"
         f"- Singapore is a mature market: growth is in single digits and equipment sales are falling. Most new "
         f"growth there will come from selling more products to existing customers.")
+
+
+def _country_focus():
+    """One country: each product's monthly units, and the customers that order the most."""
+    clean = c.regional()["clean"]
+    st.markdown("##### Country focus")
+    k = c.select(st, "Country", c.COUNTRY_ORDER, key="cd_country", format_func=lambda k: COUNTRIES[k])
+    d = clean[clean.country == k]
+    left, right = st.columns([1, 1.15], gap="medium")
+    with left:
+        st.markdown(f"###### Monthly units by product, {COUNTRIES[k]}")
+        mm = d.groupby(["month", "product"]).quantity.sum().reset_index()
+        fig = go.Figure()
+        for p in PRODUCTS:
+            one = mm[mm["product"] == p]
+            fig.add_scatter(x=one.month, y=one.quantity, name=c.PRODUCT_LABEL[p], mode="lines+markers",
+                            line=dict(color=COLORS[p], width=2.5), marker=dict(size=6),
+                            hovertemplate="%{y:,.0f} units<extra>" + p + "</extra>")
+            # label each line at its end: the product colours alone are hard to tell apart for colour-blind readers
+            fig.add_annotation(x=one.month.iloc[-1], y=one.quantity.iloc[-1], text=f"<b>{p}</b>", showarrow=False,
+                               xanchor="left", xshift=8, font=dict(color=COLORS[p], size=13))
+        fig.update_layout(height=c.table_height(10), margin=dict(l=0, r=24, t=10, b=0), yaxis_title="units",
+                          xaxis_title="", showlegend=False, hovermode="x unified")
+        c.chart(fig)
+    with right:
+        st.markdown("###### Top 10 customers by order value, Apr–Sep 2026")
+        between = lambda w: d[(d.month >= w[0]) & (d.month <= w[1])]
+        now, prev = between(CURRENT), between(PRIOR_YEAR)
+        top = now.groupby("customer").agg(value=("line_value_sgd", "sum"), units=("quantity", "sum"),
+                                          products=("product", lambda s: ", ".join(sorted(s.unique()))))
+        top = top.nlargest(10, "value")
+        before = prev.groupby("customer").line_value_sgd.sum().reindex(top.index)
+        top["growth"] = (top.value / before - 1) * 100  # blank for customers with no orders a year earlier
+        st.dataframe(top.reset_index(), hide_index=True, width="stretch", height=c.table_height(10),
+                     column_config={
+                         "customer": st.column_config.TextColumn("Customer", width="large"),
+                         "value": st.column_config.NumberColumn("Value (SGD)", format="localized"),
+                         "units": st.column_config.NumberColumn("Units", format="localized"),
+                         "products": st.column_config.TextColumn("Buys"),
+                         "growth": st.column_config.NumberColumn("YoY value", format="%+.0f%%",
+                                                                 help="Blank: no orders a year earlier")})
+    share = top.value.sum() / now.line_value_sgd.sum()
+    st.caption(f"The top 10 customers make up {share:.0%} of {COUNTRIES[k]}'s order value. Customers are counted "
+               f"after merging duplicate records, so one hospital appears once across SPD, QTS and QTG.")
 
 
 ISO3 = {"SG": "SGP", "MY": "MYS", "TH": "THA", "ID": "IDN", "VN": "VNM"}
@@ -155,8 +201,9 @@ def _growth_map(g):
 def forecasting():
     f = c.forecasts()
     bt, acc = f["backtest"], f["accuracy"]
-    from onerecord.forecast import wape
+    from onerecord.forecast import mape, wape
     ab = bt[bt["product"] != "C"]
+    mape_ma6, mape_model = mape(ab, "baseline_ma6"), mape(ab, "calendar_model")
     cut = 1 - wape(ab, "calendar_model") / wape(ab, "baseline_ma6")
     c.header("Forecasting", f"The calendar model cuts forecast error by {cut:.0%} compared with the 6-month average")
     c.kpi_row([
@@ -165,11 +212,15 @@ def forecasting():
               delta=f"{-cut:+.0%}", tone=c.tone(-cut, up_is_good=False)),
         c.kpi("Series improved", (acc[acc["product"] != "C"].Improvement > 0).sum(), suffix=" of 10",
               help="Products A and B"),
-        c.kpi("Horizon tested", "1–3 months", help="Rolling origins Apr–Sep 2026; error = WAPE"),
+        c.kpi("MAPE, AI model", mape_model * 100, decimals=1, suffix="%",
+              delta=f"{(mape_model - mape_ma6) * 100:+.1f} pts vs 6-month avg",
+              tone=c.tone(mape_model - mape_ma6, up_is_good=False),
+              help=f"Average % miss per month. The 6-month average's MAPE is {mape_ma6:.1%}."),
     ])
-    st.caption("Error is measured as WAPE: total absolute error divided by actual units. It covers Products A and "
-               "B, forecasting 1–3 months ahead from each month Apr–Sep 2026, using only the data available at "
-               "the time.")
+    st.caption("Error is measured as WAPE: total absolute error divided by actual units. MAPE is the average of "
+               "each month's % miss, so small months count as much as big ones and it runs higher. Both cover "
+               "Products A and B, forecasting 1–3 months ahead from each month Apr–Sep 2026, using only the data "
+               "available at the time.")
 
     with st.expander("How the model works", expanded=False):
         st.markdown(
@@ -179,9 +230,7 @@ def forecasting():
             "year-end push, the January slowdown, and public holidays such as Lunar New Year, Tet, Songkran and "
             "Hari Raya. It estimates the size of each effect from all five countries together, which is why 12–18 "
             "months of history is enough. It is re-run each month alongside an error report.")
-        eff = pd.DataFrame({"Calendar effect": list(f["effects"]), "Learned impact on units": list(f["effects"].values())})
-        st.dataframe(eff, hide_index=True, column_config={
-            "Learned impact on units": st.column_config.NumberColumn(format="percent")})
+    _seasonality(f["effects"])
 
     s1, s2, s3 = st.columns([2, 2, 1.3], vertical_alignment="bottom")
     country = c.select(s1, "Country", [ALL, *c.COUNTRY_ORDER], index=1 + c.COUNTRY_ORDER.index("TH"),
@@ -200,12 +249,14 @@ def forecasting():
         "product": PRODUCT_COL,
         "MA6 error": st.column_config.NumberColumn("6-month average error", format="percent"),
         "Model error": st.column_config.NumberColumn(format="percent"),
-        "Improvement": st.column_config.NumberColumn(format="percent")})
+        "Improvement": st.column_config.NumberColumn(format="percent"),
+        "MA6 MAPE": st.column_config.NumberColumn("6-month average MAPE", format="percent"),
+        "Model MAPE": st.column_config.NumberColumn(format="percent")})
     st.markdown(
         "The largest gains are for Product A in Indonesia, Malaysia and Thailand, where the 6-month average misses "
         "dengue season. Singapore A gets slightly worse because its dengue effect is milder than the regional "
         "estimate; a Singapore-specific effect can be added once there is more history. Vietnam B is poor under "
-        "both methods because the drop comes from lost accounts, which the drop-off alerts on Sales actions cover. "
+        "both methods because the drop comes from lost accounts, which the drop-off alerts on Customers cover. "
         "Product C orders are too irregular to forecast monthly and are better planned from the sales pipeline.")
 
     st.markdown("##### Stock plan for next quarter")
@@ -225,6 +276,20 @@ def forecasting():
         "drivers": st.column_config.TextColumn("Calendar drivers"),
         "action": st.column_config.TextColumn("Recommended action", width="large")})
     _ai_brief(plan)
+
+
+def _seasonality(effects):
+    st.markdown("##### Seasonality the model learned")
+    eff = pd.Series(effects).sort_values()
+    fig = go.Figure(go.Bar(x=eff.values, y=eff.index, orientation="h", text=[f"{v:+.0%}" for v in eff.values],
+                           textposition="outside", cliponaxis=False,
+                           marker_color=[theme.GOOD if v >= 0 else theme.BAD for v in eff.values],
+                           hovertemplate="%{y}: %{x:+.1%} units<extra></extra>"))
+    fig.update_layout(height=40 + 30 * len(eff), margin=dict(l=0, r=40, t=10, b=0), xaxis_tickformat="+.0%",
+                      xaxis_title="change in units in the months the event applies", yaxis_title="")
+    c.chart(fig)
+    st.caption("Estimated from all five countries together. The 6-month average has none of these, which is why "
+               "it lags dengue season and the year-end budget spend.")
 
 
 def _forecast_one(f, country, prod, show_ma6):
@@ -330,7 +395,7 @@ STATUS_COL = st.column_config.TextColumn("Check", help="False alarm or counted t
 
 def actions():
     cmp = c.regional()["compare"]
-    c.header("Sales actions", f"{len(cmp['clean_drop'])} customers are ordering much less, with about "
+    c.header("Customers", f"{len(cmp['clean_drop'])} customers are ordering much less, with about "
                               f"S${cmp['clean_drop'].value_at_risk_per_q.sum():,.0f} a quarter at risk")
     raw = st.toggle("Show raw SAP records (before duplicates are merged)",
                     help="Runs the same analysis on the customer records as they sit in SAP today")
@@ -470,13 +535,66 @@ def inbound():
 
 
 # --------------------------------------------------------------------------- data quality
+ESCALATE_DAYS = 4  # same default as the escalation setting on the Business case page
+
+
+def _cycle_time():
+    d = c.raw()
+    req, steps = d["requests"], d["steps"]
+    bd, _ = c.process_baseline()
+    waiting = bd.set_index("stage").share.get("Waiting for approvers", 0)
+    c.header("MDM ops", f"Requests take {req.cycle_days.median():.0f} days to reach SAP, and {waiting:.0%} of that "
+                        f"is waiting for approvers")
+    c.kpi_row([
+        c.kpi("Median time to SAP", req.cycle_days.median(), decimals=1, suffix=" days"),
+        c.kpi("Slowest 10%", round(req.cycle_days.quantile(.9)), suffix="+ days"),
+        c.kpi("Bounced back at least once", (req.bounces > 0).mean() * 100, suffix="%", tone="bad"),
+        c.kpi("Requests, 18 months", len(req), help=f"{req.submitted_at.min()[:10]} to {req.submitted_at.max()[:10]}, "
+                                                     f"from the email request history"),
+    ])
+    st.caption("Today's email process, measured from the request history. The workflow replaces these steps; "
+               "Business case simulates the same requests under the new process.")
+
+    left, right = st.columns(2, gap="medium")
+    with left:
+        st.markdown("##### Request cycle time by type")
+        t = req.groupby("request_type").cycle_days.agg(["median", "count"]).sort_values("median")
+        fig = go.Figure(go.Bar(x=t["median"], y=t.index, orientation="h", marker_color=theme.PRIMARY,
+                               text=[f"{m:.0f} days ({n} requests)" for m, n in zip(t["median"], t["count"])],
+                               textposition="outside", cliponaxis=False,
+                               hovertemplate="%{y}: median %{x:.1f} days<extra></extra>"))
+        fig.update_layout(height=230, margin=dict(l=0, r=120, t=10, b=0), xaxis_title="median days to SAP",
+                          yaxis_title="")
+        c.chart(fig)
+    with right:
+        st.markdown("##### Approval bottlenecks")
+        a = steps[steps.step.str.contains("approval")]
+        b = a.groupby("actor_role").agg(approvals=("request_id", "count"), median=("wait_days", "median"),
+                                        late=("wait_days", lambda w: (w > ESCALATE_DAYS).mean()),
+                                        total=("wait_days", "sum")).sort_values("total")
+        fig = go.Figure(go.Bar(x=b.total, y=b.index, orientation="h", marker_color=theme.WARN,
+                               customdata=b[["approvals", "median", "late"]].values,
+                               text=[f"{l:.0%} waited over {ESCALATE_DAYS} days" for l in b.late],
+                               textposition="outside", cliponaxis=False,
+                               hovertemplate="%{y}<br>%{customdata[0]} approvals, median wait %{customdata[1]:.1f} "
+                                             "days<br>%{x:,.0f} days waited in total<extra></extra>"))
+        fig.update_layout(height=230, margin=dict(l=0, r=150, t=10, b=0), xaxis_title="total days waited",
+                          yaxis_title="")
+        c.chart(fig)
+    reasons = req.bounce_reasons[req.bounce_reasons != ""].str.split(";").explode().str.strip().value_counts()
+    top3 = ", ".join(f"{r.lower()} ({n})" for r, n in reasons.head(3).items())
+    st.caption(f"Each approver takes about {a.wait_days.median():.0f} days to respond, so the delay comes from "
+               f"approvals running one after another, not from one slow approver. The most common reasons a request "
+               f"bounces back: {top3}. The smart form makes these fields required.")
+
+
 def quality():
     q = c.data_quality()
     cl, pairs, s = q["clusters"], q["pairs"], q["score"]
     dups = cl[cl.cluster_size > 1]
     is_dup = cl.record_id != cl.golden_id
-    c.header("Data quality", f"{is_dup.sum()} of {len(cl)} customer records ({is_dup.mean():.0%}) are duplicates "
-                             f"of another record")
+    _cycle_time()
+    st.markdown("##### Duplicates caught")
     c.kpi_row([
         c.kpi("Customer records", len(cl)),
         c.kpi("Duplicate records found", int(is_dup.sum()), delta=f"{is_dup.mean():.0%} of records", tone="bad"),
@@ -529,7 +647,7 @@ def quality():
     st.markdown("Merging duplicates doesn't change country totals, because each order is still counted once. It "
                 "changes the per-customer figures: how many customers there are, who appears to have stopped "
                 "ordering (because their orders moved to a new record), and who appears to buy only Product A "
-                "(because their B orders sit on another entity's record). Sales actions shows the before-and-after "
+                "(because their B orders sit on another entity's record). Customers shows the before-and-after "
                 "difference.")
 
 

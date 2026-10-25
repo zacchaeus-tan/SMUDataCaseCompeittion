@@ -9,7 +9,8 @@ AI model:          "business-calendar" regression, fitted on log units across al
                    holidays (Lunar New Year, Tet, Songkran, Hari Raya / Lebaran). Few parameters, so it
                    learns from 12-18 months of history where a full seasonal model cannot.
 Both are scored by a rolling backtest: forecast 1-3 months ahead from each origin Apr-Sep 2026.
-Accuracy metric: WAPE = sum |forecast - actual| / sum actual (lower is better).
+Accuracy metric: WAPE = sum |forecast - actual| / sum actual (lower is better). MAPE (the average of each
+month's % miss) is shown alongside; it weighs small months as much as big ones, so it runs higher.
 """
 import numpy as np
 import pandas as pd
@@ -104,9 +105,15 @@ def wape(df: pd.DataFrame, col: str) -> float:
     return float((df[col] - df.actual).abs().sum() / df.actual.sum())
 
 
+def mape(df: pd.DataFrame, col: str) -> float:
+    d = df[df.actual > 0]
+    return float(((d[col] - d.actual).abs() / d.actual).mean())
+
+
 def accuracy_table(bt: pd.DataFrame) -> pd.DataFrame:
     out = bt.groupby(["country", "product"]).apply(
-        lambda g: pd.Series({"MA6 error": wape(g, "baseline_ma6"), "Model error": wape(g, "calendar_model")}),
+        lambda g: pd.Series({"MA6 error": wape(g, "baseline_ma6"), "Model error": wape(g, "calendar_model"),
+                             "MA6 MAPE": mape(g, "baseline_ma6"), "Model MAPE": mape(g, "calendar_model")}),
         include_groups=False).reset_index()
     out["Improvement"] = 1 - out["Model error"] / out["MA6 error"]
     return out
