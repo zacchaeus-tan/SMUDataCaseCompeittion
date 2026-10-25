@@ -26,8 +26,11 @@ and the working Microsoft 365 build itself (see [Microsoft 365 build](#microsoft
 ## Results (on synthetic data, see *Assumptions*)
 
 - **Request → SAP:** median 18.8 → about 4 days, and the slowest 10% go from 28 → about 6 days. This is simulated on the same 150 requests.
-- **Duplicates:** 41 of 246 customer records (17%) found. On the synthetic answer key that's 100% precision and
-  100% recall; look-alike records go to a human review queue rather than being merged automatically.
+- **Duplicates, two layers.** *Stopping new ones:* the request form flags all 41 planted duplicates when each is typed
+  in as a new request, from the name alone (typos included); 6 of 205 genuinely new customers (3%) get a warning, which
+  only asks for a reason. *Cleaning up old ones:* the bulk matcher finds the 41 duplicate records among 246 (17%),
+  100% precision and recall on the synthetic answer key, with look-alikes sent to human review. Both figures are on
+  data we generated, so validate them in a pilot.
 - **Forecasting:** 11.1% error vs 13.7% for today's 6-month average (WAPE, Products A/B, forecasting 1–3 months ahead, tested on data the model hadn't seen).
 - **Sales signals:** 27 customers dropping off (catching 18 of the 19 real cases), compared with 56 alerts on raw records. 98 cross-sell leads with no false gaps.
 - **Email sorting:** the rules never mislabelled anything, but sent most messy, hand-written emails to review. That gap is
@@ -44,14 +47,15 @@ The Streamlit app remains the place for the regional business view and forecasti
 | Brief asks for | How the M365 build does it |
 |---|---|
 | A standard intake for Customer, Item, Vendor and Cost Center requests | **Power App "NewRequestForm"**, *New request* screen. It shows only the fields that apply. Labels, help text and required/conditional rules come from the **RequiredFields** list (e.g. *Regulatory licence no.* appears when an item is regulated). **Submit** stays disabled until the request is complete **and plausible**: placeholders such as *N/A*, *TBC* or *-* never pass, and each field has a format check (registration no. against the country's format: SG UEN, MY SSM, TH 13-digit tax ID, ID NPWP, VN MST; HS code 6–10 digits; generic checks for tax ID, licence, bank account). The problem shows in red under the field. MDM picks a field's check on the Rules screen (`RequiredFields.Check`). *Is this regulated?* has no default and offers **Not sure**, which sends the item to Quality/Regulatory to decide instead of skipping them; a hint shows whether the closest existing item is regulated. A *Who will approve* card shows the approvers by name before submitting, read from the same **RoutingRules** and **Roles** the flow uses, and says when a step has nobody set up. |
-| No duplicates reaching an approver | Live checks while typing. **Customer:** same registration no. or a known alias blocks; all main words of the name in the same country warns. **Item:** same manufacturer part no. blocks; similar description (any entity) warns. **Vendor:** same tax ID blocks. **Cost Center:** an existing cost centre for that entity + department blocks. A warning can be overridden with an explicit "this is a different …" switch. |
+| No duplicates reaching an approver | Live checks while typing, against SAP's records **and** against requests already waiting for approval. **Names** (customer, item, vendor) are cleaned up and compared by the letter pairs they share, so typos still match: 82% or more similar is a *Possible match* (customers within the same country, items within the same product family). **IDs** (registration no., manufacturer part no., tax ID) are compared without punctuation, so `200288778-W` = `200288778W`: a match is *Blocked*, as is a known short name (`Aliases`) or a second cost centre for the same entity + department. A block names the existing code to use instead (records are shared by SPD, QTS and QTG). If the requestor is sure it's different, they switch on *Not the same* / *This is a different …* and **must give a reason**, which every approval card shows with a warning sign. The ID checks are direct lookups on an `IDKey` column and the name checks only load one country's or product family's records, so the check keeps working as the lists grow. The same logic is mirrored in `onerecord/livecheck.py`, which measures it. |
 | Faster approvals | **Flow "OneRecord - Route and approve"**. It reads **RoutingRules** and **Roles** and sends every stage-1 check **in parallel** as an approval card in Teams/Outlook. Conditional rules (e.g. Quality/Regulatory only for regulated items) come from the list. The MDM Analyst approves last. Each card offers **Approve / Request changes / Reject**. *Request changes* sends the request back to the requestor at once (Teams message, status *Changes requested*); they press **Edit and resubmit** in *My requests*, the form opens with their answers filled in, and only the approver who asked sees it again. The others carry on meanwhile. Every edit is written to the request's **ChangeNote** (sensitive fields are named, never shown), which the re-check and the MDM final check display. A request not resubmitted within 14 days is closed. A rejection now reaches the requestor straight away. |
 | Requestors and approvers know where a request stands | Approvers get cards plus **"OneRecord - Reminders and escalation"**: a reminder at 9 AM in the approver's own time zone once `SLADays` pass, escalation to `EscalateTo` after `EscalateAfterDays`. Requestors get Teams messages on rejection or completion. The app's **My requests** screen shows status, stage, days open, **who it is still waiting on**, a **timeline** of everything logged for the request, the submitted details and (permissions allowing) the sensitive details. The MDM team can switch to all requests. |
 | Closing the email route | **Flow "OneRecord - Email auto-reply"** (standard Outlook connector) watches the MDM mailbox. When a staff member emails a master data request (same phrases as the email classifier), it replies with the form link and the rule that emailed requests aren't set up in SAP. Customers and our own replies are ignored. |
 | A trustworthy record of who approved what | **ApprovalLog** list: every assignment, decision, reminder, escalation, routing gap and SAP file is a row. Team members have **read-only** access; only the flows (running as the owner) write to it. Sensitive values are never logged. |
 | Protecting sensitive fields | Bank details and credit terms are saved to **SensitiveDetails**, separate from the request. Item-level permissions let requestors read only their own rows; Finance and MDM have Design access to read all. Approval cards for roles allowed to see them (from **RequiredFields → VisibleToRoles**) carry a **link** to the row, never the values, so nothing sensitive goes into Teams or email. |
 | Changing rules, fields and approvers without IT | The app's **Rules** screen (MDM only) puts every rule in one place: a *rules check* that lists any business unit with nobody set up for an approval step, an **Add a business unit** form (creates the BU and its BU Head in one step), and editable tables for business units, approval steps, form fields, people and known names. New rows start switched off or blank, so a half-finished row can't change routing. Under the hood these are list rows: A new business unit is a **BusinessUnits** row plus its people in **Roles**. A new approval step is a **RoutingRules** row. Making a field required or conditional is a **RequiredFields** row. If a business unit has no approver for a step yet (Marcus's story), the request goes to the MDM Analyst instead of stalling. MDM is told in Teams, and the gap is logged and shown on the request. |
-| Getting the record into SAP B1 | After MDM approval, the flow writes a **SAP Data Transfer Workbench** file (tab-delimited `.txt` with DTW's two header rows) to `SAP_Imports`, which only Owners can open. The file is one per request and per object: BusinessPartners, Items or ProfitCenters. The flow proposes the SAP code (e.g. `C20007`), writes it to the request, and tells the requestor. |
+| Getting the record into SAP B1 | After MDM approval, the flow writes a **SAP Data Transfer Workbench** file (tab-delimited `.txt` with DTW's two header rows) to `SAP_Imports`, which only Owners can open. The file is one per request and per object: BusinessPartners, Items or ProfitCenters. The flow proposes the SAP code (e.g. `C20007`) and **adds the record to its master list straight away** (`SAPStatus` = *Pending SAP import*), so the next request's duplicate check already sees it. The request becomes **Ready for SAP import** and MDM gets a Teams message. After importing the file, MDM presses **Mark as created in SAP** in *My requests* (correcting the code if SAP gave another); only then does the status say *Created in SAP*, the master list row switch to *In SAP*, and the requestor hear that it's live. |
+| Cleaning up duplicates already in SAP | The Streamlit **MDM ops** page lists the duplicate groups the bulk matcher found (plus borderline pairs, unticked, for review). MDM confirms them and downloads DTW files that **freeze** the extra business partners and items, with a note naming the code to use, plus an old-to-new code list for reporting. Freezing keeps past orders in place; nothing is deleted. |
 
 ### Tested end to end (synthetic data, on our tenant)
 
@@ -92,6 +96,9 @@ The app and flows are generated from code in this repo. Rebuilding takes about a
      and create a single-line text column called `ContactEmail`. Then add single-line text columns `ManufacturerPartNo`
      and `RegulatedAnswer`, and a **multiple lines of text** column (plain text) called `ChangeNote`.
    - **RequiredFields:** if your list predates the `Check` column, add it as a single-line text column (blank = the app's default check).
+   - **Duplicate check:** run `python3 sharepoint/match_keys.py` before importing the master list CSVs (it adds
+     `MatchKey`, `IDKey` and `SAPStatus`). On Requests, add single-line text columns `MatchKey`, `IDKey` and `DupReason`.
+     In the app's settings, set the data row limit to 2,000.
    - **SensitiveDetails:** `CreditLimit` = Number. **ApprovalLog:** `Timestamp` = Date and time.
    - **BusinessUnits:** `Active` = Yes/No. **ItemMaster:** `Regulated` = Yes/No.
    - **RoutingRules:** `Stage`, `SLADays`, `EscalateAfterDays` = Number; `Active` = Yes/No.
@@ -128,8 +135,10 @@ The app and flows are generated from code in this repo. Rebuilding takes about a
 - The Rules screen is hidden from everyone but the MDM Analyst in **Roles**, but that is display only. To stop others editing the rule lists directly in SharePoint, give Members **Read** on them.
 - RequiredFields can show, hide or require fields the app already has. A brand-new field needs an app change (one line in `gen_form.py`).
 - The SAP file carries segment and payment terms as text ("Clinic", "45 days"). Real SAP uses numeric codes, so MDM would map them once.
-- Duplicate checks are rule-based, so a misspelt name only gets a warning if all its main words still match. The bulk matcher
-  in `onerecord/dedup.py` is typo-tolerant. In production, the form would call the same engine through one premium connector.
+- The form's name check compares letter pairs; it doesn't use address or city like the bulk matcher, so two branches of one chain in the same country (e.g. *Mercy Medical Clinic Bandung* vs *Medical Clinic Bandung*) can get a warning. That's why it only warns and asks for a reason.
+- The 82% threshold was tuned on our synthetic duplicates. Re-check it on real SAP data in the pilot (`onerecord/livecheck.py` measures it).
+- Vendors are compared across all countries, because the vendor country is free text. With thousands of vendors this list would need a country or first-letter filter.
+- The flow waits for *Mark as created in SAP* by checking every 5 minutes for up to about 17 days; after that it reminds MDM and stops waiting.
 - Requests are picked up within a minute, because the SharePoint trigger polls the list.
 
 ## Run it
@@ -140,8 +149,9 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Use the sidebar to switch persona (Amy, Wei Jie, Priya…) and to fast-forward the demo clock so reminders
-and escalation fire. The optional AI step for ambiguous emails and the AI action brief need an `OPENAI_API_KEY`
+The Streamlit app is the regional business view (switch user at the bottom of the sidebar; Priya sees *MDM ops*).
+The request workflow is demoed in the Microsoft 365 build; the older Streamlit mock-up of it is hidden
+(`SHOW_WORKFLOW_MOCKUP` in `app.py`). The optional AI step for ambiguous emails and the AI action brief need an `OPENAI_API_KEY`
 (model `gpt-5.4-nano` by default; set `OPENAI_MODEL` to change it). Without a key, those emails stay in human review.
 
 ### Demo script (Amy's story)

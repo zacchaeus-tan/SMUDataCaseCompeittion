@@ -486,6 +486,20 @@ def quality():
     st.caption(f"Checked against the synthetic answer key: precision {s['precision']:.0%}, recall {s['recall']:.0%} "
                f"({s['found_pairs']} of {s['true_pairs']} duplicate pairs). Real SAP data will be messier, which "
                f"is why borderline matches go to human review.")
+    live = c.live_check()
+    st.markdown("##### Two checks: one at the door, one for the backlog")
+    st.markdown(
+        f"- **The request form (stops new duplicates).** When a requestor types a customer, the form compares the "
+        f"name with that country's records, allowing for typos, and blocks a matching registration no. or a known "
+        f"short name. Tested on the {live['duplicates']} planted duplicates as if each were typed in as a new "
+        f"request: **{live['caught_name_only']} of {live['duplicates']} flagged from the name alone**, "
+        f"{live['caught_with_reg']} of {live['duplicates']} when the registration no. is also entered. Of "
+        f"{live['originals']} genuinely new customers, {live['false_warnings']} "
+        f"({live['false_warnings'] / live['originals']:.0%}) get a warning, which only asks the requestor for a "
+        f"reason before submitting.\n"
+        f"- **This page (cleans up the duplicates already in SAP).** The bulk matcher above compares every pair of "
+        f"records across SPD, QTS and QTG. MDM confirms the groups below and downloads an SAP import file that "
+        f"freezes the extra records.")
     with st.expander("How matching works"):
         st.markdown("Records are only compared within the same country across SPD, QTS and QTG. The same "
                     "registration number is a match, and different numbers never are. Otherwise the matcher compares "
@@ -510,12 +524,62 @@ def quality():
             st.markdown(f"- `{dup}` ({items.loc[dup, 'description']}) duplicates `{keep}` "
                         f"({items.loc[keep, 'description']}). Merging them stops the dengue test from looking "
                         f"like it is declining in Thailand and Vietnam.")
+    _cleanup(dups, pairs, q["item_map"])
     st.markdown("##### Why it matters")
     st.markdown("Merging duplicates doesn't change country totals, because each order is still counted once. It "
                 "changes the per-customer figures: how many customers there are, who appears to have stopped "
                 "ordering (because their orders moved to a new record), and who appears to buy only Product A "
                 "(because their B orders sit on another entity's record). Sales actions shows the before-and-after "
                 "difference.")
+
+
+def _dtw(obj_cols, rows):
+    """A Data Transfer Workbench file: tab-separated, object property names then database column names, then data."""
+    lines = ["\t".join(c[0] for c in obj_cols), "\t".join(c[1] for c in obj_cols)]
+    lines += ["\t".join(str(v) for v in r) for r in rows]
+    return "\r\n".join(lines) + "\r\n"
+
+
+def _cleanup(dups, pairs, item_map):
+    """MDM confirms duplicate groups and downloads SAP import files that freeze the extra records.
+    Freezing (not deleting) keeps their order history in SAP while stopping anyone from using them again."""
+    st.markdown("##### Clean up the duplicates already in SAP")
+    st.caption("Untick a record if it isn't really a duplicate. Borderline pairs from the review queue start unticked: "
+               "tick them once checked. The download freezes each ticked record in SAP B1 with a note saying which "
+               "code to use instead; it doesn't delete anything, so past orders stay where they are.")
+    extra = dups[dups.record_id != dups.golden_id]
+    rows = pd.DataFrame({"freeze": True, "record_id": extra.record_id, "customer_name": extra.customer_name,
+                         "keep": extra.golden_id, "keep_name": extra.golden_name, "why": "Matched automatically"})
+    review = pairs[pairs.decision == "review"]
+    if len(review):
+        rows = pd.concat([rows, pd.DataFrame({
+            "freeze": False, "record_id": review.record_b, "customer_name": review.name_b, "keep": review.record_a,
+            "keep_name": review.name_a, "why": "Review: " + review.reason})], ignore_index=True)
+    picked = st.data_editor(rows, hide_index=True, width="stretch", key="cleanup", disabled=[
+        "record_id", "customer_name", "keep", "keep_name", "why"], column_config={
+        "freeze": st.column_config.CheckboxColumn("Freeze"),
+        "record_id": st.column_config.TextColumn("Duplicate record"),
+        "customer_name": st.column_config.TextColumn("Name on it"),
+        "keep": st.column_config.TextColumn("Use instead"),
+        "keep_name": st.column_config.TextColumn("Kept record's name"),
+        "why": st.column_config.TextColumn("Why")})
+    chosen = picked[picked.freeze]
+    note = lambda keep: f"Duplicate - use {keep}"  # SAP's frozen remarks field is short (30 characters)
+    bp = _dtw([("RecordKey", "RecordKey"), ("CardCode", "CardCode"), ("Frozen", "frozenFor"),
+               ("FrozenRemarks", "FrozenComm")],
+              [(i + 1, r.record_id, "tYES", note(r.keep)) for i, r in enumerate(chosen.itertuples())])
+    items = _dtw([("RecordKey", "RecordKey"), ("ItemCode", "ItemCode"), ("Frozen", "frozenFor"),
+                  ("FrozenRemarks", "FrozenComm")],
+                 [(i + 1, dup, "tYES", note(keep)) for i, (dup, keep) in enumerate(item_map.items())])
+    remap = chosen[["record_id", "keep"]].rename(columns={"record_id": "old_code", "keep": "use_code"})
+    a, b, d = st.columns(3)
+    a.download_button(f"Business partners to freeze ({len(chosen)})", bp, "Cleanup_BusinessPartners_DTW.txt",
+                      "text/plain", disabled=chosen.empty, width="stretch")
+    b.download_button(f"Items to freeze ({len(item_map)})", items, "Cleanup_Items_DTW.txt", "text/plain",
+                      disabled=not item_map, width="stretch")
+    d.download_button("Old code to new code list (CSV)", remap.to_csv(index=False), "Cleanup_code_map.csv",
+                      "text/csv", disabled=chosen.empty, width="stretch",
+                      help="For finance and reporting: which code each frozen record's history belongs to")
 
 
 # --------------------------------------------------------------------------- business case

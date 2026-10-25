@@ -24,24 +24,32 @@ All of them use **standard connectors only** (no Premium licence needed).
 | **RoutingRules** | Who approves what; the MDM team edits rows instead of calling IT | MDM team | `RequestType`, `Entity`, `ConditionField`, `ConditionValue`, `ApproverRole` (Text), `Stage` (Number: 1 = parallel checks, 2 = MDM final), `SLADays`, `EscalateAfterDays` (Number), `Active` (Yes/No) |
 | **RequiredFields** | Which fields the form shows and requires, per request type | MDM team | `RequestType`, `FieldName`, `DisplayLabel`, `FieldType`, `Required` (Always/Conditional), `ConditionField`, `ConditionValue`, `Sensitive` (Yes/No), `VisibleToRoles`, `HelpText`, `Check` (Text: the format check, one of None / Text / RegNo / HSCode / TaxID / LicenceNo / PartNo / BankAccount / Email / Months / Year; blank = the app's default) |
 | **Roles** | Role → person, escalation contact and time zone | MDM team | `Role`, `Entity`, `PersonName`, `PersonEmail`, `EscalateTo` (Text), `TimeZone` (Text, e.g. `Asia/Bangkok`) |
-| **CustomerMaster** | Copy of SAP customer records **without sensitive fields**, used for the duplicate search | Loaded from SAP (here: the CSV) | `Title` = record ID, `CustomerName`, `NormalizedName`, `Country`, `City`, `Address`, `RegistrationNo`, `Segment`, `CreatedByEntity` |
-| **ItemMaster** | Same idea, for items | Loaded from SAP | `Title` = item code, `Description`, `NormalizedName`, `ProductFamily`, `Regulated` |
+| **CustomerMaster** | Copy of SAP customer records **without sensitive fields**, used for the duplicate search | Loaded from SAP (here: the CSV) | `Title` = record ID, `CustomerName`, `NormalizedName`, `Country`, `City`, `Address`, `RegistrationNo`, `Segment`, `CreatedByEntity`, `MatchKey`, `IDKey`, `SAPStatus` (see below) |
+| **ItemMaster** | Same idea, for items | Loaded from SAP | `Title` = item code, `Description`, `NormalizedName`, `ProductFamily`, `Regulated`, `ManufacturerPartNo`, `MatchKey`, `IDKey`, `SAPStatus` |
+| **VendorMaster** / **CostCentres** | Same idea, for vendors (no bank columns) and cost centres | Loaded from SAP | VendorMaster: `VendorName`, `Country`, `TaxID`, `MatchKey`, `IDKey`, `SAPStatus`; CostCentres: `CostCentreName`, `Entity`, `Department`, `Owner`, `SAPStatus` |
 | **Aliases** | Known abbreviations → official record (e.g. `nuh`) | MDM team | `Title` = alias, `CanonicalName`, `RecordID` |
 
 ## Live duplicate check in Power Apps (no Premium needed)
 
-`NormalizedName` is pre-computed as follows: lowercase, punctuation removed, legal suffixes removed
-(pte, ltd, sdn, bhd, co, jsc, pt, inc, gmbh, ag, sa), and abbreviations expanded (hosp→hospital, ctr/center→centre,
-univ→university, med→medical, lab→laboratory, diag→diagnostic, gen→general). Apply the same steps to what the
-requestor types, then check:
+The master lists carry three columns for it (all single line of text), filled by `python3 sharepoint/match_keys.py`:
 
-1. **Registration number matches exactly** → block (*"This customer already exists: C10007"*).
-2. **Alias hit**: the cleaned-up input is listed in `Aliases` → block, showing the official record.
-3. **Name contains all the main words**: in the same country, `NormalizedName` contains each word of 4+ letters
-   from the input (`Search`/`in` in Power Fx) → mark as *Possible match* and let the requestor confirm.
+- `MatchKey`: the name cleaned up: lower case, punctuation and legal words (pte, ltd, sdn, bhd, co, jsc, pt, inc, gmbh,
+  ag, sa, the) removed, abbreviations expanded (hosp→hospital, ctr/center→centre, univ→university, med→medical,
+  lab→laboratory, spec→specialist, diag→diagnostic, gen→general, comm→community), then letters and digits only.
+  *National Univ. Hospital (S) Pte Ltd* → `nationaluniversityhospitals`.
+- `IDKey`: registration no. / manufacturer part no. / tax ID in capitals without punctuation.
+- `SAPStatus`: *In SAP*, or *Pending SAP import* for a record the flow added after approval.
 
-This is deliberately simpler than the Python fuzzy matching, which catches typos and runs in bulk across all
-entities. **Pitch line:** *"In production, the form calls the same matching engine through one Premium connector."*
+The form applies the same clean-up to what the requestor types (Requests stores it in `MatchKey` / `IDKey`, and keeps
+the requestor's override reason in `DupReason`), then:
+
+1. **Same `IDKey`** in the master list, or in a request still waiting for approval → *Blocked*.
+2. **Known short name** in `Aliases` → *Blocked*. A second cost centre for the same entity + department → *Blocked*.
+3. **Similar name**: 82% or more of the letter pairs in common (Dice coefficient), customers in the same country and
+   items in the same product family, also against waiting requests → *Possible match*.
+
+A block or a warning can be overridden only with a reason. `onerecord/livecheck.py` is the same logic in Python;
+change both together.
 
 ## Flows to build in Power Automate
 

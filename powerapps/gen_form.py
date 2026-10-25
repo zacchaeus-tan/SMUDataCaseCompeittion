@@ -62,6 +62,8 @@ CARD = {"Fill": "RGBA(255, 255, 255, 1)", "LayoutMinHeight": "16", "LayoutMinWid
         "PaddingBottom": "8", "PaddingLeft": "8", "PaddingRight": "8", "PaddingTop": "8",
         "RadiusBottomLeft": "8", "RadiusBottomRight": "8", "RadiusTopLeft": "8", "RadiusTopRight": "8"}
 
+GREY = "RGBA(96, 94, 92, 1)"
+
 TYPES = ["Customer", "Item", "Vendor", "Cost Center"]
 COUNTRIES = ["SG", "MY", "TH", "ID", "VN"]
 CHOICES = {
@@ -191,6 +193,193 @@ def strip_punct(expr):
     return expr
 
 
+def alnum(expr, upper=False):
+    """Power Fx: the text's letters and digits only (expr must already be lower or upper case)."""
+    rng = "A-Z0-9" if upper else "a-z0-9"
+    return (f'Concat(Filter(ForAll(Sequence(Len({expr})), Mid({expr}, Value, 1)) As ch, '
+            f'IsMatch(ch.Value, "[{rng}]")), Value)')
+
+
+def pairs_of(key):
+    """Power Fx: the distinct letter pairs of a match key, as a one-column table (Value)."""
+    return f"Distinct(ForAll(Sequence(Max(Len({key}) - 1, 0)), Mid({key}, Value, 2)), Value)"
+
+
+def similarity(key):
+    """Power Fx: share of letter pairs `key` has in common with the typed name (onerecord/livecheck.similarity)."""
+    return (f"With({{b: {pairs_of(key)}}}, If(CountRows(InputPairs) = 0 || CountRows(b) = 0, 0, "
+            f"2 * CountRows(Filter(InputPairs As g, g.Value in b.Value)) / (CountRows(InputPairs) + CountRows(b))))")
+
+
+ID_LABEL = 'Switch(SelectedType, "Customer", "registration no.", "Item", "manufacturer part no.", "Vendor", "tax ID", "")'
+PENDING = '"Pending approval", "Changes requested", "Resubmitted"'
+# Plain string (not an f-string), so Power Fx braces stay single; {LEGAL} etc. are filled in below.
+DUP_FX = """// ---- Live duplicate checks (mirrored in onerecord/livecheck.py; change both together)
+// Names: cleaned up (lower case, no punctuation or legal words, abbreviations expanded, letters and digits only)
+// and compared by the share of letter pairs they have in common, so typos still match. Customers are compared
+// within the same country, items within the same product family; both filters run in SharePoint, so the check
+// works however long the lists get. IDs are compared without punctuation through the lists' IDKey column.
+MatchThreshold = 0.82;
+Noun = Switch(SelectedType, "Cost Center", "cost centre", Lower(SelectedType));
+NameInput = Switch(SelectedType, "Customer", txtCustomerName.Text, "Item", txtItemDescription.Text,
+                   "Vendor", txtVendorName.Text, "");
+LegalWords = {LEGAL};
+NameBasic = Concat(
+    Filter(Split(Trim({BASIC}), " ") As w, !IsBlank(w.Value) && !(w.Value in LegalWords)),
+    Value, " "
+);
+NameKey = Concat(
+    ForAll(Split(NameBasic, " ") As w, Switch(w.Value, {EXPAND}, w.Value)),
+    Value, ""
+);
+InputKey = {INPUT_KEY};
+InputPairs = {INPUT_PAIRS};
+IDInput = Switch(SelectedType, "Customer", txtRegistrationNo.Text, "Item", txtManufacturerPartNo.Text,
+                 "Vendor", txtTaxID.Text, "");
+InputIDKey = {ID_KEY};
+
+// Existing records with the same ID (direct lookups on IDKey)
+IDMatch = If(
+    !IsBlank(InputIDKey),
+    Switch(
+        SelectedType,
+        "Customer", With({m: LookUp(CustomerMaster, IDKey = InputIDKey)},
+            If(!IsBlank(m), {RecordID: m.Title, Name: m.CustomerName, Status: m.SAPStatus, Regulated: false})),
+        "Item", With({m: LookUp(ItemMaster, IDKey = InputIDKey)},
+            If(!IsBlank(m), {RecordID: m.Title, Name: m.Description, Status: m.SAPStatus, Regulated: m.Regulated})),
+        "Vendor", With({m: LookUp(VendorMaster, IDKey = InputIDKey)},
+            If(!IsBlank(m), {RecordID: m.Title, Name: m.VendorName, Status: m.SAPStatus, Regulated: false}))
+    )
+);
+AliasMatch = If(SelectedType = "Customer" && !IsBlank(NameBasic),
+                LookUp(Aliases, Title = NameBasic || Title = Concat(ForAll(Split(NameBasic, " ") As w,
+                    Switch(w.Value, {EXPAND}, w.Value)), Value, " ")));
+// Existing records with a similar name
+NameCandidates = Switch(
+    SelectedType,
+    "Customer", ForAll(Filter(CustomerMaster, Country = ddCustomerCountry.Selected.Value),
+        {RecordID: Title, Name: CustomerName, Key: MatchKey, Status: SAPStatus, Regulated: false}),
+    "Item", ForAll(If(IsBlank(ddProductFamily.Selected.Value), ItemMaster,
+                      Filter(ItemMaster, ProductFamily = ddProductFamily.Selected.Value)),
+        {RecordID: Title, Name: Description, Key: MatchKey, Status: SAPStatus, Regulated: Regulated}),
+    "Vendor", ForAll(VendorMaster,
+        {RecordID: Title, Name: VendorName, Key: MatchKey, Status: SAPStatus, Regulated: false})
+);
+NameMatch = If(
+    Len(InputKey) >= 4,
+    First(Sort(Filter(ForAll(NameCandidates As c,
+        {RecordID: c.RecordID, Name: c.Name, Status: c.Status, Regulated: c.Regulated, Score: {SIM_C}}),
+        Score >= MatchThreshold), Score, SortOrder.Descending))
+);
+// Requests for the same thing that are already on their way (not the one being edited)
+PendingRows = With(
+    {id: EditID},
+    Filter(
+        ForAll(Filter(Requests, RequestType = SelectedType &&
+                      (Status = "Pending approval" || Status = "Changes requested" || Status = "Resubmitted")),
+            {ID: Title, Name: Coalesce(CustomerName, ItemDescription, VendorName, CostCenterName), Country: Country,
+             Entity: Entity, Dept: Department, Key: MatchKey, IDK: IDKey, By: Requestor}),
+        ID <> id
+    )
+);
+PendingID = If(!IsBlank(InputIDKey), LookUp(PendingRows, IDK = InputIDKey));
+PendingName = If(
+    Len(InputKey) >= 4,
+    First(Sort(Filter(ForAll(Filter(PendingRows, SelectedType <> "Customer" || Country = ddCustomerCountry.Selected.Value) As p,
+        {ID: p.ID, Name: p.Name, By: p.By, Score: {SIM_P}}),
+        Score >= MatchThreshold), Score, SortOrder.Descending))
+);
+// Cost centres: one per entity and department (an assumption), so a second one is blocked unless explained
+CostCentreMatch = If(
+    SelectedType = "Cost Center" && !IsBlank(SelectedEntity) && !IsBlank(ddDepartment.Selected.Value),
+    LookUp(CostCentres, Entity = SelectedEntity && Department = ddDepartment.Selected.Value)
+);
+PendingCC = If(
+    SelectedType = "Cost Center" && !IsBlank(SelectedEntity) && !IsBlank(ddDepartment.Selected.Value),
+    LookUp(PendingRows, Entity = SelectedEntity && Dept = ddDepartment.Selected.Value)
+);
+// Help under "Is this regulated?": what the closest existing item says, and what "Not sure" does
+RegulatedHint = With(
+    {m: If(SelectedType = "Item", Coalesce(IDMatch, NameMatch))},
+    If(IsBlank(m), "",
+       "Similar item " & m.RecordID & " (" & m.Name & ") is " & If(m.Regulated, "regulated. ", "not regulated. ")) &
+    "Not sure? Choose Not sure and Quality/Regulatory will decide."
+);
+
+DupStatus = If(
+    !IsBlank(IDMatch) || !IsBlank(AliasMatch) || !IsBlank(PendingID) || !IsBlank(CostCentreMatch) || !IsBlank(PendingCC),
+        "Blocked",
+    !IsBlank(NameMatch) || !IsBlank(PendingName), "Possible match",
+    "Clear"
+);
+DupRecordID = If(
+    DupStatus <> "Clear",
+    Coalesce(IDMatch.RecordID, AliasMatch.RecordID, PendingID.ID, CostCentreMatch.Title, PendingCC.ID,
+             NameMatch.RecordID, PendingName.ID)
+);
+SAPNote = " (approved, being set up in SAP)";
+UseInstead = " Records in SAP B1 are shared by SPD, QTS and QTG, so use it instead of requesting a new one. " &
+    "If it isn't the same " & Noun & ", switch on Not the same below and say why.";
+FollowInstead = " Follow that request in My requests instead. If it's a different " & Noun &
+    ", switch on Not the same below and say why.";
+DupMessage = If(
+    !IsBlank(IDMatch),
+        "This " & Noun & " already exists: " & IDMatch.Name & " (" & IDMatch.RecordID &
+        If(IDMatch.Status = "Pending SAP import", SAPNote, "") & ") has the same " & {ID_LABEL} & "." & UseInstead,
+    !IsBlank(AliasMatch),
+        "This customer already exists: " & Char(34) & txtCustomerName.Text & Char(34) & " is a known name for " &
+        AliasMatch.CanonicalName & " (" & AliasMatch.RecordID & ")." & UseInstead,
+    !IsBlank(PendingID),
+        "Already requested: " & PendingID.ID & " (" & PendingID.Name & ", requested by " & PendingID.By &
+        ") has the same " & {ID_LABEL} & " and is waiting for approval." & FollowInstead,
+    !IsBlank(CostCentreMatch),
+        "A cost centre already exists for " & SelectedEntity & " " & ddDepartment.Selected.Value & ": " &
+        CostCentreMatch.CostCentreName & " (" & CostCentreMatch.Title & "). Use it, or switch on Not the same below " &
+        "and say why a second one is needed.",
+    !IsBlank(PendingCC),
+        "Already requested: " & PendingCC.ID & " (" & PendingCC.Name & ") for " & SelectedEntity & " " &
+        ddDepartment.Selected.Value & " is waiting for approval." & FollowInstead,
+    !IsBlank(NameMatch),
+        "Possible match: " & NameMatch.Name & " (" & NameMatch.RecordID &
+        If(NameMatch.Status = "Pending SAP import", SAPNote, "") & ", " & Text(NameMatch.Score, "0%") &
+        " similar name). If it's a different " & Noun & ", switch on This is a different " & Noun & " and say why.",
+    !IsBlank(PendingName),
+        "Possible match: " & PendingName.ID & " (" & PendingName.Name & ", requested by " & PendingName.By & ", " &
+        Text(PendingName.Score, "0%") & " similar name) is waiting for approval. If it's a different " & Noun &
+        ", switch on This is a different " & Noun & " and say why.",
+    ""
+);
+// Overriding a warning or a block needs a reason; approvers and MDM see it on their cards
+DupOverridden = DupStatus <> "Clear" && tglNotDuplicate.Value && Len(Trim(txtDupReason.Text)) >= 10;
+
+CanSubmit = !IsBlank(SelectedEntity) && CountRows(MissingFields) = 0 && CountRows(FieldProblems) = 0 &&
+    (DupStatus = "Clear" || DupOverridden) &&
+    (!Editing || CountRows(EditChanges) > 0 || !IsBlank(Trim(txtReplyNote.Text)));
+StatusText = If(
+    CanSubmit, If(Editing, "Ready to resubmit. ", "Ready to submit. ") & If(Editing, ChangesText, ""),
+    Trim(
+        If(IsBlank(SelectedEntity), "Choose a business entity. ", "") &
+        If(CountRows(MissingFields) > 0, "Still needed: " & Concat(MissingFields, DisplayLabel, ", ") & ". ", "") &
+        If(CountRows(FieldProblems) > 0, "Check: " & Concat(FieldProblems, DisplayLabel & " " & Problem, "; ") & ". ", "") &
+        If(Editing && CountRows(EditChanges) = 0 && IsBlank(Trim(txtReplyNote.Text)),
+           "Make the changes asked for, or reply to the approver. ", "") &
+        If(DupStatus <> "Clear" && !DupOverridden,
+           If(tglNotDuplicate.Value, "Say why it's not the same " & Noun & " (at least 10 characters). ",
+              If(DupStatus = "Blocked", "This " & Noun & " already exists or is already requested (see above). ",
+                 "Check the possible match above. ")), "")
+    )
+);"""
+DUP_FX = (DUP_FX.replace("{LEGAL}", fx_list(LEGAL))
+          .replace("{BASIC}", strip_punct("Lower(NameInput)"))
+          .replace("{EXPAND}", ", ".join(f'"{k}", "{v}"' for k, v in EXPAND.items()))
+          .replace("{INPUT_KEY}", alnum("NameKey"))
+          .replace("{INPUT_PAIRS}", pairs_of("InputKey"))
+          .replace("{ID_KEY}", alnum("Upper(IDInput)", upper=True))
+          .replace("{SIM_C}", similarity("c.Key"))
+          .replace("{SIM_P}", similarity("p.Key"))
+          .replace("{ID_LABEL}", ID_LABEL))
+
+
 FORMULAS = f"""RequestTypes = {fx_list(TYPES)};
 SelectedType = ddRequestType.Selected.Value;
 SelectedEntity = ddEntity.Selected.Code;
@@ -291,125 +480,7 @@ ChangesText = If(
     Concat(EditChanges, L & If(S, " changed", ": " & Char(34) & Old & Char(34) & " -> " & Char(34) & New & Char(34)), "; ") & "."
 );
 
-// ---- Live duplicate checks. Customers use the same clean-up as sharepoint/LISTS.md
-LegalWords = {fx_list(LEGAL)};
-NameBasic = Concat(
-    Filter(Split(Trim({strip_punct("Lower(txtCustomerName.Text)")}), " ") As w,
-           !IsBlank(w.Value) && !(w.Value in LegalWords)),
-    Value, " "
-);
-NameKey = Concat(
-    ForAll(Split(NameBasic, " ") As w,
-           Switch(w.Value, {", ".join(f'"{k}", "{v}"' for k, v in EXPAND.items())}, w.Value)),
-    Value, " "
-);
-KeyWords = Filter(Split(NameKey, " ") As w, Len(w.Value) >= 4);
-CustomerRows = ForAll(
-    CustomerMaster,
-    {{RecordID: Title, Name: CustomerName, Norm: NormalizedName, Country: Country, RegNo: RegistrationNo}}
-);
-RegMatch = If(
-    !IsBlank(Trim(txtRegistrationNo.Text)),
-    LookUp(CustomerRows, Upper(RegNo) = Upper(Trim(txtRegistrationNo.Text)))
-);
-AliasMatch = If(!IsBlank(NameBasic), LookUp(Aliases, Title = NameBasic || Title = NameKey));
-NameMatch = If(
-    CountRows(KeyWords) > 0 && !IsBlank(ddCustomerCountry.Selected.Value),
-    First(Filter(CustomerRows As c,
-                 c.Country = ddCustomerCountry.Selected.Value &&
-                 CountRows(Filter(KeyWords As k, !(k.Value in c.Norm))) = 0))
-);
-// Items: same manufacturer part no. blocks; all main words of the description in any entity's item warns
-ItemKeyWords = Filter(Split(Trim({strip_punct("Lower(txtItemDescription.Text)")}), " ") As w, Len(w.Value) >= 4);
-ItemRows = ForAll(
-    ItemMaster,
-    {{RecordID: Title, Name: Description, Norm: NormalizedName, PartNo: ManufacturerPartNo, Regulated: Regulated}}
-);
-PartMatch = If(
-    !IsBlank(Trim(txtManufacturerPartNo.Text)),
-    LookUp(ItemRows, Upper(PartNo) = Upper(Trim(txtManufacturerPartNo.Text)))
-);
-ItemNameMatch = If(
-    CountRows(ItemKeyWords) > 0,
-    First(Filter(ItemRows As c, CountRows(Filter(ItemKeyWords As k, !(k.Value in c.Norm))) = 0))
-);
-// Help under "Is this regulated?": what the closest existing item says, and what "Not sure" does
-RegulatedHint = With(
-    {{m: Coalesce(PartMatch, ItemNameMatch)}},
-    If(IsBlank(m), "",
-       "Similar item " & m.RecordID & " (" & m.Name & ") is " & If(m.Regulated, "regulated. ", "not regulated. ")) &
-    "Not sure? Choose Not sure and Quality/Regulatory will decide."
-);
-// Vendors: same tax ID blocks
-VendorRows = ForAll(VendorMaster, {{RecordID: Title, Name: VendorName, TaxID: TaxID}});
-VendorTaxMatch = If(
-    !IsBlank(Trim(txtTaxID.Text)),
-    LookUp(VendorRows, Upper(TaxID) = Upper(Trim(txtTaxID.Text)))
-);
-// Cost centres: one per entity and department, so a second one blocks
-CostCentreMatch = If(
-    !IsBlank(SelectedEntity) && !IsBlank(ddDepartment.Selected.Value),
-    LookUp(CostCentres, Entity = SelectedEntity && Department = ddDepartment.Selected.Value)
-);
-
-DupStatus = Switch(
-    SelectedType,
-    "Customer", If(!IsBlank(RegMatch) || !IsBlank(AliasMatch), "Blocked", !IsBlank(NameMatch), "Possible match", "Clear"),
-    "Item", If(!IsBlank(PartMatch), "Blocked", !IsBlank(ItemNameMatch), "Possible match", "Clear"),
-    "Vendor", If(!IsBlank(VendorTaxMatch), "Blocked", "Clear"),
-    "Cost Center", If(!IsBlank(CostCentreMatch), "Blocked", "Clear"),
-    "Clear"
-);
-DupRecordID = If(
-    DupStatus = "Clear", Blank(),
-    Switch(
-        SelectedType,
-        "Customer", Coalesce(RegMatch.RecordID, AliasMatch.RecordID, NameMatch.RecordID),
-        "Item", Coalesce(PartMatch.RecordID, ItemNameMatch.RecordID),
-        "Vendor", VendorTaxMatch.RecordID,
-        "Cost Center", CostCentreMatch.Title
-    )
-);
-DupMessage = Switch(
-    SelectedType,
-    "Customer", If(
-        !IsBlank(RegMatch),
-            "This customer already exists: " & RegMatch.Name & " (" & RegMatch.RecordID & ") has registration no. " & RegMatch.RegNo & ".",
-        !IsBlank(AliasMatch),
-            "This customer already exists: " & Char(34) & txtCustomerName.Text & Char(34) & " is a known name for " & AliasMatch.CanonicalName & " (" & AliasMatch.RecordID & ").",
-        !IsBlank(NameMatch),
-            "Possible match: " & NameMatch.Name & " (" & NameMatch.RecordID & ", " & NameMatch.Country & "). If this is a different customer, confirm it with the switch.",
-        ""),
-    "Item", If(
-        !IsBlank(PartMatch),
-            "This item already exists: part no. " & PartMatch.PartNo & " is " & PartMatch.Name & " (" & PartMatch.RecordID & ").",
-        !IsBlank(ItemNameMatch),
-            "Possible match: " & ItemNameMatch.Name & " (" & ItemNameMatch.RecordID & "). If this is a different item, confirm it with the switch.",
-        ""),
-    "Vendor", If(!IsBlank(VendorTaxMatch),
-        "This vendor already exists: tax ID " & VendorTaxMatch.TaxID & " belongs to " & VendorTaxMatch.Name & " (" & VendorTaxMatch.RecordID & ").", ""),
-    "Cost Center", If(!IsBlank(CostCentreMatch),
-        "A cost centre already exists for " & SelectedEntity & " " & ddDepartment.Selected.Value & ": " & CostCentreMatch.CostCentreName & " (" & CostCentreMatch.Title & ").", ""),
-    ""
-);
-
-CanSubmit = !IsBlank(SelectedEntity) && CountRows(MissingFields) = 0 && CountRows(FieldProblems) = 0 &&
-    DupStatus <> "Blocked" && (DupStatus <> "Possible match" || tglNotDuplicate.Value) &&
-    (!Editing || CountRows(EditChanges) > 0 || !IsBlank(Trim(txtReplyNote.Text)));
-StatusText = If(
-    CanSubmit, If(Editing, "Ready to resubmit. ", "Ready to submit. ") & If(Editing, ChangesText, ""),
-    Trim(
-        If(IsBlank(SelectedEntity), "Choose a business entity. ", "") &
-        If(CountRows(MissingFields) > 0, "Still needed: " & Concat(MissingFields, DisplayLabel, ", ") & ". ", "") &
-        If(CountRows(FieldProblems) > 0, "Check: " & Concat(FieldProblems, DisplayLabel & " " & Problem, "; ") & ". ", "") &
-        If(Editing && CountRows(EditChanges) = 0 && IsBlank(Trim(txtReplyNote.Text)),
-           "Make the changes asked for, or reply to the approver. ", "") &
-        Switch(DupStatus,
-            "Blocked", "This " & Lower(SelectedType) & " already exists, so it can't be submitted again. ",
-            "Possible match", If(tglNotDuplicate.Value, "", "Confirm the possible match above. "),
-            "")
-    )
-);
+{DUP_FX}
 
 // ---- My requests screen
 RolesRows = ForAll(Roles, {{Role: Role, Entity: Entity, Name: PersonName, Email: Lower(PersonEmail)}});
@@ -447,6 +518,8 @@ WaitingText = If(SelectedRequest.Status = "Changes requested",
     "You (" & SelectedRequest.Requestor & "): " & LastAsk.Role & " asked for changes: " & LastAsk.Detail &
     " Press Edit and resubmit." & If(CountRows(WaitingOn) > 0, Char(10), ""), "") &
 If(
+    SelectedRequest.Status = "Ready for SAP import" && CountRows(WaitingOn) = 0,
+        "MDM team: import the file in SAP_Imports into SAP B1, then press Mark as created in SAP.",
     CountRows(WaitingOn) = 0, If(SelectedRequest.Status = "Changes requested", "", "No one. " & SelectedRequest.Status & "."),
     Concat(
         WaitingOn As w,
@@ -504,7 +577,9 @@ SubmittedText = With(
                 {{L: "Department", V: r.Department}},
                 {{L: "Owner", V: r.Owner}},
                 {{L: "Budget year", V: Text(r.BudgetYear)}},
-                {{L: "Duplicate check", V: r.DuplicateCheck & If(IsBlank(r.PossibleMatchID), "", " (" & r.PossibleMatchID & ")")}}
+                {{L: "Duplicate check", V: r.DuplicateCheck & If(IsBlank(r.PossibleMatchID), "", " (" & r.PossibleMatchID & ")")}},
+                {{L: "Why it's not a duplicate", V: r.DupReason}},
+                {{L: "SAP code", V: r.SAPCode}}
             ),
             !IsBlank(V)
         ),
@@ -697,7 +772,7 @@ top_blocks = [
           '"Which Lives Group business this is for"', "true"),
 ]
 
-reset_targets = ["ddEntity", "tglNotDuplicate", "txtReplyNote"] + [f[2] for f in FIELDS]
+reset_targets = ["ddEntity", "tglNotDuplicate", "txtDupReason", "txtReplyNote"] + [f[2] for f in FIELDS]
 
 IDENT = ["Title: rid", "RequestType: SelectedType", "Entity: SelectedEntity", "Requestor: User().FullName",
          'Status: "Pending approval"', 'CurrentStage: "Submitted, waiting for approvers"', "SubmittedAt: Now()"]
@@ -726,7 +801,10 @@ DATA = [
     'Department: If(SelectedType = "Cost Center", ddDepartment.Selected.Value)',
     'Owner: If(SelectedType = "Cost Center", txtOwner.Text)',
     'BudgetYear: If(SelectedType = "Cost Center", Value(txtBudgetYear.Text))',
-    "DuplicateCheck: DupStatus", "PossibleMatchID: DupRecordID",
+    'DuplicateCheck: If(DupStatus = "Clear", "Clear", DupStatus & If(DupOverridden, " - requestor says different", ""))',
+    "PossibleMatchID: DupRecordID",
+    'DupReason: If(DupOverridden, Trim(txtDupReason.Text), "")',
+    "MatchKey: InputKey", "IDKey: InputIDKey",
 ]
 PATCH_REQ = ",\n".join(IDENT + DATA)
 # Resubmit after "Request changes": same fields, plus a dated line in ChangeNote saying what changed
@@ -856,18 +934,23 @@ screen_children = [
     header(1, "OneRecord | New request", "New"),
     edit_banner,
     ctl("DupBanner", "GroupContainer@1.5.0", dict(
-        CARD, FillPortions="0", Height="96", Visible='DupStatus <> "Clear"',
+        CARD, FillPortions="0", Height="If(tglNotDuplicate.Value, 168, 124)", Visible='DupStatus <> "Clear"',
         Fill='If(DupStatus = "Blocked", RGBA(253, 231, 233, 1), RGBA(255, 244, 206, 1))',
         LayoutDirection="LayoutDirection.Vertical", LayoutAlignItems="LayoutAlignItems.Stretch",
         LayoutGap="4", PaddingLeft="16", PaddingRight="16"),
         [
-            label("lblDupMessage", "DupMessage", Size="12", FontWeight="FontWeight.Semibold",
-                  FillPortions="0", Height="40", Wrap="true"),
+            label("lblDupMessage", "DupMessage", Size="11", FontWeight="FontWeight.Semibold",
+                  FillPortions="0", Height="66", Wrap="true", VerticalAlign="VerticalAlign.Top"),
             ctl("tglNotDuplicate", "Classic/Toggle@2.1.0", dict(
-                TOGGLE, FillPortions="0", Height="36", Width="420", Default="false", Size="12",
-                AlignInContainer="AlignInContainer.Start", Visible='DupStatus = "Possible match"',
-                TrueText='"Confirmed: this is a different " & Lower(SelectedType)',
-                FalseText='"This is a different " & Lower(SelectedType)')),
+                TOGGLE, FillPortions="0", Height="36", Width="420", Size="12",
+                Default="If(Editing, !IsBlank(EditRec.DupReason), false)",
+                AlignInContainer="AlignInContainer.Start",
+                TrueText='If(DupStatus = "Blocked", "Not the same " & Noun, "This is a different " & Noun)',
+                FalseText='If(DupStatus = "Blocked", "Not the same " & Noun, "This is a different " & Noun)')),
+            ctl("txtDupReason", "Classic/TextInput@2.3.2", dict(
+                TEXTINPUT, FillPortions="0", Height="38", Size="11", Visible="tglNotDuplicate.Value",
+                Default='If(Editing, EditRec.DupReason, "")',
+                HintText='"Why is it different? e.g. separate legal entity with its own registration no. (approvers see this)"')),
         ], variant="AutoLayout"),
     ctl("MainContainer1", "GroupContainer@1.5.0", dict(
         CARD, LayoutDirection="LayoutDirection.Vertical",
@@ -924,7 +1007,8 @@ app_yaml = HEADER + "App:\n  Properties:\n    Formulas: |-\n" + indent("=" + FOR
 
 # ---------------------------------------------------------------------------- My requests screen
 STATUS_COLOR = ('Switch({s}, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), '
-                '"Changes requested", RGBA(157, 93, 0, 1), RGBA(0, 90, 158, 1))')
+                '"Changes requested", RGBA(157, 93, 0, 1), "Ready for SAP import", RGBA(92, 46, 145, 1), '
+                'RGBA(0, 90, 158, 1))')
 row_name = ("Coalesce(ThisItem.CustomerName, ThisItem.ItemDescription, ThisItem.VendorName, "
             "ThisItem.CostCenterName)")
 # Three fixed lines per row (ID and type, name, entity and status): wrapped text in one short label got clipped.
@@ -985,7 +1069,7 @@ list_panel = ctl("ListPanel", "GroupContainer@1.5.0", dict(
         "LayoutAlignItems": "LayoutAlignItems.Center", "LayoutGap": "12", "DropShadow": "DropShadow.None"}, [
         ctl("ddStatusFilter", "Classic/DropDown@2.3.1", dict(
             DROPDOWN, Items=fx_list(["All", "Pending approval", "Changes requested", "Resubmitted", "Rejected",
-                                     "Created in SAP"]), Default='"All"',
+                                     "Ready for SAP import", "Created in SAP"]), Default='"All"',
             FillPortions="0", Width="220", Height="36", Size="11")),
         ctl("tglShowAll", "Classic/Toggle@2.1.0", dict(
             TOGGLE, Default="false", Visible="IsMDM", FillPortions="1", Height="36", Size="11",
@@ -998,6 +1082,18 @@ list_panel = ctl("ListPanel", "GroupContainer@1.5.0", dict(
           Height="32", Size="11", Color="RGBA(96, 94, 92, 1)"),
     gallery,
 ], variant="AutoLayout")
+
+# MDM confirms the SAP import; the Route and approve flow (waiting for this) logs it, updates the master list
+# and tells the requestor. The ID goes through a plain value first, as for the log lookups.
+MARK_CREATED = """With(
+    {id: SelectedRequestID, code: Upper(Trim(txtSAPCode.Text))},
+    IfError(
+        Patch(Requests, LookUp(Requests, Title = id), {Status: "Created in SAP", SAPCode: code});
+        Notify(id & " marked as created in SAP as " & code & ". The requestor will be told.", NotificationType.Success);
+        Refresh(Requests),
+        Notify("Couldn't update: " & FirstError.Message, NotificationType.Error)
+    )
+)"""
 
 detail_panel = ctl("DetailPanel", "GroupContainer@1.5.0", dict(
     CARD, FillPortions="1", LayoutDirection="LayoutDirection.Vertical", LayoutAlignItems="LayoutAlignItems.Stretch",
@@ -1023,6 +1119,24 @@ detail_panel = ctl("DetailPanel", "GroupContainer@1.5.0", dict(
             Visible='!IsBlank(galRequests.Selected) && SelectedRequest.Status = "Changes requested" && '
                     "Lower(SelectedRequest.'Created By'.Email) = Lower(User().Email)",
             OnSelect="Set(gEditID, SelectedRequestID);\nNavigate(NewRequestScreen, ScreenTransition.None)")),
+        ctl("SAPImportPanel", "GroupContainer@1.5.0", dict(
+            CARD, FillPortions="0", Height="132", Fill="RGBA(243, 238, 250, 1)",
+            Visible='!IsBlank(galRequests.Selected) && IsMDM && SelectedRequest.Status = "Ready for SAP import"',
+            LayoutDirection="LayoutDirection.Vertical", LayoutAlignItems="LayoutAlignItems.Stretch", LayoutGap="4",
+            PaddingLeft="12", PaddingRight="12"), [
+            label("lblSAPImportHelp", '"Imported into SAP B1? Enter the code SAP gave it (normally the proposed code) and '
+                                      'confirm. The requestor is told it is live, and the master list is updated."',
+                  Size="10", Wrap="true", FillPortions="0", Height="40", PaddingLeft="0", Color=GREY),
+            row("rowSAPImport", [
+                ctl("txtSAPCode", "Classic/TextInput@2.3.2", dict(
+                    TEXTINPUT, FillPortions="1", Height="36", Size="11", Default="SelectedRequest.SAPCode",
+                    HintText='"SAP code"')),
+                ctl("btnMarkCreated", "Classic/Button@2.2.0", dict(
+                    BUTTON, Text='"Mark as created in SAP"', FillPortions="0", Width="220", Height="36", Size="11",
+                    DisplayMode="If(IsBlank(Trim(txtSAPCode.Text)), DisplayMode.Disabled, DisplayMode.Edit)",
+                    OnSelect=MARK_CREATED)),
+            ], 40, align="LayoutAlignItems.Center"),
+        ], variant="AutoLayout"),
     ] + [shown_with_selection(c) for c in
         section("Waiting", "Waiting on", "WaitingText")
       + section("Timeline", "Timeline", "TimelineText")
@@ -1049,7 +1163,6 @@ mine_yaml = HEADER + "\n".join([
 ] + mine_screen(6)) + "\n"
 
 # ---------------------------------------------------------------------------- Rules screen (MDM only)
-GREY = "RGBA(96, 94, 92, 1)"
 
 
 

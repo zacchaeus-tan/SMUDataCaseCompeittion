@@ -308,7 +308,7 @@
           Properties:
             Fill: =If(DupStatus = "Blocked", RGBA(253, 231, 233, 1), RGBA(255, 244, 206, 1))
             FillPortions: =0
-            Height: =96
+            Height: =If(tglNotDuplicate.Value, 168, 124)
             LayoutAlignItems: =LayoutAlignItems.Stretch
             LayoutDirection: =LayoutDirection.Vertical
             LayoutGap: =4
@@ -337,11 +337,12 @@
                   FocusedBorderThickness: =4
                   Font: =Font.'Segoe UI'
                   FontWeight: =FontWeight.Semibold
-                  Height: =40
+                  Height: =66
                   LayoutMinHeight: =16
                   LayoutMinWidth: =16
-                  Size: =12
+                  Size: =11
                   Text: =DupMessage
+                  VerticalAlign: =VerticalAlign.Top
                   Wrap: =true
             - tglNotDuplicate:
                 Control: Classic/Toggle@2.1.0
@@ -350,11 +351,11 @@
                   BorderColor: =RGBA(0, 0, 0, 0)
                   BorderStyle: =BorderStyle.None
                   Color: =RGBA(50, 49, 48, 1)
-                  Default: =false
+                  Default: =If(Editing, !IsBlank(EditRec.DupReason), false)
                   DisabledBorderColor: =RGBA(0, 0, 0, 0)
                   FalseFill: =RGBA(96, 94, 92, 1)
                   FalseHoverFill: =RGBA(50, 49, 48, 1)
-                  FalseText: ="This is a different " & Lower(SelectedType)
+                  FalseText: =If(DupStatus = "Blocked", "Not the same " & Noun, "This is a different " & Noun)
                   FillPortions: =0
                   FocusedBorderThickness: =4
                   Font: =Font.'Segoe UI'
@@ -366,10 +367,36 @@
                   Size: =12
                   TrueFill: =RGBA(0, 120, 212, 1)
                   TrueHoverFill: =RGBA(16, 110, 190, 1)
-                  TrueText: |-
-                    ="Confirmed: this is a different " & Lower(SelectedType)
-                  Visible: =DupStatus = "Possible match"
+                  TrueText: =If(DupStatus = "Blocked", "Not the same " & Noun, "This is a different " & Noun)
                   Width: =420
+            - txtDupReason:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  BorderColor: =RGBA(200, 198, 196, 1)
+                  Color: =RGBA(50, 49, 48, 1)
+                  Default: =If(Editing, EditRec.DupReason, "")
+                  DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                  DisabledColor: =RGBA(161, 159, 157, 1)
+                  DisabledFill: =RGBA(242, 242, 241, 0)
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  Font: =Font.'Segoe UI'
+                  Height: =38
+                  HintText: ="Why is it different? e.g. separate legal entity with its own registration no. (approvers see this)"
+                  HoverBorderColor: =RGBA(16, 110, 190, 1)
+                  HoverColor: =RGBA(50, 49, 48, 1)
+                  HoverFill: =RGBA(255, 255, 255, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PressedBorderColor: =RGBA(0, 120, 212, 1)
+                  PressedColor: =RGBA(50, 49, 48, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Size: =11
+                  Visible: =tglNotDuplicate.Value
       - MainContainer1:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
@@ -3043,6 +3070,7 @@
                   OnSelect: |-
                     =Reset(ddEntity);
                     Reset(tglNotDuplicate);
+                    Reset(txtDupReason);
                     Reset(txtReplyNote);
                     Reset(txtCustomerName);
                     Reset(ddCustomerCountry);
@@ -3129,8 +3157,11 @@
                                 Department: If(SelectedType = "Cost Center", ddDepartment.Selected.Value),
                                 Owner: If(SelectedType = "Cost Center", txtOwner.Text),
                                 BudgetYear: If(SelectedType = "Cost Center", Value(txtBudgetYear.Text)),
-                                DuplicateCheck: DupStatus,
+                                DuplicateCheck: If(DupStatus = "Clear", "Clear", DupStatus & If(DupOverridden, " - requestor says different", "")),
                                 PossibleMatchID: DupRecordID,
+                                DupReason: If(DupOverridden, Trim(txtDupReason.Text), ""),
+                                MatchKey: InputKey,
+                                IDKey: InputIDKey,
                                 Status: "Resubmitted",
                                 CurrentStage: "Resubmitted; back with the approver who asked for changes",
                                 ChangeNote: If(IsBlank(EditRec.ChangeNote), "", EditRec.ChangeNote & Char(10)) & Text(Now(), "dd mmm yyyy hh:mm") & " " & User().FullName & ": " & ChangesText & If(IsBlank(Trim(txtReplyNote.Text)), "", " Reply: " & Trim(txtReplyNote.Text))
@@ -3148,6 +3179,7 @@
                             Set(gEditID, "");
                             Reset(ddEntity);
                             Reset(tglNotDuplicate);
+                            Reset(txtDupReason);
                             Reset(txtReplyNote);
                             Reset(txtCustomerName);
                             Reset(ddCustomerCountry);
@@ -3213,8 +3245,11 @@
                                     Department: If(SelectedType = "Cost Center", ddDepartment.Selected.Value),
                                     Owner: If(SelectedType = "Cost Center", txtOwner.Text),
                                     BudgetYear: If(SelectedType = "Cost Center", Value(txtBudgetYear.Text)),
-                                    DuplicateCheck: DupStatus,
-                                    PossibleMatchID: DupRecordID
+                                    DuplicateCheck: If(DupStatus = "Clear", "Clear", DupStatus & If(DupOverridden, " - requestor says different", "")),
+                                    PossibleMatchID: DupRecordID,
+                                    DupReason: If(DupOverridden, Trim(txtDupReason.Text), ""),
+                                    MatchKey: InputKey,
+                                    IDKey: InputIDKey
                                 });
                                 If(SelectedType in ["Customer", "Vendor"],
                                     Patch(SensitiveDetails, Defaults(SensitiveDetails), {
@@ -3230,6 +3265,7 @@
                                 Notify(rid & " submitted. It's now with the approvers.", NotificationType.Success);
                                 Reset(ddEntity);
                                 Reset(tglNotDuplicate);
+                                Reset(txtDupReason);
                                 Reset(txtReplyNote);
                                 Reset(txtCustomerName);
                                 Reset(ddCustomerCountry);

@@ -1,247 +1,247 @@
-Title,CustomerName,NormalizedName,Country,City,Address,RegistrationNo,Segment,CreatedByEntity
-C10007,National University Hospital,national university hospital,SG,Kent Ridge,"5 Lower Kent Ridge Road, Kent Ridge",200288778W,Hospital,SPD
-C10010,National Univ. Hospital (S) Pte Ltd,national university hospital s,SG,Kent Ridge,"5 Lower Kent Ridge Rd, Kent Ridge",200288778W,Hospital,QTS
-C10012,NUH,nuh,SG,Kent Ridge,"5 Lower Kent Ridge Rd, Kent Ridge",,Hospital,SPD
-C10015,Clementi Golden Hospital,clementi golden hospital,SG,Clementi,"123 Novena Rise, Clementi",201420580K,Hospital,SPD
-C10024,Woodlands Heart Hospital,woodlands heart hospital,SG,Woodlands,"204 Lorong 6 Toa Payoh, Woodlands",200656745R,Hospital,QTS
-C10026,WOODLANDS HEART HOSP.,woodlands heart hospital,SG,Woodlands,204 Lorong 6 Toa Payoh Woodlands,,Hospital,QTG
-C10029,Toa Payoh Sunrise Hospital,toa payoh sunrise hospital,SG,Toa Payoh,"235 Jurong West Street 41, Toa Payoh",201585684N,Hospital,SPD
-C10037,Toa Payoh Sunrise Hosp.,toa payoh sunrise hospital,SG,Toa Payoh,"235 Jurong West St 41, Toa Payoh",201585684N,Hospital,QTG
-C10041,Clementi Northpoint Hospital,clementi northpoint hospital,SG,Clementi,"256 Tampines Avenue 5, Clementi",200876369W,Hospital,QTS
-C10048,Outram Medical Centre,outram medical centre,SG,Outram,"266 Novena Rise, Outram",201339428M,Hospital,SPD
-C10054,Bedok Green Valley Hospital,bedok green valley hospital,SG,Bedok,"73 Outram Road, Bedok",200225992Z,Hospital,SPD
-C10056,Toa Payoh Northpoint Hospital,toa payoh northpoint hospital,SG,Toa Payoh,"410 Outram Road, Toa Payoh",202062684R,Hospital,SPD
-C10059,Bukit Timah Riverside Hospital,bukit timah riverside hospital,SG,Bukit Timah,"355 Outram Road, Bukit Timah",200977012R,Hospital,SPD
-C10065,Tampines Golden Hospital,tampines golden hospital,SG,Tampines,"353 Lorong 6 Toa Payoh, Tampines",200933992R,Hospital,SPD
-C10072,Tampines Heart Hospital,tampines heart hospital,SG,Tampines,"383 Bedok North Road, Tampines",199968903K,Hospital,SPD
-C10074,Bukit Timah Eastern Hospital,bukit timah eastern hospital,SG,Bukit Timah,"62 Novena Rise, Bukit Timah",201981624N,Hospital,SPD
-C10080,Community Clinical Laboratory Pte Ltd,community clinical laboratory,SG,Outram,"115 Outram Road, Outram",201327198W,Laboratory,QTS
-C10081,Jurong Medical Diagnostic Laboratory Pte Ltd,jurong medical diagnostic laboratory,SG,Jurong,"193 Novena Rise, Jurong",199861032K,Laboratory,SPD
-C10085,Jurong Medical Diagnostic Laboratory,jurong medical diagnostic laboratory,SG,Jurong,193 Novena Rise Jurong,,Laboratory,SPD
-C10086,Golden Pathology Laboratory Toa Payoh Pte Ltd,golden pathology laboratory toa payoh,SG,Toa Payoh,"63 Outram Road, Toa Payoh",200984923W,Laboratory,SPD
-C10095,Eastern Clinical Laboratory Pte Ltd,eastern clinical laboratory,SG,Clementi,"364 Tampines Avenue 5, Clementi",201262318K,Laboratory,SPD
-C10096,Outram Mercy Diagnostic Laboratory Pte Ltd,outram mercy diagnostic laboratory,SG,Outram,"248 Novena Rise, Outram",199994626W,Laboratory,SPD
-C10098,Pacific Pathology Laboratory Jurong Pte Ltd,pacific pathology laboratory jurong,SG,Jurong,"218 Bedok North Road, Jurong",202220309R,Laboratory,SPD
-C10099,Sunrise Pathology Laboratory Bedok Pte Ltd,sunrise pathology laboratory bedok,SG,Bedok,"91 Woodlands Avenue 2, Bedok",201173183R,Laboratory,SPD
-C10106,Northpoint Clinical Laboratory Pte Ltd,northpoint clinical laboratory,SG,Bedok,"94 Novena Rise, Bedok",200630546N,Laboratory,SPD
-C10111,Lakeside Pathology Laboratory Bukit Timah Pte Ltd,lakeside pathology laboratory bukit timah,SG,Bukit Timah,"289 Lorong 6 Toa Payoh, Bukit Timah",201682841M,Laboratory,SPD
-C10113,Lakeside Pathology Lab Bukit Timah Pte. Ltd.,lakeside pathology laboratory bukit timah,SG,Bukit Timah,289 Lorong 6 Toa Payoh Bukit Timah,201682841M,Laboratory,SPD
-C10121,Women's & Children's Clinical Laboratory Pte Ltd,women's & children's clinical laboratory,SG,Woodlands,"323 Tampines Avenue 5, Woodlands",201151097N,Laboratory,SPD
-C10127,Lotus Pathology Laboratory Novena Pte Ltd,lotus pathology laboratory novena,SG,Novena,"213 Novena Rise, Novena",199622641M,Laboratory,SPD
-C10128,Unity Pathology Laboratory Woodlands Pte Ltd,unity pathology laboratory woodlands,SG,Woodlands,"311 Novena Rise, Woodlands",200751427W,Laboratory,SPD
-C10136,Serangoon Hope Polyclinic Pte Ltd,serangoon hope polyclinic,SG,Serangoon,"200 Lorong 6 Toa Payoh, Serangoon",202156703K,Clinic,SPD
-C10137,Tampines Sunrise Polyclinic Pte Ltd,tampines sunrise polyclinic,SG,Tampines,"164 Novena Rise, Tampines",201254890M,Clinic,SPD
-C10139,Jurong Medical Polyclinic Pte Ltd,jurong medical polyclinic,SG,Jurong,"306 Lorong 6 Toa Payoh, Jurong",199565675W,Clinic,SPD
-C10141,Women's & Children's Family Clinic Jurong Pte Ltd,women's & children's family clinic jurong,SG,Jurong,"15 Bedok North Road, Jurong",200329357M,Clinic,SPD
-C10142,Women's & Children's Family Clinic Juorng Pte Ltd,women's & children's family clinic juorng,SG,Jurong,"15 Bedok North Road, Jurong",,Clinic,SPD
-C10146,Lakeside Medical Clinic Yishun Pte Ltd,lakeside medical clinic yishun,SG,Yishun,"430 Jurong West Street 41, Yishun",201214981Z,Clinic,QTS
-C10147,Unity Medical Clinic Pasir Ris Pte Ltd,unity medical clinic pasir ris,SG,Pasir Ris,"337 Novena Rise, Pasir Ris",201541825R,Clinic,SPD
-C10154,Eastern Family Clinic Woodlands Pte Ltd,eastern family clinic woodlands,SG,Woodlands,"425 Lorong 6 Toa Payoh, Woodlands",200536342N,Clinic,SPD
-C10163,Sunrise Medical Clinic Clementi Pte Ltd,sunrise medical clinic clementi,SG,Clementi,"82 Bedok North Road, Clementi",199973551K,Clinic,QTS
-C10167,Women's & Children's Medical Clinic Yishun Pte Ltd,women's & children's medical clinic yishun,SG,Yishun,"154 Woodlands Avenue 2, Yishun",201244736M,Clinic,SPD
-C10169,Pasir Ris Lakeside Polyclinic Pte Ltd,pasir ris lakeside polyclinic,SG,Pasir Ris,"294 Novena Rise, Pasir Ris",200759883W,Clinic,QTS
-C10176,Community Family Clinic Tampines Pte Ltd,community family clinic tampines,SG,Tampines,"200 Woodlands Avenue 2, Tampines",201244267N,Clinic,SPD
-C10181,Community Family Clinic Tampines,community family clinic tampines,SG,Tampines,"200 Woodlands Ave 2, Tampines",201244267N,Clinic,QTS
-C10182,Serangoon Sunrise Polyclinic Pte Ltd,serangoon sunrise polyclinic,SG,Serangoon,"69 Bedok North Road, Serangoon",200192551K,Clinic,SPD
-C10188,Women's & Children's Family Clinic Serangoon Pte Ltd,women's & children's family clinic serangoon,SG,Serangoon,"265 Novena Rise, Serangoon",200051244W,Clinic,SPD
-C10189,Harmony Medical Clinic Novena Pte Ltd,harmony medical clinic novena,SG,Novena,"189 Lorong 6 Toa Payoh, Novena",200179747M,Clinic,SPD
-C10192,Harmony Med Clinic Novena Pte Ltd,harmony medical clinic novena,SG,Novena,189 Lorong 6 Toa Payoh Novena,200179747M,Clinic,QTS
-C10200,Pasir Ris Specialist Polyclinic Pte Ltd,pasir ris specialist polyclinic,SG,Pasir Ris,"135 Lorong 6 Toa Payoh, Pasir Ris",201525407N,Clinic,SPD
-C10205,Pasir Ris Spec. Ployclinic Pte Ltd,pasir ris specialist ployclinic,SG,Pasir Ris,135 Lorong 6 Toa Payoh Pasir Ris,201525407N,Clinic,SPD
-C10206,Outram Lakeside Polyclinic Pte Ltd,outram lakeside polyclinic,SG,Outram,"43 Tampines Avenue 5, Outram",201921516R,Clinic,SPD
-C10209,Melaka Unity Hospital,melaka unity hospital,MY,Melaka,"166 Jalan Wong Ah Fook, Melaka",20210164099053,Hospital,SPD
-C10215,Seremban Pacific Hospital,seremban pacific hospital,MY,Seremban,"109 Jalan Tun Razak, Seremban",20180186043714,Hospital,SPD
-C10222,Shah Alam Riverside Hospital,shah alam riverside hospital,MY,Shah Alam,"75 Persiaran Gurney, Shah Alam",20070141446260,Hospital,SPD
-C10225,Kota Kinabalu Pacific Hospital,kota kinabalu pacific hospital,MY,Kota Kinabalu,"12 Persiaran Gurney, Kota Kinabalu",20110164983661,Hospital,SPD
-C10233,Kuching Mercy Hospital,kuching mercy hospital,MY,Kuching,"170 Jalan Ampang, Kuching",20150133215571,Hospital,SPD
-C10235,Kota Kinabalu Green Valley Hospital,kota kinabalu green valley hospital,MY,Kota Kinabalu,"436 Jalan Gasing, Kota Kinabalu",20110111577597,Hospital,SPD
-C10242,KOTA KINABALU GREEN VALLEY HOSPITAL,kota kinabalu green valley hospital,MY,Kota Kinabalu,"436 Jalan Gasing, Kota Kinabalu",20110111577597,Hospital,SPD
-C10246,Petaling Jaya Heart Hospital,petaling jaya heart hospital,MY,Petaling Jaya,"405 Jalan Gasing, Petaling Jaya",20220147166155,Hospital,SPD
-C10253,Johor Bahru Community Hospital,johor bahru community hospital,MY,Johor Bahru,"169 Jalan Tun Razak, Johor Bahru",20190137698636,Hospital,SPD
-C10262,Seremban Northpoint Hospital,seremban northpoint hospital,MY,Seremban,"69 Jalan Ampang, Seremban",19910146356183,Hospital,QTS
-C10268,Shah Alam Hope Hospital,shah alam hope hospital,MY,Shah Alam,"340 Jalan Sultan Ismail, Shah Alam",20110156628928,Hospital,SPD
-C10274,Shah Alam Community Hospital,shah alam community hospital,MY,Shah Alam,"12 Jalan Gasing, Shah Alam",20130144071544,Hospital,SPD
-C10279,Ipoh Heart Hospital,ipoh heart hospital,MY,Ipoh,"298 Jalan Ampang, Ipoh",20160118664330,Hospital,SPD
-C10282,Shah Alam St. Mary's Hospital,shah alam st mary's hospital,MY,Shah Alam,"47 Persiaran Gurney, Shah Alam",20100175663953,Hospital,SPD
-C10291,Melaka Medical Centre,melaka medical centre,MY,Melaka,"445 Jalan Gasing, Melaka",19960191786246,Hospital,QTS
-C10296,Melaka Med. Centre,melaka medical centre,MY,Melaka,"445 Jln Gasing, Melaka",19960191786246,Hospital,QTG
-C10299,Penang Medical Diagnostic Laboratory Sdn Bhd,penang medical diagnostic laboratory,MY,Penang,"406 Jalan Sultan Ismail, Penang",20210128349025,Laboratory,SPD
-C10305,Seremban Northpoint Diagnostic Laboratory Sdn Bhd,seremban northpoint diagnostic laboratory,MY,Seremban,"78 Persiaran Gurney, Seremban",19990129324407,Laboratory,SPD
-C10309,Community Pathology Laboratory Kuching Sdn Bhd,community pathology laboratory kuching,MY,Kuching,"87 Jalan Tun Razak, Kuching",19930134915395,Laboratory,SPD
-C10311,Specialist Pathology Laboratory Melaka Sdn Bhd,specialist pathology laboratory melaka,MY,Melaka,"349 Jalan Wong Ah Fook, Melaka",20160130806154,Laboratory,QTS
-C10319,Lakeside Clinical Laboratory Sdn Bhd,lakeside clinical laboratory,MY,Kuching,"358 Jalan Sultan Ismail, Kuching",20110113769882,Laboratory,SPD
-C10322,Penang Eastern Diagnostic Laboratory Sdn Bhd,penang eastern diagnostic laboratory,MY,Penang,"339 Jalan Gasing, Penang",20030159975934,Laboratory,SPD
-C10328,PENANG EASTERN DIAGNOSTIC LABORATORY SDN BHD,penang eastern diagnostic laboratory,MY,Penang,"339 Jln Gasing, Penang",20030159975934,Laboratory,SPD
-C10335,Sunrise Clinical Laboratory Sdn Bhd,sunrise clinical laboratory,MY,Kuala Lumpur,"379 Jalan Gasing, Kuala Lumpur",20200122316302,Laboratory,QTS
-C10344,Seremban Women's & Children's Diagnostic Laboratory Sdn Bhd,seremban women's & children's diagnostic laboratory,MY,Seremban,"89 Jalan Tun Razak, Seremban",20170135407316,Laboratory,QTS
-C10347,Kuching Pacific Diagnostic Laboratory Sdn Bhd,kuching pacific diagnostic laboratory,MY,Ipoh,"245 Persiaran Gurney, Ipoh",20190146652985,Laboratory,SPD
-C10352,KUCHING PACIFIC DIAGNOSTIC LAB SDN BHD,kuching pacific diagnostic laboratory,MY,Ipoh,245 Persiaran Gurney Ipoh,20190146652985,Laboratory,SPD
-C10358,Golden Pathology Laboratory Kuching Sdn Bhd,golden pathology laboratory kuching,MY,Kuching,"312 Jalan Wong Ah Fook, Kuching",19930199928734,Laboratory,SPD
-C10367,Medical Clinical Laboratory Sdn Bhd,medical clinical laboratory,MY,Melaka,"51 Jalan Sultan Ismail, Melaka",20080114996960,Laboratory,SPD
-C10369,Medical Clinical Laboratory,medical clinical laboratory,MY,Melaka,"51 Jalan Sultan Ismail, Melaka",20080114996960,Laboratory,SPD
-C10376,Golden Clinical Laboratory Sdn Bhd,golden clinical laboratory,MY,Seremban,"246 Persiaran Gurney, Seremban",19910130549175,Laboratory,QTS
-C10385,Ipoh Central Diagnostic Laboratory Sdn Bhd,ipoh central diagnostic laboratory,MY,Ipoh,"384 Jalan Ampang, Ipoh",19970154951322,Laboratory,SPD
-C10387,Ipoh Central Diagnostic Laboratory Sdn. Bhd.,ipoh central diagnostic laboratory,MY,Ipoh,"384 Jln Ampang, Ipoh",19970154951322,Laboratory,SPD
-C10393,Kuala Lumpur Pacific Diagnostic Laboratory Sdn Bhd,kuala lumpur pacific diagnostic laboratory,MY,Kuala Lumpur,"264 Jalan Sultan Ismail, Kuala Lumpur",20160115541091,Laboratory,SPD
-C10401,Seremban Pacific Polyclinic Sdn Bhd,seremban pacific polyclinic,MY,Seremban,"272 Jalan Ampang, Seremban",20210139335391,Clinic,SPD
-C10404,Melaka Unity Polyclinic Sdn Bhd,melaka unity polyclinic,MY,Melaka,"393 Jalan Gasing, Melaka",19910157441910,Clinic,SPD
-C10409,Lakeside Medical Clinic Kuala Lumpur Sdn Bhd,lakeside medical clinic kuala lumpur,MY,Kuala Lumpur,"284 Jalan Tun Razak, Kuala Lumpur",20190164411918,Clinic,SPD
-C10410,Harmony Medical Clinic Ipoh Sdn Bhd,harmony medical clinic ipoh,MY,Ipoh,"131 Jalan Tun Razak, Ipoh",19920139333593,Clinic,SPD
-C10419,Harmony Family Clinic Petaling Jaya Sdn Bhd,harmony family clinic petaling jaya,MY,Petaling Jaya,"240 Persiaran Gurney, Petaling Jaya",19920135501820,Clinic,SPD
-C10426,Heart Medical Clinic Ipoh Sdn Bhd,heart medical clinic ipoh,MY,Ipoh,"147 Persiaran Gurney, Ipoh",19920173267927,Clinic,QTS
-C10430,Lakeside Family Clinic Melaka Sdn Bhd,lakeside family clinic melaka,MY,Melaka,"122 Jalan Gasing, Melaka",19930182701840,Clinic,SPD
-C10435,Lakseide Family Clinic Melaka Sdn. Bhd.,lakseide family clinic melaka,MY,Melaka,"122 Jln Gasing, Melaka",19930182701840,Clinic,QTS
-C10437,Women's & Children's Medical Clinic Seremban Sdn Bhd,women's & children's medical clinic seremban,MY,Seremban,"122 Jalan Tun Razak, Seremban",20020177759488,Clinic,SPD
-C10443,Harmony Medical Clinic Petaling Jaya Sdn Bhd,harmony medical clinic petaling jaya,MY,Petaling Jaya,"383 Jalan Tun Razak, Petaling Jaya",20050173667615,Clinic,QTS
-C10444,Harmony Medical Clinic Petaling Jaya,harmony medical clinic petaling jaya,MY,Petaling Jaya,"383 Jln Tun Razak, Petaling Jaya",20050173667615,Clinic,QTS
-C10445,Penang Central Polyclinic Sdn Bhd,penang central polyclinic,MY,Penang,"46 Jalan Wong Ah Fook, Penang",20210194458990,Clinic,SPD
-C10447,Central Family Clinic Seremban Sdn Bhd,central family clinic seremban,MY,Seremban,"130 Jalan Tun Razak, Seremban",19970160632340,Clinic,QTS
-C10452,Petaling Jaya Central Polyclinic Sdn Bhd,petaling jaya central polyclinic,MY,Petaling Jaya,"377 Jalan Tun Razak, Petaling Jaya",20190189176114,Clinic,SPD
-C10459,Community Medical Clinic Johor Bahru Sdn Bhd,community medical clinic johor bahru,MY,Johor Bahru,"314 Persiaran Gurney, Johor Bahru",20090129815022,Clinic,SPD
-C10468,Golden Family Clinic Petaling Jaya Sdn Bhd,golden family clinic petaling jaya,MY,Petaling Jaya,"63 Jalan Ampang, Petaling Jaya",20040153588665,Clinic,SPD
-C10474,Ipoh Riverside Polyclinic Sdn Bhd,ipoh riverside polyclinic,MY,Ipoh,"379 Persiaran Gurney, Ipoh",20160173015220,Clinic,SPD
-C10482,Sunrise Family Clinic Kuala Lumpur Sdn Bhd,sunrise family clinic kuala lumpur,MY,Kuala Lumpur,"390 Jalan Gasing, Kuala Lumpur",20040199213390,Clinic,SPD
-C10490,Pacific Medical Clinic Melaka Sdn Bhd,pacific medical clinic melaka,MY,Melaka,"316 Persiaran Gurney, Melaka",20090182870673,Clinic,SPD
-C10496,Phuket Medical Centre,phuket medical centre,TH,Phuket,"155 Sukhumvit Road, Phuket",0105543112421,Hospital,SPD
-C10505,Hat Yai General Hospital,hat yai general hospital,TH,Hat Yai,"410 Mittraphap Road, Hat Yai",0105564483124,Hospital,SPD
-C10512,Hat Yai Hope Hospital,hat yai hope hospital,TH,Hat Yai,"426 Mittraphap Road, Hat Yai",0105563958829,Hospital,SPD
-C10517,Udon Thani Pacific Hospital,udon thani pacific hospital,TH,Udon Thani,"319 Phahonyothin Road, Udon Thani",0105546374807,Hospital,SPD
-C10519,UDON THANI PACIFIC HOSPITAL,udon thani pacific hospital,TH,Udon Thani,"319 Phahonyothin Rd, Udon Thani",0105546374807,Hospital,SPD
-C10527,Udon Thani Green Valley Hospital,udon thani green valley hospital,TH,Udon Thani,"417 Rama IV Road, Udon Thani",0105559222392,Hospital,SPD
-C10532,Nonthaburi Mercy Hospital,nonthaburi mercy hospital,TH,Nonthaburi,"265 Petchkasem Road, Nonthaburi",0105536607873,Hospital,SPD
-C10534,Udon Thani Family Hospital,udon thani family hospital,TH,Udon Thani,"330 Sukhumvit Road, Udon Thani",0105542796162,Hospital,QTG
-C10542,Nonthaburi Eastern Hospital,nonthaburi eastern hospital,TH,Nonthaburi,"77 Nimmanhaemin Road, Nonthaburi",0105561290226,Hospital,QTS
-C10543,Bangkok Hope Hospital,bangkok hope hospital,TH,Bangkok,"238 Nimmanhaemin Road, Bangkok",0105534208652,Hospital,SPD
-C10552,Chiang Mai Riverside Hospital,chiang mai riverside hospital,TH,Chiang Mai,"365 Mittraphap Road, Chiang Mai",0105565163519,Hospital,SPD
-C10556,Khon Kaen Harmony Hospital,khon kaen harmony hospital,TH,Udon Thani,"386 Sukhumvit Road, Udon Thani",0105557547615,Hospital,QTS
-C10564,Hat Yai Eastern Hospital,hat yai eastern hospital,TH,Hat Yai,"380 Mittraphap Road, Hat Yai",0105565148386,Hospital,SPD
-C10573,"Lotus Clinical Laboratory Co., Ltd.",lotus clinical laboratory,TH,Hat Yai,"437 Phahonyothin Road, Hat Yai",0105543954053,Laboratory,SPD
-C10577,"Chiang Mai St. Mary's Diagnostic Laboratory Co., Ltd.",chiang mai st mary's diagnostic laboratory,TH,Chiang Mai,"1 Rama IV Road, Chiang Mai",0105569925723,Laboratory,SPD
-C10578,"Mercy Pathology Laboratory Udon Thani Co., Ltd.",mercy pathology laboratory udon thani,TH,Udon Thani,"314 Nimmanhaemin Road, Udon Thani",0105555255518,Laboratory,SPD
-C10579,"Mercy Pathoolgy Laboratory Udon Thani Co., Ltd.",mercy pathoolgy laboratory udon thani,TH,Udon Thani,"314 Nimmanhaemin Rd, Udon Thani",,Laboratory,SPD
-C10582,"Udon Thani Harmony Diagnostic Laboratory Co., Ltd.",udon thani harmony diagnostic laboratory,TH,Udon Thani,"390 Phahonyothin Road, Udon Thani",0105555927177,Laboratory,SPD
-C10584,"Bangkok St. Mary's Diagnostic Laboratory Co., Ltd.",bangkok st mary's diagnostic laboratory,TH,Bangkok,"443 Petchkasem Road, Bangkok",0105549727405,Laboratory,SPD
-C10590,"Sunrise Clinical Laboratory Co., Ltd.",sunrise clinical laboratory,TH,Udon Thani,"132 Sukhumvit Road, Udon Thani",0105543840513,Laboratory,SPD
-C10592,"Hope Clinical Laboratory Co., Ltd.",hope clinical laboratory,TH,Chiang Mai,"275 Mittraphap Road, Chiang Mai",0105533648076,Laboratory,SPD
-C10597,"Hope Clinical Lab Co., Ltd.",hope clinical laboratory,TH,Chiang Mai,"275 Mittraphap Rd, Chiang Mai",,Laboratory,SPD
-C10603,"Udon Thani General Diagnostic Laboratory Co., Ltd.",udon thani general diagnostic laboratory,TH,Udon Thani,"226 Mittraphap Road, Udon Thani",0105531609024,Laboratory,SPD
-C10607,"Pattaya Heart Diagnostic Laboratory Co., Ltd.",pattaya heart diagnostic laboratory,TH,Pattaya,"213 Phahonyothin Road, Pattaya",0105540037366,Laboratory,SPD
-C10609,Pattaya Heart Diagnostic Laboratory,pattaya heart diagnostic laboratory,TH,Pattaya,"213 Phahonyothin Road, Pattaya",0105540037366,Laboratory,SPD
-C10617,"Golden Clinical Laboratory Co., Ltd.",golden clinical laboratory,TH,Chiang Mai,"212 Nimmanhaemin Road, Chiang Mai",0105559601109,Laboratory,SPD
-C10619,"Phuket Lotus Diagnostic Laboratory Co., Ltd.",phuket lotus diagnostic laboratory,TH,Phuket,"139 Petchkasem Road, Phuket",0105561004048,Laboratory,SPD
-C10624,"Bangkok Family Diagnostic Laboratory Co., Ltd.",bangkok family diagnostic laboratory,TH,Bangkok,"239 Nimmanhaemin Road, Bangkok",0105535171377,Laboratory,SPD
-C10633,Bangkok Family Diagnostic Lab. Co Ltd,bangkok family diagnostic laboratory,TH,Bangkok,"239 Nimmanhaemin Rd, Bangkok",0105535171377,Laboratory,SPD
-C10635,"Khon Kaen Unity Polyclinic Co., Ltd.",khon kaen unity polyclinic,TH,Khon Kaen,"48 Phahonyothin Road, Khon Kaen",0105566175618,Clinic,SPD
-C10644,"Women's & Children's Medical Clinic Phuket Co., Ltd.",women's & children's medical clinic phuket,TH,Phuket,"100 Mittraphap Road, Phuket",0105546914060,Clinic,SPD
-C10647,"Phuket Harmony Polyclinic Co., Ltd.",phuket harmony polyclinic,TH,Phuket,"34 Petchkasem Road, Phuket",0105569946047,Clinic,SPD
-C10650,"Khon Kaen Riverside Polyclinic Co., Ltd.",khon kaen riverside polyclinic,TH,Khon Kaen,"326 Sukhumvit Road, Khon Kaen",0105550495155,Clinic,SPD
-C10656,"Khon Kaen Riverside Polcylinic Co., Ltd.",khon kaen riverside polcylinic,TH,Khon Kaen,"326 Sukhumvit Rd, Khon Kaen",0105550495155,Clinic,SPD
-C10657,"Udon Thani Specialist Polyclinic Co., Ltd.",udon thani specialist polyclinic,TH,Udon Thani,"162 Phahonyothin Road, Udon Thani",0105550041518,Clinic,SPD
-C10660,"Mercy Medical Clinic Khon Kaen Co., Ltd.",mercy medical clinic khon kaen,TH,Khon Kaen,"277 Sukhumvit Road, Khon Kaen",0105532016753,Clinic,QTS
-C10663,"Mercy Medical Clniic Khon Kaen Co., Ltd.",mercy medical clniic khon kaen,TH,Khon Kaen,"277 Sukhumvit Rd, Khon Kaen",,Clinic,QTS
-C10671,"Udon Thani Hope Polyclinic Co., Ltd.",udon thani hope polyclinic,TH,Udon Thani,"277 Petchkasem Road, Udon Thani",0105544688790,Clinic,SPD
-C10673,"General Family Clinic Udon Thani Co., Ltd.",general family clinic udon thani,TH,Udon Thani,"334 Phahonyothin Road, Udon Thani",0105554365826,Clinic,SPD
-C10676,"Mercy Family Clinic Chiang Mai Co., Ltd.",mercy family clinic chiang mai,TH,Chiang Mai,"389 Sukhumvit Road, Chiang Mai",0105559083966,Clinic,SPD
-C10680,"Nonthaburi Family Polyclinic Co., Ltd.",nonthaburi family polyclinic,TH,Nonthaburi,"61 Rama IV Road, Nonthaburi",0105558365126,Clinic,SPD
-C10683,"General Family Clinic Chiang Mai Co., Ltd.",general family clinic chiang mai,TH,Chiang Mai,"271 Nimmanhaemin Road, Chiang Mai",0105553563185,Clinic,SPD
-C10684,"Hat Yai Women's & Children's Polyclinic Co., Ltd.",hat yai women's & children's polyclinic,TH,Hat Yai,"385 Nimmanhaemin Road, Hat Yai",0105549203136,Clinic,SPD
-C10685,"Heart Family Clinic Nonthaburi Co., Ltd.",heart family clinic nonthaburi,TH,Nonthaburi,"279 Petchkasem Road, Nonthaburi",0105568443458,Clinic,SPD
-C10694,Heart Family Clinic Nonthaburi Co Ltd,heart family clinic nonthaburi,TH,Nonthaburi,"279 Petchkasem Rd, Nonthaburi",0105568443458,Clinic,SPD
-C10699,"Northpoint Medical Clinic Nonthaburi Co., Ltd.",northpoint medical clinic nonthaburi,TH,Nonthaburi,"439 Rama IV Road, Nonthaburi",0105547984287,Clinic,SPD
-C10707,"Pattaya General Polyclinic Co., Ltd.",pattaya general polyclinic,TH,Pattaya,"438 Petchkasem Road, Pattaya",0105549473038,Clinic,SPD
-C10714,"Pacific Family Clinic Chiang Mai Co., Ltd.",pacific family clinic chiang mai,TH,Chiang Mai,"262 Nimmanhaemin Road, Chiang Mai",0105551100739,Clinic,SPD
-C10723,Rumah Sakit Lakeside Makassar,rumah sakit lakeside makassar,ID,Makassar,"163 Jalan MH Thamrin, Makassar",34.728.789.5-113.000,Hospital,SPD
-C10724,Rumah Sakit Medical Yogyakarta,rumah sakit medical yogyakarta,ID,Yogyakarta,"385 Jalan Ahmad Yani, Yogyakarta",95.176.885.9-231.000,Hospital,SPD
-C10725,Rumah Sakit Pacific Makassar,rumah sakit pacific makassar,ID,Makassar,"387 Jalan Gatot Subroto, Makassar",89.107.856.9-100.000,Hospital,SPD
-C10734,Rumah Sakit Central Bandung,rumah sakit central bandung,ID,Bandung,"11 Jalan Diponegoro, Bandung",07.887.118.2-554.000,Hospital,SPD
-C10736,Rumah Sakit General Medan,rumah sakit general medan,ID,Medan,"192 Jalan Diponegoro, Medan",05.304.137.5-637.000,Hospital,QTS
-C10738,Rumah Sakit Pacific Denpasar,rumah sakit pacific denpasar,ID,Denpasar,"438 Jalan Jenderal Sudirman, Denpasar",14.412.510.4-464.000,Hospital,SPD
-C10745,Rumah Sakit Sunrise Jakarta,rumah sakit sunrise jakarta,ID,Jakarta,"3 Jalan Ahmad Yani, Jakarta",27.103.107.5-270.000,Hospital,SPD
-C10747,Rumah Sakit Harmony Makassar,rumah sakit harmony makassar,ID,Makassar,"92 Jalan Gatot Subroto, Makassar",32.145.183.3-528.000,Hospital,SPD
-C10752,Rumah Sakit Green Valley Yogyakarta,rumah sakit green valley yogyakarta,ID,Yogyakarta,"11 Jalan Pemuda, Yogyakarta",64.718.839.3-698.000,Hospital,SPD
-C10754,Rumah Sakit Heart Medan,rumah sakit heart medan,ID,Medan,"252 Jalan Jenderal Sudirman, Medan",17.598.800.2-624.000,Hospital,SPD
-C10758,Rumah Sakit Sunrise Surabaya,rumah sakit sunrise surabaya,ID,Surabaya,"251 Jalan Jenderal Sudirman, Surabaya",86.512.582.6-421.000,Hospital,SPD
-C10763,Rumah Sakit Surnise Surabaya,rumah sakit surnise surabaya,ID,Surabaya,"251 Jln Jenderal Sudirman, Surabaya",,Hospital,QTG
-C10771,Rumah Sakit Lotus Yogyakarta,rumah sakit lotus yogyakarta,ID,Yogyakarta,"403 Jalan Gatot Subroto, Yogyakarta",19.933.424.8-300.000,Hospital,SPD
-C10778,Rumah Sakit Lotus Medan,rumah sakit lotus medan,ID,Medan,"203 Jalan MH Thamrin, Medan",67.931.274.1-774.000,Hospital,QTG
-C10780,Rumah Sakit Sunrise Bandung,rumah sakit sunrise bandung,ID,Bandung,"80 Jalan Ahmad Yani, Bandung",20.127.864.5-239.000,Hospital,SPD
-C10787,RUMAH SAKIT SUNRISE BANDUNG,rumah sakit sunrise bandung,ID,Bandung,"80 Jln Ahmad Yani, Bandung",,Hospital,QTS
-C10788,PT General Clinical Laboratory,general clinical laboratory,ID,Denpasar,"62 Jalan Gatot Subroto, Denpasar",67.702.786.9-560.000,Laboratory,SPD
-C10791,PT Bandung Unity Diagnostic Laboratory,bandung unity diagnostic laboratory,ID,Bandung,"197 Jalan Gatot Subroto, Bandung",47.862.547.4-760.000,Laboratory,SPD
-C10796,PT Mercy Clinical Laboratory,mercy clinical laboratory,ID,Jakarta,"69 Jalan Jenderal Sudirman, Jakarta",89.975.702.7-743.000,Laboratory,SPD
-C10799,PT Jakarta Central Diagnostic Laboratory,jakarta central diagnostic laboratory,ID,Jakarta,"66 Jalan MH Thamrin, Jakarta",70.514.880.7-715.000,Laboratory,QTS
-C10806,PT Makassar Unity Diagnostic Laboratory,makassar unity diagnostic laboratory,ID,Makassar,"34 Jalan MH Thamrin, Makassar",96.470.222.1-848.000,Laboratory,SPD
-C10811,PT Specialist Pathology Laboratory Makassar,specialist pathology laboratory makassar,ID,Makassar,"174 Jalan Gatot Subroto, Makassar",47.136.708.9-771.000,Laboratory,SPD
-C10815,PT Denpasar Specialist Diagnostic Laboratory,denpasar specialist diagnostic laboratory,ID,Denpasar,"100 Jalan Ahmad Yani, Denpasar",04.248.281.6-101.000,Laboratory,SPD
-C10819,PT Denpasar Specialist Diangostic Laboratory,denpasar specialist diangostic laboratory,ID,Denpasar,"100 Jln Ahmad Yani, Denpasar",04.248.281.6-101.000,Laboratory,SPD
-C10820,PT Riverside Clinical Laboratory,riverside clinical laboratory,ID,Surabaya,"71 Jalan Gatot Subroto, Surabaya",84.356.940.2-927.000,Laboratory,SPD
-C10822,PT Medan Harmony Diagnostic Laboratory,medan harmony diagnostic laboratory,ID,Medan,"375 Jalan Jenderal Sudirman, Medan",93.233.289.3-321.000,Laboratory,SPD
-C10825,PT Green Valley Pathology Laboratory Yogyakarta,green valley pathology laboratory yogyakarta,ID,Yogyakarta,"24 Jalan Pemuda, Yogyakarta",92.112.468.5-275.000,Laboratory,SPD
-C10829,PT Golden Pathology Laboratory Bandung,golden pathology laboratory bandung,ID,Bandung,"138 Jalan Jenderal Sudirman, Bandung",82.822.260.8-417.000,Laboratory,SPD
-C10838,PT Golden Pathology Lab Bandung,golden pathology laboratory bandung,ID,Bandung,"138 Jln Jenderal Sudirman, Bandung",,Laboratory,SPD
-C10844,PT Medan St. Mary's Diagnostic Laboratory,medan st mary's diagnostic laboratory,ID,Medan,"201 Jalan Ahmad Yani, Medan",07.777.470.6-121.000,Laboratory,SPD
-C10848,PT Lotus Pathology Laboratory Makassar,lotus pathology laboratory makassar,ID,Makassar,"357 Jalan MH Thamrin, Makassar",30.308.621.8-906.000,Laboratory,SPD
-C10853,PT St. Mary's Clinical Laboratory,st mary's clinical laboratory,ID,Jakarta,"206 Jalan Pemuda, Jakarta",33.393.509.5-926.000,Laboratory,SPD
-C10855,PT Medan Community Polyclinic,medan community polyclinic,ID,Medan,"200 Jalan Ahmad Yani, Medan",01.588.447.7-615.000,Clinic,SPD
-C10857,PT Northpoint Family Clinic Yogyakarta,northpoint family clinic yogyakarta,ID,Yogyakarta,"90 Jalan Jenderal Sudirman, Yogyakarta",85.354.686.7-275.000,Clinic,SPD
-C10862,PT Eastern Family Clinic Makassar,eastern family clinic makassar,ID,Makassar,"368 Jalan Gatot Subroto, Makassar",64.190.215.1-126.000,Clinic,SPD
-C10868,Eastern Family Clinic Makassar,eastern family clinic makassar,ID,Makassar,"368 Jln Gatot Subroto, Makassar",,Clinic,QTS
-C10877,PT Medical Clinic Bandung,medical clinic bandung,ID,Bandung,"86 Jalan Jenderal Sudirman, Bandung",64.117.189.7-731.000,Clinic,SPD
-C10886,PT General Family Clinic Bandung,general family clinic bandung,ID,Bandung,"195 Jalan Ahmad Yani, Bandung",20.383.975.5-322.000,Clinic,SPD
-C10891,PT Heart Medical Clinic Semarang,heart medical clinic semarang,ID,Semarang,"322 Jalan MH Thamrin, Semarang",15.542.815.8-550.000,Clinic,SPD
-C10894,PT Medan Sunrise Polyclinic,medan sunrise polyclinic,ID,Medan,"227 Jalan Ahmad Yani, Medan",78.773.503.8-236.000,Clinic,SPD
-C10898,PT Heart Medical Clinic Medan,heart medical clinic medan,ID,Medan,"38 Jalan MH Thamrin, Medan",94.542.822.7-622.000,Clinic,SPD
-C10905,Heart Medical Clinic Medan,heart medical clinic medan,ID,Medan,"38 Jalan MH Thamrin, Medan",94.542.822.7-622.000,Clinic,SPD
-C10911,PT Women's & Children's Family Clinic Surabaya,women's & children's family clinic surabaya,ID,Surabaya,"140 Jalan Ahmad Yani, Surabaya",63.192.480.1-786.000,Clinic,SPD
-C10915,Women's & Children's Family Clinic Surabaya,women's & children's family clinic surabaya,ID,Surabaya,"140 Jalan Ahmad Yani, Surabaya",,Clinic,SPD
-C10923,PT Sunrise Medical Clinic Yogyakarta,sunrise medical clinic yogyakarta,ID,Yogyakarta,"173 Jalan Diponegoro, Yogyakarta",42.607.682.9-293.000,Clinic,SPD
-C10929,PT Lotus Family Clinic Jakarta,lotus family clinic jakarta,ID,Jakarta,"133 Jalan Pemuda, Jakarta",01.978.172.2-399.000,Clinic,SPD
-C10935,PT Unity Family Clinic Semarang,unity family clinic semarang,ID,Semarang,"391 Jalan Jenderal Sudirman, Semarang",04.569.746.5-829.000,Clinic,SPD
-C10942,PT Lotus Medical Clinic Makassar,lotus medical clinic makassar,ID,Makassar,"133 Jalan Ahmad Yani, Makassar",04.667.828.4-575.000,Clinic,SPD
-C10946,PT Specialist Medical Clinic Jakarta,specialist medical clinic jakarta,ID,Jakarta,"59 Jalan Gatot Subroto, Jakarta",91.951.445.5-369.000,Clinic,SPD
-C10950,Specialist Medical Clinic Jakarta,specialist medical clinic jakarta,ID,Jakarta,"59 Jln Gatot Subroto, Jakarta",91.951.445.5-369.000,Clinic,SPD
-C10956,PT St. Mary's Family Clinic Medan,st mary's family clinic medan,ID,Medan,"326 Jalan MH Thamrin, Medan",97.170.150.3-459.000,Clinic,SPD
-C10959,PT Mercy Medical Clinic Bandung,mercy medical clinic bandung,ID,Bandung,"282 Jalan Ahmad Yani, Bandung",65.738.945.1-390.000,Clinic,SPD
-C10962,PT Mercy Medical Clinic Yogyakarta,mercy medical clinic yogyakarta,ID,Yogyakarta,"111 Jalan Ahmad Yani, Yogyakarta",49.761.679.8-679.000,Clinic,SPD
-C10970,Da Nang Medical Centre,da nang medical centre,VN,Da Nang,"6 Nguyen Hue Boulevard, Da Nang",0725154150,Hospital,SPD
-C10973,DA NANG MEDICAL CENTRE,da nang medical centre,VN,Da Nang,"6 Nguyen Hue Blvd, Da Nang",,Hospital,SPD
-C10974,Nha Trang Harmony Hospital,nha trang harmony hospital,VN,Nha Trang,"224 Ly Thuong Kiet Street, Nha Trang",0967370950,Hospital,SPD
-C10976,Ho Chi Minh City Riverside Hospital,ho chi minh city riverside hospital,VN,Ho Chi Minh City,"15 Ly Thuong Kiet Street, Ho Chi Minh City",0469586357,Hospital,SPD
-C10977,Hue Sunrise Hospital,hue sunrise hospital,VN,Hue,"81 Hai Ba Trung Street, Hue",0796371786,Hospital,SPD
-C10981,Ho Chi Minh City Specialist Hospital,ho chi minh city specialist hospital,VN,Ho Chi Minh City,"239 Dien Bien Phu Street, Ho Chi Minh City",0187574452,Hospital,QTS
-C10989,Hai Phong Heart Hospital,hai phong heart hospital,VN,Hai Phong,"345 Dien Bien Phu Street, Hai Phong",0657495487,Hospital,SPD
-C10997,Can Tho Lotus Hospital,can tho lotus hospital,VN,Can Tho,"424 Le Loi Street, Can Tho",0988194645,Hospital,SPD
-C11005,Ho Chi Minh City Family Hospital,ho chi minh city family hospital,VN,Ho Chi Minh City,"139 Tran Hung Dao Street, Ho Chi Minh City",0980856433,Hospital,SPD
-C11006,HO CHI MINH CITY FAMILY HOSPITAL,ho chi minh city family hospital,VN,Ho Chi Minh City,"139 Tran Hung Dao St, Ho Chi Minh City",0980856433,Hospital,SPD
-C11015,Nha Trang Family Hospital,nha trang family hospital,VN,Nha Trang,"262 Le Loi Street, Nha Trang",0883239637,Hospital,SPD
-C11016,Hue Pacific Hospital,hue pacific hospital,VN,Ho Chi Minh City,"205 Nguyen Hue Boulevard, Ho Chi Minh City",0183424099,Hospital,SPD
-C11017,"Hope Pathology Laboratory Ho Chi Minh City Co., Ltd",hope pathology laboratory ho chi minh city,VN,Ho Chi Minh City,"421 Dien Bien Phu Street, Ho Chi Minh City",0123739003,Laboratory,SPD
-C11022,"Golden Clinical Laboratory Co., Ltd",golden clinical laboratory,VN,Hue,"33 Hai Ba Trung Street, Hue",0506718717,Laboratory,SPD
-C11028,"Nha Trang Hope Diagnostic Laboratory Co., Ltd",nha trang hope diagnostic laboratory,VN,Nha Trang,"251 Dien Bien Phu Street, Nha Trang",0592197545,Laboratory,SPD
-C11033,"NHA TRANG HOPE DIAGNOSTIC LAB. CO., LTD",nha trang hope diagnostic laboratory,VN,Nha Trang,"251 Dien Bien Phu Street, Nha Trang",0592197545,Laboratory,SPD
-C11034,"Harmony Pathology Laboratory Hanoi Co., Ltd",harmony pathology laboratory hanoi,VN,Hanoi,"391 Nguyen Hue Boulevard, Hanoi",0788427950,Laboratory,SPD
-C11040,"Mercy Pathology Laboratory Hue Co., Ltd",mercy pathology laboratory hue,VN,Hue,"251 Le Loi Street, Hue",0680570946,Laboratory,SPD
-C11048,Mercy Pathology Laboratory Hue Co. Ltd,mercy pathology laboratory hue,VN,Hue,"251 Le Loi Street, Hue",0680570946,Laboratory,SPD
-C11051,"Can Tho Golden Diagnostic Laboratory Co., Ltd",can tho golden diagnostic laboratory,VN,Can Tho,"251 Hai Ba Trung Street, Can Tho",0379584456,Laboratory,SPD
-C11056,"Ho Chi Minh City Central Diagnostic Laboratory Co., Ltd",ho chi minh city central diagnostic laboratory,VN,Ho Chi Minh City,"291 Le Loi Street, Ho Chi Minh City",0575631022,Laboratory,SPD
-C11065,"Unity Clinical Laboratory Co., Ltd",unity clinical laboratory,VN,Hanoi,"22 Hai Ba Trung Street, Hanoi",0975255800,Laboratory,SPD
-C11073,"Unity Cliincal Laboratory Co., Ltd",unity cliincal laboratory,VN,Hanoi,"22 Hai Ba Trung Street, Hanoi",0975255800,Laboratory,SPD
-C11079,"Hai Phong Lakeside Diagnostic Laboratory Co., Ltd",hai phong lakeside diagnostic laboratory,VN,Hai Phong,"16 Le Loi Street, Hai Phong",0513560480,Laboratory,SPD
-C11087,"Can Tho Heart Diagnostic Laboratory Co., Ltd",can tho heart diagnostic laboratory,VN,Can Tho,"229 Le Loi Street, Can Tho",0617544301,Laboratory,QTS
-C11092,"Lakeside Medical Clinic Da Nang Co., Ltd",lakeside medical clinic da nang,VN,Da Nang,"256 Ly Thuong Kiet Street, Da Nang",0652309503,Clinic,SPD
-C11093,"Green Valley Medical Clinic Da Nang Co., Ltd",green valley medical clinic da nang,VN,Da Nang,"158 Hai Ba Trung Street, Da Nang",0309811911,Clinic,SPD
-C11101,"Nha Trang Northpoint Polyclinic Co., Ltd",nha trang northpoint polyclinic,VN,Nha Trang,"246 Le Loi Street, Nha Trang",0343061710,Clinic,SPD
-C11107,"Can Tho Women's & Children's Polyclinic Co., Ltd",can tho women's & children's polyclinic,VN,Can Tho,"424 Tran Hung Dao Street, Can Tho",0991214256,Clinic,SPD
-C11112,"Medical Clinic Nha Trang Co., Ltd",medical clinic nha trang,VN,Nha Trang,"261 Le Loi Street, Nha Trang",0784443923,Clinic,SPD
-C11118,"MDEICAL CLINIC NHA TRANG CO., LTD",mdeical clinic nha trang,VN,Nha Trang,"261 Le Loi St, Nha Trang",,Clinic,SPD
-C11125,"Da Nang Specialist Polyclinic Co., Ltd",da nang specialist polyclinic,VN,Da Nang,"275 Hai Ba Trung Street, Da Nang",0523794890,Clinic,SPD
-C11134,"Central Family Clinic Ho Chi Minh City Co., Ltd",central family clinic ho chi minh city,VN,Ho Chi Minh City,"364 Nguyen Hue Boulevard, Ho Chi Minh City",0781940867,Clinic,SPD
-C11143,"Pacific Medical Clinic Hue Co., Ltd",pacific medical clinic hue,VN,Hue,"202 Dien Bien Phu Street, Hue",0464375526,Clinic,SPD
-C11152,Pacific Medical Cliinc Hue,pacific medical cliinc hue,VN,Hue,"202 Dien Bien Phu St, Hue",,Clinic,SPD
-C11158,"Specialist Medical Clinic Hai Phong Co., Ltd",specialist medical clinic hai phong,VN,Hai Phong,"365 Nguyen Hue Boulevard, Hai Phong",0256984613,Clinic,SPD
-C11161,"Harmony Medical Clinic Da Nang Co., Ltd",harmony medical clinic da nang,VN,Da Nang,"419 Ly Thuong Kiet Street, Da Nang",0648649812,Clinic,SPD
-C11165,"Da Nang Unity Polyclinic Co., Ltd",da nang unity polyclinic,VN,Da Nang,"393 Tran Hung Dao Street, Da Nang",0853776438,Clinic,SPD
-C11171,"Women's & Children's Medical Clinic Nha Trang Co., Ltd",women's & children's medical clinic nha trang,VN,Nha Trang,"205 Ly Thuong Kiet Street, Nha Trang",0468296098,Clinic,SPD
-C11178,"Riverside Medical Clinic Can Tho Co., Ltd",riverside medical clinic can tho,VN,Can Tho,"1 Nguyen Hue Boulevard, Can Tho",0969954489,Clinic,SPD
-C11184,"Ho Chi Minh City Golden Polyclinic Co., Ltd",ho chi minh city golden polyclinic,VN,Ho Chi Minh City,"167 Tran Hung Dao Street, Ho Chi Minh City",0453766299,Clinic,SPD
-C11192,"Harmony Medical Clinic Hue Co., Ltd",harmony medical clinic hue,VN,Hue,"308 Dien Bien Phu Street, Hue",0443107345,Clinic,QTS
+Title,CustomerName,NormalizedName,Country,City,Address,RegistrationNo,Segment,CreatedByEntity,MatchKey,IDKey,SAPStatus
+C10007,National University Hospital,national university hospital,SG,Kent Ridge,"5 Lower Kent Ridge Road, Kent Ridge",200288778W,Hospital,SPD,nationaluniversityhospital,200288778W,In SAP
+C10010,National Univ. Hospital (S) Pte Ltd,national university hospital s,SG,Kent Ridge,"5 Lower Kent Ridge Rd, Kent Ridge",200288778W,Hospital,QTS,nationaluniversityhospitals,200288778W,In SAP
+C10012,NUH,nuh,SG,Kent Ridge,"5 Lower Kent Ridge Rd, Kent Ridge",,Hospital,SPD,nuh,,In SAP
+C10015,Clementi Golden Hospital,clementi golden hospital,SG,Clementi,"123 Novena Rise, Clementi",201420580K,Hospital,SPD,clementigoldenhospital,201420580K,In SAP
+C10024,Woodlands Heart Hospital,woodlands heart hospital,SG,Woodlands,"204 Lorong 6 Toa Payoh, Woodlands",200656745R,Hospital,QTS,woodlandshearthospital,200656745R,In SAP
+C10026,WOODLANDS HEART HOSP.,woodlands heart hospital,SG,Woodlands,204 Lorong 6 Toa Payoh Woodlands,,Hospital,QTG,woodlandshearthospital,,In SAP
+C10029,Toa Payoh Sunrise Hospital,toa payoh sunrise hospital,SG,Toa Payoh,"235 Jurong West Street 41, Toa Payoh",201585684N,Hospital,SPD,toapayohsunrisehospital,201585684N,In SAP
+C10037,Toa Payoh Sunrise Hosp.,toa payoh sunrise hospital,SG,Toa Payoh,"235 Jurong West St 41, Toa Payoh",201585684N,Hospital,QTG,toapayohsunrisehospital,201585684N,In SAP
+C10041,Clementi Northpoint Hospital,clementi northpoint hospital,SG,Clementi,"256 Tampines Avenue 5, Clementi",200876369W,Hospital,QTS,clementinorthpointhospital,200876369W,In SAP
+C10048,Outram Medical Centre,outram medical centre,SG,Outram,"266 Novena Rise, Outram",201339428M,Hospital,SPD,outrammedicalcentre,201339428M,In SAP
+C10054,Bedok Green Valley Hospital,bedok green valley hospital,SG,Bedok,"73 Outram Road, Bedok",200225992Z,Hospital,SPD,bedokgreenvalleyhospital,200225992Z,In SAP
+C10056,Toa Payoh Northpoint Hospital,toa payoh northpoint hospital,SG,Toa Payoh,"410 Outram Road, Toa Payoh",202062684R,Hospital,SPD,toapayohnorthpointhospital,202062684R,In SAP
+C10059,Bukit Timah Riverside Hospital,bukit timah riverside hospital,SG,Bukit Timah,"355 Outram Road, Bukit Timah",200977012R,Hospital,SPD,bukittimahriversidehospital,200977012R,In SAP
+C10065,Tampines Golden Hospital,tampines golden hospital,SG,Tampines,"353 Lorong 6 Toa Payoh, Tampines",200933992R,Hospital,SPD,tampinesgoldenhospital,200933992R,In SAP
+C10072,Tampines Heart Hospital,tampines heart hospital,SG,Tampines,"383 Bedok North Road, Tampines",199968903K,Hospital,SPD,tampineshearthospital,199968903K,In SAP
+C10074,Bukit Timah Eastern Hospital,bukit timah eastern hospital,SG,Bukit Timah,"62 Novena Rise, Bukit Timah",201981624N,Hospital,SPD,bukittimaheasternhospital,201981624N,In SAP
+C10080,Community Clinical Laboratory Pte Ltd,community clinical laboratory,SG,Outram,"115 Outram Road, Outram",201327198W,Laboratory,QTS,communityclinicallaboratory,201327198W,In SAP
+C10081,Jurong Medical Diagnostic Laboratory Pte Ltd,jurong medical diagnostic laboratory,SG,Jurong,"193 Novena Rise, Jurong",199861032K,Laboratory,SPD,jurongmedicaldiagnosticlaboratory,199861032K,In SAP
+C10085,Jurong Medical Diagnostic Laboratory,jurong medical diagnostic laboratory,SG,Jurong,193 Novena Rise Jurong,,Laboratory,SPD,jurongmedicaldiagnosticlaboratory,,In SAP
+C10086,Golden Pathology Laboratory Toa Payoh Pte Ltd,golden pathology laboratory toa payoh,SG,Toa Payoh,"63 Outram Road, Toa Payoh",200984923W,Laboratory,SPD,goldenpathologylaboratorytoapayoh,200984923W,In SAP
+C10095,Eastern Clinical Laboratory Pte Ltd,eastern clinical laboratory,SG,Clementi,"364 Tampines Avenue 5, Clementi",201262318K,Laboratory,SPD,easternclinicallaboratory,201262318K,In SAP
+C10096,Outram Mercy Diagnostic Laboratory Pte Ltd,outram mercy diagnostic laboratory,SG,Outram,"248 Novena Rise, Outram",199994626W,Laboratory,SPD,outrammercydiagnosticlaboratory,199994626W,In SAP
+C10098,Pacific Pathology Laboratory Jurong Pte Ltd,pacific pathology laboratory jurong,SG,Jurong,"218 Bedok North Road, Jurong",202220309R,Laboratory,SPD,pacificpathologylaboratoryjurong,202220309R,In SAP
+C10099,Sunrise Pathology Laboratory Bedok Pte Ltd,sunrise pathology laboratory bedok,SG,Bedok,"91 Woodlands Avenue 2, Bedok",201173183R,Laboratory,SPD,sunrisepathologylaboratorybedok,201173183R,In SAP
+C10106,Northpoint Clinical Laboratory Pte Ltd,northpoint clinical laboratory,SG,Bedok,"94 Novena Rise, Bedok",200630546N,Laboratory,SPD,northpointclinicallaboratory,200630546N,In SAP
+C10111,Lakeside Pathology Laboratory Bukit Timah Pte Ltd,lakeside pathology laboratory bukit timah,SG,Bukit Timah,"289 Lorong 6 Toa Payoh, Bukit Timah",201682841M,Laboratory,SPD,lakesidepathologylaboratorybukittimah,201682841M,In SAP
+C10113,Lakeside Pathology Lab Bukit Timah Pte. Ltd.,lakeside pathology laboratory bukit timah,SG,Bukit Timah,289 Lorong 6 Toa Payoh Bukit Timah,201682841M,Laboratory,SPD,lakesidepathologylaboratorybukittimah,201682841M,In SAP
+C10121,Women's & Children's Clinical Laboratory Pte Ltd,women's & children's clinical laboratory,SG,Woodlands,"323 Tampines Avenue 5, Woodlands",201151097N,Laboratory,SPD,womenschildrensclinicallaboratory,201151097N,In SAP
+C10127,Lotus Pathology Laboratory Novena Pte Ltd,lotus pathology laboratory novena,SG,Novena,"213 Novena Rise, Novena",199622641M,Laboratory,SPD,lotuspathologylaboratorynovena,199622641M,In SAP
+C10128,Unity Pathology Laboratory Woodlands Pte Ltd,unity pathology laboratory woodlands,SG,Woodlands,"311 Novena Rise, Woodlands",200751427W,Laboratory,SPD,unitypathologylaboratorywoodlands,200751427W,In SAP
+C10136,Serangoon Hope Polyclinic Pte Ltd,serangoon hope polyclinic,SG,Serangoon,"200 Lorong 6 Toa Payoh, Serangoon",202156703K,Clinic,SPD,serangoonhopepolyclinic,202156703K,In SAP
+C10137,Tampines Sunrise Polyclinic Pte Ltd,tampines sunrise polyclinic,SG,Tampines,"164 Novena Rise, Tampines",201254890M,Clinic,SPD,tampinessunrisepolyclinic,201254890M,In SAP
+C10139,Jurong Medical Polyclinic Pte Ltd,jurong medical polyclinic,SG,Jurong,"306 Lorong 6 Toa Payoh, Jurong",199565675W,Clinic,SPD,jurongmedicalpolyclinic,199565675W,In SAP
+C10141,Women's & Children's Family Clinic Jurong Pte Ltd,women's & children's family clinic jurong,SG,Jurong,"15 Bedok North Road, Jurong",200329357M,Clinic,SPD,womenschildrensfamilyclinicjurong,200329357M,In SAP
+C10142,Women's & Children's Family Clinic Juorng Pte Ltd,women's & children's family clinic juorng,SG,Jurong,"15 Bedok North Road, Jurong",,Clinic,SPD,womenschildrensfamilyclinicjuorng,,In SAP
+C10146,Lakeside Medical Clinic Yishun Pte Ltd,lakeside medical clinic yishun,SG,Yishun,"430 Jurong West Street 41, Yishun",201214981Z,Clinic,QTS,lakesidemedicalclinicyishun,201214981Z,In SAP
+C10147,Unity Medical Clinic Pasir Ris Pte Ltd,unity medical clinic pasir ris,SG,Pasir Ris,"337 Novena Rise, Pasir Ris",201541825R,Clinic,SPD,unitymedicalclinicpasirris,201541825R,In SAP
+C10154,Eastern Family Clinic Woodlands Pte Ltd,eastern family clinic woodlands,SG,Woodlands,"425 Lorong 6 Toa Payoh, Woodlands",200536342N,Clinic,SPD,easternfamilyclinicwoodlands,200536342N,In SAP
+C10163,Sunrise Medical Clinic Clementi Pte Ltd,sunrise medical clinic clementi,SG,Clementi,"82 Bedok North Road, Clementi",199973551K,Clinic,QTS,sunrisemedicalclinicclementi,199973551K,In SAP
+C10167,Women's & Children's Medical Clinic Yishun Pte Ltd,women's & children's medical clinic yishun,SG,Yishun,"154 Woodlands Avenue 2, Yishun",201244736M,Clinic,SPD,womenschildrensmedicalclinicyishun,201244736M,In SAP
+C10169,Pasir Ris Lakeside Polyclinic Pte Ltd,pasir ris lakeside polyclinic,SG,Pasir Ris,"294 Novena Rise, Pasir Ris",200759883W,Clinic,QTS,pasirrislakesidepolyclinic,200759883W,In SAP
+C10176,Community Family Clinic Tampines Pte Ltd,community family clinic tampines,SG,Tampines,"200 Woodlands Avenue 2, Tampines",201244267N,Clinic,SPD,communityfamilyclinictampines,201244267N,In SAP
+C10181,Community Family Clinic Tampines,community family clinic tampines,SG,Tampines,"200 Woodlands Ave 2, Tampines",201244267N,Clinic,QTS,communityfamilyclinictampines,201244267N,In SAP
+C10182,Serangoon Sunrise Polyclinic Pte Ltd,serangoon sunrise polyclinic,SG,Serangoon,"69 Bedok North Road, Serangoon",200192551K,Clinic,SPD,serangoonsunrisepolyclinic,200192551K,In SAP
+C10188,Women's & Children's Family Clinic Serangoon Pte Ltd,women's & children's family clinic serangoon,SG,Serangoon,"265 Novena Rise, Serangoon",200051244W,Clinic,SPD,womenschildrensfamilyclinicserangoon,200051244W,In SAP
+C10189,Harmony Medical Clinic Novena Pte Ltd,harmony medical clinic novena,SG,Novena,"189 Lorong 6 Toa Payoh, Novena",200179747M,Clinic,SPD,harmonymedicalclinicnovena,200179747M,In SAP
+C10192,Harmony Med Clinic Novena Pte Ltd,harmony medical clinic novena,SG,Novena,189 Lorong 6 Toa Payoh Novena,200179747M,Clinic,QTS,harmonymedicalclinicnovena,200179747M,In SAP
+C10200,Pasir Ris Specialist Polyclinic Pte Ltd,pasir ris specialist polyclinic,SG,Pasir Ris,"135 Lorong 6 Toa Payoh, Pasir Ris",201525407N,Clinic,SPD,pasirrisspecialistpolyclinic,201525407N,In SAP
+C10205,Pasir Ris Spec. Ployclinic Pte Ltd,pasir ris specialist ployclinic,SG,Pasir Ris,135 Lorong 6 Toa Payoh Pasir Ris,201525407N,Clinic,SPD,pasirrisspecialistployclinic,201525407N,In SAP
+C10206,Outram Lakeside Polyclinic Pte Ltd,outram lakeside polyclinic,SG,Outram,"43 Tampines Avenue 5, Outram",201921516R,Clinic,SPD,outramlakesidepolyclinic,201921516R,In SAP
+C10209,Melaka Unity Hospital,melaka unity hospital,MY,Melaka,"166 Jalan Wong Ah Fook, Melaka",20210164099053,Hospital,SPD,melakaunityhospital,20210164099053,In SAP
+C10215,Seremban Pacific Hospital,seremban pacific hospital,MY,Seremban,"109 Jalan Tun Razak, Seremban",20180186043714,Hospital,SPD,serembanpacifichospital,20180186043714,In SAP
+C10222,Shah Alam Riverside Hospital,shah alam riverside hospital,MY,Shah Alam,"75 Persiaran Gurney, Shah Alam",20070141446260,Hospital,SPD,shahalamriversidehospital,20070141446260,In SAP
+C10225,Kota Kinabalu Pacific Hospital,kota kinabalu pacific hospital,MY,Kota Kinabalu,"12 Persiaran Gurney, Kota Kinabalu",20110164983661,Hospital,SPD,kotakinabalupacifichospital,20110164983661,In SAP
+C10233,Kuching Mercy Hospital,kuching mercy hospital,MY,Kuching,"170 Jalan Ampang, Kuching",20150133215571,Hospital,SPD,kuchingmercyhospital,20150133215571,In SAP
+C10235,Kota Kinabalu Green Valley Hospital,kota kinabalu green valley hospital,MY,Kota Kinabalu,"436 Jalan Gasing, Kota Kinabalu",20110111577597,Hospital,SPD,kotakinabalugreenvalleyhospital,20110111577597,In SAP
+C10242,KOTA KINABALU GREEN VALLEY HOSPITAL,kota kinabalu green valley hospital,MY,Kota Kinabalu,"436 Jalan Gasing, Kota Kinabalu",20110111577597,Hospital,SPD,kotakinabalugreenvalleyhospital,20110111577597,In SAP
+C10246,Petaling Jaya Heart Hospital,petaling jaya heart hospital,MY,Petaling Jaya,"405 Jalan Gasing, Petaling Jaya",20220147166155,Hospital,SPD,petalingjayahearthospital,20220147166155,In SAP
+C10253,Johor Bahru Community Hospital,johor bahru community hospital,MY,Johor Bahru,"169 Jalan Tun Razak, Johor Bahru",20190137698636,Hospital,SPD,johorbahrucommunityhospital,20190137698636,In SAP
+C10262,Seremban Northpoint Hospital,seremban northpoint hospital,MY,Seremban,"69 Jalan Ampang, Seremban",19910146356183,Hospital,QTS,serembannorthpointhospital,19910146356183,In SAP
+C10268,Shah Alam Hope Hospital,shah alam hope hospital,MY,Shah Alam,"340 Jalan Sultan Ismail, Shah Alam",20110156628928,Hospital,SPD,shahalamhopehospital,20110156628928,In SAP
+C10274,Shah Alam Community Hospital,shah alam community hospital,MY,Shah Alam,"12 Jalan Gasing, Shah Alam",20130144071544,Hospital,SPD,shahalamcommunityhospital,20130144071544,In SAP
+C10279,Ipoh Heart Hospital,ipoh heart hospital,MY,Ipoh,"298 Jalan Ampang, Ipoh",20160118664330,Hospital,SPD,ipohhearthospital,20160118664330,In SAP
+C10282,Shah Alam St. Mary's Hospital,shah alam st mary's hospital,MY,Shah Alam,"47 Persiaran Gurney, Shah Alam",20100175663953,Hospital,SPD,shahalamstmaryshospital,20100175663953,In SAP
+C10291,Melaka Medical Centre,melaka medical centre,MY,Melaka,"445 Jalan Gasing, Melaka",19960191786246,Hospital,QTS,melakamedicalcentre,19960191786246,In SAP
+C10296,Melaka Med. Centre,melaka medical centre,MY,Melaka,"445 Jln Gasing, Melaka",19960191786246,Hospital,QTG,melakamedicalcentre,19960191786246,In SAP
+C10299,Penang Medical Diagnostic Laboratory Sdn Bhd,penang medical diagnostic laboratory,MY,Penang,"406 Jalan Sultan Ismail, Penang",20210128349025,Laboratory,SPD,penangmedicaldiagnosticlaboratory,20210128349025,In SAP
+C10305,Seremban Northpoint Diagnostic Laboratory Sdn Bhd,seremban northpoint diagnostic laboratory,MY,Seremban,"78 Persiaran Gurney, Seremban",19990129324407,Laboratory,SPD,serembannorthpointdiagnosticlaboratory,19990129324407,In SAP
+C10309,Community Pathology Laboratory Kuching Sdn Bhd,community pathology laboratory kuching,MY,Kuching,"87 Jalan Tun Razak, Kuching",19930134915395,Laboratory,SPD,communitypathologylaboratorykuching,19930134915395,In SAP
+C10311,Specialist Pathology Laboratory Melaka Sdn Bhd,specialist pathology laboratory melaka,MY,Melaka,"349 Jalan Wong Ah Fook, Melaka",20160130806154,Laboratory,QTS,specialistpathologylaboratorymelaka,20160130806154,In SAP
+C10319,Lakeside Clinical Laboratory Sdn Bhd,lakeside clinical laboratory,MY,Kuching,"358 Jalan Sultan Ismail, Kuching",20110113769882,Laboratory,SPD,lakesideclinicallaboratory,20110113769882,In SAP
+C10322,Penang Eastern Diagnostic Laboratory Sdn Bhd,penang eastern diagnostic laboratory,MY,Penang,"339 Jalan Gasing, Penang",20030159975934,Laboratory,SPD,penangeasterndiagnosticlaboratory,20030159975934,In SAP
+C10328,PENANG EASTERN DIAGNOSTIC LABORATORY SDN BHD,penang eastern diagnostic laboratory,MY,Penang,"339 Jln Gasing, Penang",20030159975934,Laboratory,SPD,penangeasterndiagnosticlaboratory,20030159975934,In SAP
+C10335,Sunrise Clinical Laboratory Sdn Bhd,sunrise clinical laboratory,MY,Kuala Lumpur,"379 Jalan Gasing, Kuala Lumpur",20200122316302,Laboratory,QTS,sunriseclinicallaboratory,20200122316302,In SAP
+C10344,Seremban Women's & Children's Diagnostic Laboratory Sdn Bhd,seremban women's & children's diagnostic laboratory,MY,Seremban,"89 Jalan Tun Razak, Seremban",20170135407316,Laboratory,QTS,serembanwomenschildrensdiagnosticlaboratory,20170135407316,In SAP
+C10347,Kuching Pacific Diagnostic Laboratory Sdn Bhd,kuching pacific diagnostic laboratory,MY,Ipoh,"245 Persiaran Gurney, Ipoh",20190146652985,Laboratory,SPD,kuchingpacificdiagnosticlaboratory,20190146652985,In SAP
+C10352,KUCHING PACIFIC DIAGNOSTIC LAB SDN BHD,kuching pacific diagnostic laboratory,MY,Ipoh,245 Persiaran Gurney Ipoh,20190146652985,Laboratory,SPD,kuchingpacificdiagnosticlaboratory,20190146652985,In SAP
+C10358,Golden Pathology Laboratory Kuching Sdn Bhd,golden pathology laboratory kuching,MY,Kuching,"312 Jalan Wong Ah Fook, Kuching",19930199928734,Laboratory,SPD,goldenpathologylaboratorykuching,19930199928734,In SAP
+C10367,Medical Clinical Laboratory Sdn Bhd,medical clinical laboratory,MY,Melaka,"51 Jalan Sultan Ismail, Melaka",20080114996960,Laboratory,SPD,medicalclinicallaboratory,20080114996960,In SAP
+C10369,Medical Clinical Laboratory,medical clinical laboratory,MY,Melaka,"51 Jalan Sultan Ismail, Melaka",20080114996960,Laboratory,SPD,medicalclinicallaboratory,20080114996960,In SAP
+C10376,Golden Clinical Laboratory Sdn Bhd,golden clinical laboratory,MY,Seremban,"246 Persiaran Gurney, Seremban",19910130549175,Laboratory,QTS,goldenclinicallaboratory,19910130549175,In SAP
+C10385,Ipoh Central Diagnostic Laboratory Sdn Bhd,ipoh central diagnostic laboratory,MY,Ipoh,"384 Jalan Ampang, Ipoh",19970154951322,Laboratory,SPD,ipohcentraldiagnosticlaboratory,19970154951322,In SAP
+C10387,Ipoh Central Diagnostic Laboratory Sdn. Bhd.,ipoh central diagnostic laboratory,MY,Ipoh,"384 Jln Ampang, Ipoh",19970154951322,Laboratory,SPD,ipohcentraldiagnosticlaboratory,19970154951322,In SAP
+C10393,Kuala Lumpur Pacific Diagnostic Laboratory Sdn Bhd,kuala lumpur pacific diagnostic laboratory,MY,Kuala Lumpur,"264 Jalan Sultan Ismail, Kuala Lumpur",20160115541091,Laboratory,SPD,kualalumpurpacificdiagnosticlaboratory,20160115541091,In SAP
+C10401,Seremban Pacific Polyclinic Sdn Bhd,seremban pacific polyclinic,MY,Seremban,"272 Jalan Ampang, Seremban",20210139335391,Clinic,SPD,serembanpacificpolyclinic,20210139335391,In SAP
+C10404,Melaka Unity Polyclinic Sdn Bhd,melaka unity polyclinic,MY,Melaka,"393 Jalan Gasing, Melaka",19910157441910,Clinic,SPD,melakaunitypolyclinic,19910157441910,In SAP
+C10409,Lakeside Medical Clinic Kuala Lumpur Sdn Bhd,lakeside medical clinic kuala lumpur,MY,Kuala Lumpur,"284 Jalan Tun Razak, Kuala Lumpur",20190164411918,Clinic,SPD,lakesidemedicalclinickualalumpur,20190164411918,In SAP
+C10410,Harmony Medical Clinic Ipoh Sdn Bhd,harmony medical clinic ipoh,MY,Ipoh,"131 Jalan Tun Razak, Ipoh",19920139333593,Clinic,SPD,harmonymedicalclinicipoh,19920139333593,In SAP
+C10419,Harmony Family Clinic Petaling Jaya Sdn Bhd,harmony family clinic petaling jaya,MY,Petaling Jaya,"240 Persiaran Gurney, Petaling Jaya",19920135501820,Clinic,SPD,harmonyfamilyclinicpetalingjaya,19920135501820,In SAP
+C10426,Heart Medical Clinic Ipoh Sdn Bhd,heart medical clinic ipoh,MY,Ipoh,"147 Persiaran Gurney, Ipoh",19920173267927,Clinic,QTS,heartmedicalclinicipoh,19920173267927,In SAP
+C10430,Lakeside Family Clinic Melaka Sdn Bhd,lakeside family clinic melaka,MY,Melaka,"122 Jalan Gasing, Melaka",19930182701840,Clinic,SPD,lakesidefamilyclinicmelaka,19930182701840,In SAP
+C10435,Lakseide Family Clinic Melaka Sdn. Bhd.,lakseide family clinic melaka,MY,Melaka,"122 Jln Gasing, Melaka",19930182701840,Clinic,QTS,lakseidefamilyclinicmelaka,19930182701840,In SAP
+C10437,Women's & Children's Medical Clinic Seremban Sdn Bhd,women's & children's medical clinic seremban,MY,Seremban,"122 Jalan Tun Razak, Seremban",20020177759488,Clinic,SPD,womenschildrensmedicalclinicseremban,20020177759488,In SAP
+C10443,Harmony Medical Clinic Petaling Jaya Sdn Bhd,harmony medical clinic petaling jaya,MY,Petaling Jaya,"383 Jalan Tun Razak, Petaling Jaya",20050173667615,Clinic,QTS,harmonymedicalclinicpetalingjaya,20050173667615,In SAP
+C10444,Harmony Medical Clinic Petaling Jaya,harmony medical clinic petaling jaya,MY,Petaling Jaya,"383 Jln Tun Razak, Petaling Jaya",20050173667615,Clinic,QTS,harmonymedicalclinicpetalingjaya,20050173667615,In SAP
+C10445,Penang Central Polyclinic Sdn Bhd,penang central polyclinic,MY,Penang,"46 Jalan Wong Ah Fook, Penang",20210194458990,Clinic,SPD,penangcentralpolyclinic,20210194458990,In SAP
+C10447,Central Family Clinic Seremban Sdn Bhd,central family clinic seremban,MY,Seremban,"130 Jalan Tun Razak, Seremban",19970160632340,Clinic,QTS,centralfamilyclinicseremban,19970160632340,In SAP
+C10452,Petaling Jaya Central Polyclinic Sdn Bhd,petaling jaya central polyclinic,MY,Petaling Jaya,"377 Jalan Tun Razak, Petaling Jaya",20190189176114,Clinic,SPD,petalingjayacentralpolyclinic,20190189176114,In SAP
+C10459,Community Medical Clinic Johor Bahru Sdn Bhd,community medical clinic johor bahru,MY,Johor Bahru,"314 Persiaran Gurney, Johor Bahru",20090129815022,Clinic,SPD,communitymedicalclinicjohorbahru,20090129815022,In SAP
+C10468,Golden Family Clinic Petaling Jaya Sdn Bhd,golden family clinic petaling jaya,MY,Petaling Jaya,"63 Jalan Ampang, Petaling Jaya",20040153588665,Clinic,SPD,goldenfamilyclinicpetalingjaya,20040153588665,In SAP
+C10474,Ipoh Riverside Polyclinic Sdn Bhd,ipoh riverside polyclinic,MY,Ipoh,"379 Persiaran Gurney, Ipoh",20160173015220,Clinic,SPD,ipohriversidepolyclinic,20160173015220,In SAP
+C10482,Sunrise Family Clinic Kuala Lumpur Sdn Bhd,sunrise family clinic kuala lumpur,MY,Kuala Lumpur,"390 Jalan Gasing, Kuala Lumpur",20040199213390,Clinic,SPD,sunrisefamilyclinickualalumpur,20040199213390,In SAP
+C10490,Pacific Medical Clinic Melaka Sdn Bhd,pacific medical clinic melaka,MY,Melaka,"316 Persiaran Gurney, Melaka",20090182870673,Clinic,SPD,pacificmedicalclinicmelaka,20090182870673,In SAP
+C10496,Phuket Medical Centre,phuket medical centre,TH,Phuket,"155 Sukhumvit Road, Phuket",0105543112421,Hospital,SPD,phuketmedicalcentre,0105543112421,In SAP
+C10505,Hat Yai General Hospital,hat yai general hospital,TH,Hat Yai,"410 Mittraphap Road, Hat Yai",0105564483124,Hospital,SPD,hatyaigeneralhospital,0105564483124,In SAP
+C10512,Hat Yai Hope Hospital,hat yai hope hospital,TH,Hat Yai,"426 Mittraphap Road, Hat Yai",0105563958829,Hospital,SPD,hatyaihopehospital,0105563958829,In SAP
+C10517,Udon Thani Pacific Hospital,udon thani pacific hospital,TH,Udon Thani,"319 Phahonyothin Road, Udon Thani",0105546374807,Hospital,SPD,udonthanipacifichospital,0105546374807,In SAP
+C10519,UDON THANI PACIFIC HOSPITAL,udon thani pacific hospital,TH,Udon Thani,"319 Phahonyothin Rd, Udon Thani",0105546374807,Hospital,SPD,udonthanipacifichospital,0105546374807,In SAP
+C10527,Udon Thani Green Valley Hospital,udon thani green valley hospital,TH,Udon Thani,"417 Rama IV Road, Udon Thani",0105559222392,Hospital,SPD,udonthanigreenvalleyhospital,0105559222392,In SAP
+C10532,Nonthaburi Mercy Hospital,nonthaburi mercy hospital,TH,Nonthaburi,"265 Petchkasem Road, Nonthaburi",0105536607873,Hospital,SPD,nonthaburimercyhospital,0105536607873,In SAP
+C10534,Udon Thani Family Hospital,udon thani family hospital,TH,Udon Thani,"330 Sukhumvit Road, Udon Thani",0105542796162,Hospital,QTG,udonthanifamilyhospital,0105542796162,In SAP
+C10542,Nonthaburi Eastern Hospital,nonthaburi eastern hospital,TH,Nonthaburi,"77 Nimmanhaemin Road, Nonthaburi",0105561290226,Hospital,QTS,nonthaburieasternhospital,0105561290226,In SAP
+C10543,Bangkok Hope Hospital,bangkok hope hospital,TH,Bangkok,"238 Nimmanhaemin Road, Bangkok",0105534208652,Hospital,SPD,bangkokhopehospital,0105534208652,In SAP
+C10552,Chiang Mai Riverside Hospital,chiang mai riverside hospital,TH,Chiang Mai,"365 Mittraphap Road, Chiang Mai",0105565163519,Hospital,SPD,chiangmairiversidehospital,0105565163519,In SAP
+C10556,Khon Kaen Harmony Hospital,khon kaen harmony hospital,TH,Udon Thani,"386 Sukhumvit Road, Udon Thani",0105557547615,Hospital,QTS,khonkaenharmonyhospital,0105557547615,In SAP
+C10564,Hat Yai Eastern Hospital,hat yai eastern hospital,TH,Hat Yai,"380 Mittraphap Road, Hat Yai",0105565148386,Hospital,SPD,hatyaieasternhospital,0105565148386,In SAP
+C10573,"Lotus Clinical Laboratory Co., Ltd.",lotus clinical laboratory,TH,Hat Yai,"437 Phahonyothin Road, Hat Yai",0105543954053,Laboratory,SPD,lotusclinicallaboratory,0105543954053,In SAP
+C10577,"Chiang Mai St. Mary's Diagnostic Laboratory Co., Ltd.",chiang mai st mary's diagnostic laboratory,TH,Chiang Mai,"1 Rama IV Road, Chiang Mai",0105569925723,Laboratory,SPD,chiangmaistmarysdiagnosticlaboratory,0105569925723,In SAP
+C10578,"Mercy Pathology Laboratory Udon Thani Co., Ltd.",mercy pathology laboratory udon thani,TH,Udon Thani,"314 Nimmanhaemin Road, Udon Thani",0105555255518,Laboratory,SPD,mercypathologylaboratoryudonthani,0105555255518,In SAP
+C10579,"Mercy Pathoolgy Laboratory Udon Thani Co., Ltd.",mercy pathoolgy laboratory udon thani,TH,Udon Thani,"314 Nimmanhaemin Rd, Udon Thani",,Laboratory,SPD,mercypathoolgylaboratoryudonthani,,In SAP
+C10582,"Udon Thani Harmony Diagnostic Laboratory Co., Ltd.",udon thani harmony diagnostic laboratory,TH,Udon Thani,"390 Phahonyothin Road, Udon Thani",0105555927177,Laboratory,SPD,udonthaniharmonydiagnosticlaboratory,0105555927177,In SAP
+C10584,"Bangkok St. Mary's Diagnostic Laboratory Co., Ltd.",bangkok st mary's diagnostic laboratory,TH,Bangkok,"443 Petchkasem Road, Bangkok",0105549727405,Laboratory,SPD,bangkokstmarysdiagnosticlaboratory,0105549727405,In SAP
+C10590,"Sunrise Clinical Laboratory Co., Ltd.",sunrise clinical laboratory,TH,Udon Thani,"132 Sukhumvit Road, Udon Thani",0105543840513,Laboratory,SPD,sunriseclinicallaboratory,0105543840513,In SAP
+C10592,"Hope Clinical Laboratory Co., Ltd.",hope clinical laboratory,TH,Chiang Mai,"275 Mittraphap Road, Chiang Mai",0105533648076,Laboratory,SPD,hopeclinicallaboratory,0105533648076,In SAP
+C10597,"Hope Clinical Lab Co., Ltd.",hope clinical laboratory,TH,Chiang Mai,"275 Mittraphap Rd, Chiang Mai",,Laboratory,SPD,hopeclinicallaboratory,,In SAP
+C10603,"Udon Thani General Diagnostic Laboratory Co., Ltd.",udon thani general diagnostic laboratory,TH,Udon Thani,"226 Mittraphap Road, Udon Thani",0105531609024,Laboratory,SPD,udonthanigeneraldiagnosticlaboratory,0105531609024,In SAP
+C10607,"Pattaya Heart Diagnostic Laboratory Co., Ltd.",pattaya heart diagnostic laboratory,TH,Pattaya,"213 Phahonyothin Road, Pattaya",0105540037366,Laboratory,SPD,pattayaheartdiagnosticlaboratory,0105540037366,In SAP
+C10609,Pattaya Heart Diagnostic Laboratory,pattaya heart diagnostic laboratory,TH,Pattaya,"213 Phahonyothin Road, Pattaya",0105540037366,Laboratory,SPD,pattayaheartdiagnosticlaboratory,0105540037366,In SAP
+C10617,"Golden Clinical Laboratory Co., Ltd.",golden clinical laboratory,TH,Chiang Mai,"212 Nimmanhaemin Road, Chiang Mai",0105559601109,Laboratory,SPD,goldenclinicallaboratory,0105559601109,In SAP
+C10619,"Phuket Lotus Diagnostic Laboratory Co., Ltd.",phuket lotus diagnostic laboratory,TH,Phuket,"139 Petchkasem Road, Phuket",0105561004048,Laboratory,SPD,phuketlotusdiagnosticlaboratory,0105561004048,In SAP
+C10624,"Bangkok Family Diagnostic Laboratory Co., Ltd.",bangkok family diagnostic laboratory,TH,Bangkok,"239 Nimmanhaemin Road, Bangkok",0105535171377,Laboratory,SPD,bangkokfamilydiagnosticlaboratory,0105535171377,In SAP
+C10633,Bangkok Family Diagnostic Lab. Co Ltd,bangkok family diagnostic laboratory,TH,Bangkok,"239 Nimmanhaemin Rd, Bangkok",0105535171377,Laboratory,SPD,bangkokfamilydiagnosticlaboratory,0105535171377,In SAP
+C10635,"Khon Kaen Unity Polyclinic Co., Ltd.",khon kaen unity polyclinic,TH,Khon Kaen,"48 Phahonyothin Road, Khon Kaen",0105566175618,Clinic,SPD,khonkaenunitypolyclinic,0105566175618,In SAP
+C10644,"Women's & Children's Medical Clinic Phuket Co., Ltd.",women's & children's medical clinic phuket,TH,Phuket,"100 Mittraphap Road, Phuket",0105546914060,Clinic,SPD,womenschildrensmedicalclinicphuket,0105546914060,In SAP
+C10647,"Phuket Harmony Polyclinic Co., Ltd.",phuket harmony polyclinic,TH,Phuket,"34 Petchkasem Road, Phuket",0105569946047,Clinic,SPD,phuketharmonypolyclinic,0105569946047,In SAP
+C10650,"Khon Kaen Riverside Polyclinic Co., Ltd.",khon kaen riverside polyclinic,TH,Khon Kaen,"326 Sukhumvit Road, Khon Kaen",0105550495155,Clinic,SPD,khonkaenriversidepolyclinic,0105550495155,In SAP
+C10656,"Khon Kaen Riverside Polcylinic Co., Ltd.",khon kaen riverside polcylinic,TH,Khon Kaen,"326 Sukhumvit Rd, Khon Kaen",0105550495155,Clinic,SPD,khonkaenriversidepolcylinic,0105550495155,In SAP
+C10657,"Udon Thani Specialist Polyclinic Co., Ltd.",udon thani specialist polyclinic,TH,Udon Thani,"162 Phahonyothin Road, Udon Thani",0105550041518,Clinic,SPD,udonthanispecialistpolyclinic,0105550041518,In SAP
+C10660,"Mercy Medical Clinic Khon Kaen Co., Ltd.",mercy medical clinic khon kaen,TH,Khon Kaen,"277 Sukhumvit Road, Khon Kaen",0105532016753,Clinic,QTS,mercymedicalclinickhonkaen,0105532016753,In SAP
+C10663,"Mercy Medical Clniic Khon Kaen Co., Ltd.",mercy medical clniic khon kaen,TH,Khon Kaen,"277 Sukhumvit Rd, Khon Kaen",,Clinic,QTS,mercymedicalclniickhonkaen,,In SAP
+C10671,"Udon Thani Hope Polyclinic Co., Ltd.",udon thani hope polyclinic,TH,Udon Thani,"277 Petchkasem Road, Udon Thani",0105544688790,Clinic,SPD,udonthanihopepolyclinic,0105544688790,In SAP
+C10673,"General Family Clinic Udon Thani Co., Ltd.",general family clinic udon thani,TH,Udon Thani,"334 Phahonyothin Road, Udon Thani",0105554365826,Clinic,SPD,generalfamilyclinicudonthani,0105554365826,In SAP
+C10676,"Mercy Family Clinic Chiang Mai Co., Ltd.",mercy family clinic chiang mai,TH,Chiang Mai,"389 Sukhumvit Road, Chiang Mai",0105559083966,Clinic,SPD,mercyfamilyclinicchiangmai,0105559083966,In SAP
+C10680,"Nonthaburi Family Polyclinic Co., Ltd.",nonthaburi family polyclinic,TH,Nonthaburi,"61 Rama IV Road, Nonthaburi",0105558365126,Clinic,SPD,nonthaburifamilypolyclinic,0105558365126,In SAP
+C10683,"General Family Clinic Chiang Mai Co., Ltd.",general family clinic chiang mai,TH,Chiang Mai,"271 Nimmanhaemin Road, Chiang Mai",0105553563185,Clinic,SPD,generalfamilyclinicchiangmai,0105553563185,In SAP
+C10684,"Hat Yai Women's & Children's Polyclinic Co., Ltd.",hat yai women's & children's polyclinic,TH,Hat Yai,"385 Nimmanhaemin Road, Hat Yai",0105549203136,Clinic,SPD,hatyaiwomenschildrenspolyclinic,0105549203136,In SAP
+C10685,"Heart Family Clinic Nonthaburi Co., Ltd.",heart family clinic nonthaburi,TH,Nonthaburi,"279 Petchkasem Road, Nonthaburi",0105568443458,Clinic,SPD,heartfamilyclinicnonthaburi,0105568443458,In SAP
+C10694,Heart Family Clinic Nonthaburi Co Ltd,heart family clinic nonthaburi,TH,Nonthaburi,"279 Petchkasem Rd, Nonthaburi",0105568443458,Clinic,SPD,heartfamilyclinicnonthaburi,0105568443458,In SAP
+C10699,"Northpoint Medical Clinic Nonthaburi Co., Ltd.",northpoint medical clinic nonthaburi,TH,Nonthaburi,"439 Rama IV Road, Nonthaburi",0105547984287,Clinic,SPD,northpointmedicalclinicnonthaburi,0105547984287,In SAP
+C10707,"Pattaya General Polyclinic Co., Ltd.",pattaya general polyclinic,TH,Pattaya,"438 Petchkasem Road, Pattaya",0105549473038,Clinic,SPD,pattayageneralpolyclinic,0105549473038,In SAP
+C10714,"Pacific Family Clinic Chiang Mai Co., Ltd.",pacific family clinic chiang mai,TH,Chiang Mai,"262 Nimmanhaemin Road, Chiang Mai",0105551100739,Clinic,SPD,pacificfamilyclinicchiangmai,0105551100739,In SAP
+C10723,Rumah Sakit Lakeside Makassar,rumah sakit lakeside makassar,ID,Makassar,"163 Jalan MH Thamrin, Makassar",34.728.789.5-113.000,Hospital,SPD,rumahsakitlakesidemakassar,347287895113000,In SAP
+C10724,Rumah Sakit Medical Yogyakarta,rumah sakit medical yogyakarta,ID,Yogyakarta,"385 Jalan Ahmad Yani, Yogyakarta",95.176.885.9-231.000,Hospital,SPD,rumahsakitmedicalyogyakarta,951768859231000,In SAP
+C10725,Rumah Sakit Pacific Makassar,rumah sakit pacific makassar,ID,Makassar,"387 Jalan Gatot Subroto, Makassar",89.107.856.9-100.000,Hospital,SPD,rumahsakitpacificmakassar,891078569100000,In SAP
+C10734,Rumah Sakit Central Bandung,rumah sakit central bandung,ID,Bandung,"11 Jalan Diponegoro, Bandung",07.887.118.2-554.000,Hospital,SPD,rumahsakitcentralbandung,078871182554000,In SAP
+C10736,Rumah Sakit General Medan,rumah sakit general medan,ID,Medan,"192 Jalan Diponegoro, Medan",05.304.137.5-637.000,Hospital,QTS,rumahsakitgeneralmedan,053041375637000,In SAP
+C10738,Rumah Sakit Pacific Denpasar,rumah sakit pacific denpasar,ID,Denpasar,"438 Jalan Jenderal Sudirman, Denpasar",14.412.510.4-464.000,Hospital,SPD,rumahsakitpacificdenpasar,144125104464000,In SAP
+C10745,Rumah Sakit Sunrise Jakarta,rumah sakit sunrise jakarta,ID,Jakarta,"3 Jalan Ahmad Yani, Jakarta",27.103.107.5-270.000,Hospital,SPD,rumahsakitsunrisejakarta,271031075270000,In SAP
+C10747,Rumah Sakit Harmony Makassar,rumah sakit harmony makassar,ID,Makassar,"92 Jalan Gatot Subroto, Makassar",32.145.183.3-528.000,Hospital,SPD,rumahsakitharmonymakassar,321451833528000,In SAP
+C10752,Rumah Sakit Green Valley Yogyakarta,rumah sakit green valley yogyakarta,ID,Yogyakarta,"11 Jalan Pemuda, Yogyakarta",64.718.839.3-698.000,Hospital,SPD,rumahsakitgreenvalleyyogyakarta,647188393698000,In SAP
+C10754,Rumah Sakit Heart Medan,rumah sakit heart medan,ID,Medan,"252 Jalan Jenderal Sudirman, Medan",17.598.800.2-624.000,Hospital,SPD,rumahsakitheartmedan,175988002624000,In SAP
+C10758,Rumah Sakit Sunrise Surabaya,rumah sakit sunrise surabaya,ID,Surabaya,"251 Jalan Jenderal Sudirman, Surabaya",86.512.582.6-421.000,Hospital,SPD,rumahsakitsunrisesurabaya,865125826421000,In SAP
+C10763,Rumah Sakit Surnise Surabaya,rumah sakit surnise surabaya,ID,Surabaya,"251 Jln Jenderal Sudirman, Surabaya",,Hospital,QTG,rumahsakitsurnisesurabaya,,In SAP
+C10771,Rumah Sakit Lotus Yogyakarta,rumah sakit lotus yogyakarta,ID,Yogyakarta,"403 Jalan Gatot Subroto, Yogyakarta",19.933.424.8-300.000,Hospital,SPD,rumahsakitlotusyogyakarta,199334248300000,In SAP
+C10778,Rumah Sakit Lotus Medan,rumah sakit lotus medan,ID,Medan,"203 Jalan MH Thamrin, Medan",67.931.274.1-774.000,Hospital,QTG,rumahsakitlotusmedan,679312741774000,In SAP
+C10780,Rumah Sakit Sunrise Bandung,rumah sakit sunrise bandung,ID,Bandung,"80 Jalan Ahmad Yani, Bandung",20.127.864.5-239.000,Hospital,SPD,rumahsakitsunrisebandung,201278645239000,In SAP
+C10787,RUMAH SAKIT SUNRISE BANDUNG,rumah sakit sunrise bandung,ID,Bandung,"80 Jln Ahmad Yani, Bandung",,Hospital,QTS,rumahsakitsunrisebandung,,In SAP
+C10788,PT General Clinical Laboratory,general clinical laboratory,ID,Denpasar,"62 Jalan Gatot Subroto, Denpasar",67.702.786.9-560.000,Laboratory,SPD,generalclinicallaboratory,677027869560000,In SAP
+C10791,PT Bandung Unity Diagnostic Laboratory,bandung unity diagnostic laboratory,ID,Bandung,"197 Jalan Gatot Subroto, Bandung",47.862.547.4-760.000,Laboratory,SPD,bandungunitydiagnosticlaboratory,478625474760000,In SAP
+C10796,PT Mercy Clinical Laboratory,mercy clinical laboratory,ID,Jakarta,"69 Jalan Jenderal Sudirman, Jakarta",89.975.702.7-743.000,Laboratory,SPD,mercyclinicallaboratory,899757027743000,In SAP
+C10799,PT Jakarta Central Diagnostic Laboratory,jakarta central diagnostic laboratory,ID,Jakarta,"66 Jalan MH Thamrin, Jakarta",70.514.880.7-715.000,Laboratory,QTS,jakartacentraldiagnosticlaboratory,705148807715000,In SAP
+C10806,PT Makassar Unity Diagnostic Laboratory,makassar unity diagnostic laboratory,ID,Makassar,"34 Jalan MH Thamrin, Makassar",96.470.222.1-848.000,Laboratory,SPD,makassarunitydiagnosticlaboratory,964702221848000,In SAP
+C10811,PT Specialist Pathology Laboratory Makassar,specialist pathology laboratory makassar,ID,Makassar,"174 Jalan Gatot Subroto, Makassar",47.136.708.9-771.000,Laboratory,SPD,specialistpathologylaboratorymakassar,471367089771000,In SAP
+C10815,PT Denpasar Specialist Diagnostic Laboratory,denpasar specialist diagnostic laboratory,ID,Denpasar,"100 Jalan Ahmad Yani, Denpasar",04.248.281.6-101.000,Laboratory,SPD,denpasarspecialistdiagnosticlaboratory,042482816101000,In SAP
+C10819,PT Denpasar Specialist Diangostic Laboratory,denpasar specialist diangostic laboratory,ID,Denpasar,"100 Jln Ahmad Yani, Denpasar",04.248.281.6-101.000,Laboratory,SPD,denpasarspecialistdiangosticlaboratory,042482816101000,In SAP
+C10820,PT Riverside Clinical Laboratory,riverside clinical laboratory,ID,Surabaya,"71 Jalan Gatot Subroto, Surabaya",84.356.940.2-927.000,Laboratory,SPD,riversideclinicallaboratory,843569402927000,In SAP
+C10822,PT Medan Harmony Diagnostic Laboratory,medan harmony diagnostic laboratory,ID,Medan,"375 Jalan Jenderal Sudirman, Medan",93.233.289.3-321.000,Laboratory,SPD,medanharmonydiagnosticlaboratory,932332893321000,In SAP
+C10825,PT Green Valley Pathology Laboratory Yogyakarta,green valley pathology laboratory yogyakarta,ID,Yogyakarta,"24 Jalan Pemuda, Yogyakarta",92.112.468.5-275.000,Laboratory,SPD,greenvalleypathologylaboratoryyogyakarta,921124685275000,In SAP
+C10829,PT Golden Pathology Laboratory Bandung,golden pathology laboratory bandung,ID,Bandung,"138 Jalan Jenderal Sudirman, Bandung",82.822.260.8-417.000,Laboratory,SPD,goldenpathologylaboratorybandung,828222608417000,In SAP
+C10838,PT Golden Pathology Lab Bandung,golden pathology laboratory bandung,ID,Bandung,"138 Jln Jenderal Sudirman, Bandung",,Laboratory,SPD,goldenpathologylaboratorybandung,,In SAP
+C10844,PT Medan St. Mary's Diagnostic Laboratory,medan st mary's diagnostic laboratory,ID,Medan,"201 Jalan Ahmad Yani, Medan",07.777.470.6-121.000,Laboratory,SPD,medanstmarysdiagnosticlaboratory,077774706121000,In SAP
+C10848,PT Lotus Pathology Laboratory Makassar,lotus pathology laboratory makassar,ID,Makassar,"357 Jalan MH Thamrin, Makassar",30.308.621.8-906.000,Laboratory,SPD,lotuspathologylaboratorymakassar,303086218906000,In SAP
+C10853,PT St. Mary's Clinical Laboratory,st mary's clinical laboratory,ID,Jakarta,"206 Jalan Pemuda, Jakarta",33.393.509.5-926.000,Laboratory,SPD,stmarysclinicallaboratory,333935095926000,In SAP
+C10855,PT Medan Community Polyclinic,medan community polyclinic,ID,Medan,"200 Jalan Ahmad Yani, Medan",01.588.447.7-615.000,Clinic,SPD,medancommunitypolyclinic,015884477615000,In SAP
+C10857,PT Northpoint Family Clinic Yogyakarta,northpoint family clinic yogyakarta,ID,Yogyakarta,"90 Jalan Jenderal Sudirman, Yogyakarta",85.354.686.7-275.000,Clinic,SPD,northpointfamilyclinicyogyakarta,853546867275000,In SAP
+C10862,PT Eastern Family Clinic Makassar,eastern family clinic makassar,ID,Makassar,"368 Jalan Gatot Subroto, Makassar",64.190.215.1-126.000,Clinic,SPD,easternfamilyclinicmakassar,641902151126000,In SAP
+C10868,Eastern Family Clinic Makassar,eastern family clinic makassar,ID,Makassar,"368 Jln Gatot Subroto, Makassar",,Clinic,QTS,easternfamilyclinicmakassar,,In SAP
+C10877,PT Medical Clinic Bandung,medical clinic bandung,ID,Bandung,"86 Jalan Jenderal Sudirman, Bandung",64.117.189.7-731.000,Clinic,SPD,medicalclinicbandung,641171897731000,In SAP
+C10886,PT General Family Clinic Bandung,general family clinic bandung,ID,Bandung,"195 Jalan Ahmad Yani, Bandung",20.383.975.5-322.000,Clinic,SPD,generalfamilyclinicbandung,203839755322000,In SAP
+C10891,PT Heart Medical Clinic Semarang,heart medical clinic semarang,ID,Semarang,"322 Jalan MH Thamrin, Semarang",15.542.815.8-550.000,Clinic,SPD,heartmedicalclinicsemarang,155428158550000,In SAP
+C10894,PT Medan Sunrise Polyclinic,medan sunrise polyclinic,ID,Medan,"227 Jalan Ahmad Yani, Medan",78.773.503.8-236.000,Clinic,SPD,medansunrisepolyclinic,787735038236000,In SAP
+C10898,PT Heart Medical Clinic Medan,heart medical clinic medan,ID,Medan,"38 Jalan MH Thamrin, Medan",94.542.822.7-622.000,Clinic,SPD,heartmedicalclinicmedan,945428227622000,In SAP
+C10905,Heart Medical Clinic Medan,heart medical clinic medan,ID,Medan,"38 Jalan MH Thamrin, Medan",94.542.822.7-622.000,Clinic,SPD,heartmedicalclinicmedan,945428227622000,In SAP
+C10911,PT Women's & Children's Family Clinic Surabaya,women's & children's family clinic surabaya,ID,Surabaya,"140 Jalan Ahmad Yani, Surabaya",63.192.480.1-786.000,Clinic,SPD,womenschildrensfamilyclinicsurabaya,631924801786000,In SAP
+C10915,Women's & Children's Family Clinic Surabaya,women's & children's family clinic surabaya,ID,Surabaya,"140 Jalan Ahmad Yani, Surabaya",,Clinic,SPD,womenschildrensfamilyclinicsurabaya,,In SAP
+C10923,PT Sunrise Medical Clinic Yogyakarta,sunrise medical clinic yogyakarta,ID,Yogyakarta,"173 Jalan Diponegoro, Yogyakarta",42.607.682.9-293.000,Clinic,SPD,sunrisemedicalclinicyogyakarta,426076829293000,In SAP
+C10929,PT Lotus Family Clinic Jakarta,lotus family clinic jakarta,ID,Jakarta,"133 Jalan Pemuda, Jakarta",01.978.172.2-399.000,Clinic,SPD,lotusfamilyclinicjakarta,019781722399000,In SAP
+C10935,PT Unity Family Clinic Semarang,unity family clinic semarang,ID,Semarang,"391 Jalan Jenderal Sudirman, Semarang",04.569.746.5-829.000,Clinic,SPD,unityfamilyclinicsemarang,045697465829000,In SAP
+C10942,PT Lotus Medical Clinic Makassar,lotus medical clinic makassar,ID,Makassar,"133 Jalan Ahmad Yani, Makassar",04.667.828.4-575.000,Clinic,SPD,lotusmedicalclinicmakassar,046678284575000,In SAP
+C10946,PT Specialist Medical Clinic Jakarta,specialist medical clinic jakarta,ID,Jakarta,"59 Jalan Gatot Subroto, Jakarta",91.951.445.5-369.000,Clinic,SPD,specialistmedicalclinicjakarta,919514455369000,In SAP
+C10950,Specialist Medical Clinic Jakarta,specialist medical clinic jakarta,ID,Jakarta,"59 Jln Gatot Subroto, Jakarta",91.951.445.5-369.000,Clinic,SPD,specialistmedicalclinicjakarta,919514455369000,In SAP
+C10956,PT St. Mary's Family Clinic Medan,st mary's family clinic medan,ID,Medan,"326 Jalan MH Thamrin, Medan",97.170.150.3-459.000,Clinic,SPD,stmarysfamilyclinicmedan,971701503459000,In SAP
+C10959,PT Mercy Medical Clinic Bandung,mercy medical clinic bandung,ID,Bandung,"282 Jalan Ahmad Yani, Bandung",65.738.945.1-390.000,Clinic,SPD,mercymedicalclinicbandung,657389451390000,In SAP
+C10962,PT Mercy Medical Clinic Yogyakarta,mercy medical clinic yogyakarta,ID,Yogyakarta,"111 Jalan Ahmad Yani, Yogyakarta",49.761.679.8-679.000,Clinic,SPD,mercymedicalclinicyogyakarta,497616798679000,In SAP
+C10970,Da Nang Medical Centre,da nang medical centre,VN,Da Nang,"6 Nguyen Hue Boulevard, Da Nang",0725154150,Hospital,SPD,danangmedicalcentre,0725154150,In SAP
+C10973,DA NANG MEDICAL CENTRE,da nang medical centre,VN,Da Nang,"6 Nguyen Hue Blvd, Da Nang",,Hospital,SPD,danangmedicalcentre,,In SAP
+C10974,Nha Trang Harmony Hospital,nha trang harmony hospital,VN,Nha Trang,"224 Ly Thuong Kiet Street, Nha Trang",0967370950,Hospital,SPD,nhatrangharmonyhospital,0967370950,In SAP
+C10976,Ho Chi Minh City Riverside Hospital,ho chi minh city riverside hospital,VN,Ho Chi Minh City,"15 Ly Thuong Kiet Street, Ho Chi Minh City",0469586357,Hospital,SPD,hochiminhcityriversidehospital,0469586357,In SAP
+C10977,Hue Sunrise Hospital,hue sunrise hospital,VN,Hue,"81 Hai Ba Trung Street, Hue",0796371786,Hospital,SPD,huesunrisehospital,0796371786,In SAP
+C10981,Ho Chi Minh City Specialist Hospital,ho chi minh city specialist hospital,VN,Ho Chi Minh City,"239 Dien Bien Phu Street, Ho Chi Minh City",0187574452,Hospital,QTS,hochiminhcityspecialisthospital,0187574452,In SAP
+C10989,Hai Phong Heart Hospital,hai phong heart hospital,VN,Hai Phong,"345 Dien Bien Phu Street, Hai Phong",0657495487,Hospital,SPD,haiphonghearthospital,0657495487,In SAP
+C10997,Can Tho Lotus Hospital,can tho lotus hospital,VN,Can Tho,"424 Le Loi Street, Can Tho",0988194645,Hospital,SPD,cantholotushospital,0988194645,In SAP
+C11005,Ho Chi Minh City Family Hospital,ho chi minh city family hospital,VN,Ho Chi Minh City,"139 Tran Hung Dao Street, Ho Chi Minh City",0980856433,Hospital,SPD,hochiminhcityfamilyhospital,0980856433,In SAP
+C11006,HO CHI MINH CITY FAMILY HOSPITAL,ho chi minh city family hospital,VN,Ho Chi Minh City,"139 Tran Hung Dao St, Ho Chi Minh City",0980856433,Hospital,SPD,hochiminhcityfamilyhospital,0980856433,In SAP
+C11015,Nha Trang Family Hospital,nha trang family hospital,VN,Nha Trang,"262 Le Loi Street, Nha Trang",0883239637,Hospital,SPD,nhatrangfamilyhospital,0883239637,In SAP
+C11016,Hue Pacific Hospital,hue pacific hospital,VN,Ho Chi Minh City,"205 Nguyen Hue Boulevard, Ho Chi Minh City",0183424099,Hospital,SPD,huepacifichospital,0183424099,In SAP
+C11017,"Hope Pathology Laboratory Ho Chi Minh City Co., Ltd",hope pathology laboratory ho chi minh city,VN,Ho Chi Minh City,"421 Dien Bien Phu Street, Ho Chi Minh City",0123739003,Laboratory,SPD,hopepathologylaboratoryhochiminhcity,0123739003,In SAP
+C11022,"Golden Clinical Laboratory Co., Ltd",golden clinical laboratory,VN,Hue,"33 Hai Ba Trung Street, Hue",0506718717,Laboratory,SPD,goldenclinicallaboratory,0506718717,In SAP
+C11028,"Nha Trang Hope Diagnostic Laboratory Co., Ltd",nha trang hope diagnostic laboratory,VN,Nha Trang,"251 Dien Bien Phu Street, Nha Trang",0592197545,Laboratory,SPD,nhatranghopediagnosticlaboratory,0592197545,In SAP
+C11033,"NHA TRANG HOPE DIAGNOSTIC LAB. CO., LTD",nha trang hope diagnostic laboratory,VN,Nha Trang,"251 Dien Bien Phu Street, Nha Trang",0592197545,Laboratory,SPD,nhatranghopediagnosticlaboratory,0592197545,In SAP
+C11034,"Harmony Pathology Laboratory Hanoi Co., Ltd",harmony pathology laboratory hanoi,VN,Hanoi,"391 Nguyen Hue Boulevard, Hanoi",0788427950,Laboratory,SPD,harmonypathologylaboratoryhanoi,0788427950,In SAP
+C11040,"Mercy Pathology Laboratory Hue Co., Ltd",mercy pathology laboratory hue,VN,Hue,"251 Le Loi Street, Hue",0680570946,Laboratory,SPD,mercypathologylaboratoryhue,0680570946,In SAP
+C11048,Mercy Pathology Laboratory Hue Co. Ltd,mercy pathology laboratory hue,VN,Hue,"251 Le Loi Street, Hue",0680570946,Laboratory,SPD,mercypathologylaboratoryhue,0680570946,In SAP
+C11051,"Can Tho Golden Diagnostic Laboratory Co., Ltd",can tho golden diagnostic laboratory,VN,Can Tho,"251 Hai Ba Trung Street, Can Tho",0379584456,Laboratory,SPD,canthogoldendiagnosticlaboratory,0379584456,In SAP
+C11056,"Ho Chi Minh City Central Diagnostic Laboratory Co., Ltd",ho chi minh city central diagnostic laboratory,VN,Ho Chi Minh City,"291 Le Loi Street, Ho Chi Minh City",0575631022,Laboratory,SPD,hochiminhcitycentraldiagnosticlaboratory,0575631022,In SAP
+C11065,"Unity Clinical Laboratory Co., Ltd",unity clinical laboratory,VN,Hanoi,"22 Hai Ba Trung Street, Hanoi",0975255800,Laboratory,SPD,unityclinicallaboratory,0975255800,In SAP
+C11073,"Unity Cliincal Laboratory Co., Ltd",unity cliincal laboratory,VN,Hanoi,"22 Hai Ba Trung Street, Hanoi",0975255800,Laboratory,SPD,unitycliincallaboratory,0975255800,In SAP
+C11079,"Hai Phong Lakeside Diagnostic Laboratory Co., Ltd",hai phong lakeside diagnostic laboratory,VN,Hai Phong,"16 Le Loi Street, Hai Phong",0513560480,Laboratory,SPD,haiphonglakesidediagnosticlaboratory,0513560480,In SAP
+C11087,"Can Tho Heart Diagnostic Laboratory Co., Ltd",can tho heart diagnostic laboratory,VN,Can Tho,"229 Le Loi Street, Can Tho",0617544301,Laboratory,QTS,canthoheartdiagnosticlaboratory,0617544301,In SAP
+C11092,"Lakeside Medical Clinic Da Nang Co., Ltd",lakeside medical clinic da nang,VN,Da Nang,"256 Ly Thuong Kiet Street, Da Nang",0652309503,Clinic,SPD,lakesidemedicalclinicdanang,0652309503,In SAP
+C11093,"Green Valley Medical Clinic Da Nang Co., Ltd",green valley medical clinic da nang,VN,Da Nang,"158 Hai Ba Trung Street, Da Nang",0309811911,Clinic,SPD,greenvalleymedicalclinicdanang,0309811911,In SAP
+C11101,"Nha Trang Northpoint Polyclinic Co., Ltd",nha trang northpoint polyclinic,VN,Nha Trang,"246 Le Loi Street, Nha Trang",0343061710,Clinic,SPD,nhatrangnorthpointpolyclinic,0343061710,In SAP
+C11107,"Can Tho Women's & Children's Polyclinic Co., Ltd",can tho women's & children's polyclinic,VN,Can Tho,"424 Tran Hung Dao Street, Can Tho",0991214256,Clinic,SPD,canthowomenschildrenspolyclinic,0991214256,In SAP
+C11112,"Medical Clinic Nha Trang Co., Ltd",medical clinic nha trang,VN,Nha Trang,"261 Le Loi Street, Nha Trang",0784443923,Clinic,SPD,medicalclinicnhatrang,0784443923,In SAP
+C11118,"MDEICAL CLINIC NHA TRANG CO., LTD",mdeical clinic nha trang,VN,Nha Trang,"261 Le Loi St, Nha Trang",,Clinic,SPD,mdeicalclinicnhatrang,,In SAP
+C11125,"Da Nang Specialist Polyclinic Co., Ltd",da nang specialist polyclinic,VN,Da Nang,"275 Hai Ba Trung Street, Da Nang",0523794890,Clinic,SPD,danangspecialistpolyclinic,0523794890,In SAP
+C11134,"Central Family Clinic Ho Chi Minh City Co., Ltd",central family clinic ho chi minh city,VN,Ho Chi Minh City,"364 Nguyen Hue Boulevard, Ho Chi Minh City",0781940867,Clinic,SPD,centralfamilyclinichochiminhcity,0781940867,In SAP
+C11143,"Pacific Medical Clinic Hue Co., Ltd",pacific medical clinic hue,VN,Hue,"202 Dien Bien Phu Street, Hue",0464375526,Clinic,SPD,pacificmedicalclinichue,0464375526,In SAP
+C11152,Pacific Medical Cliinc Hue,pacific medical cliinc hue,VN,Hue,"202 Dien Bien Phu St, Hue",,Clinic,SPD,pacificmedicalcliinchue,,In SAP
+C11158,"Specialist Medical Clinic Hai Phong Co., Ltd",specialist medical clinic hai phong,VN,Hai Phong,"365 Nguyen Hue Boulevard, Hai Phong",0256984613,Clinic,SPD,specialistmedicalclinichaiphong,0256984613,In SAP
+C11161,"Harmony Medical Clinic Da Nang Co., Ltd",harmony medical clinic da nang,VN,Da Nang,"419 Ly Thuong Kiet Street, Da Nang",0648649812,Clinic,SPD,harmonymedicalclinicdanang,0648649812,In SAP
+C11165,"Da Nang Unity Polyclinic Co., Ltd",da nang unity polyclinic,VN,Da Nang,"393 Tran Hung Dao Street, Da Nang",0853776438,Clinic,SPD,danangunitypolyclinic,0853776438,In SAP
+C11171,"Women's & Children's Medical Clinic Nha Trang Co., Ltd",women's & children's medical clinic nha trang,VN,Nha Trang,"205 Ly Thuong Kiet Street, Nha Trang",0468296098,Clinic,SPD,womenschildrensmedicalclinicnhatrang,0468296098,In SAP
+C11178,"Riverside Medical Clinic Can Tho Co., Ltd",riverside medical clinic can tho,VN,Can Tho,"1 Nguyen Hue Boulevard, Can Tho",0969954489,Clinic,SPD,riversidemedicalcliniccantho,0969954489,In SAP
+C11184,"Ho Chi Minh City Golden Polyclinic Co., Ltd",ho chi minh city golden polyclinic,VN,Ho Chi Minh City,"167 Tran Hung Dao Street, Ho Chi Minh City",0453766299,Clinic,SPD,hochiminhcitygoldenpolyclinic,0453766299,In SAP
+C11192,"Harmony Medical Clinic Hue Co., Ltd",harmony medical clinic hue,VN,Hue,"308 Dien Bien Phu Street, Hue",0443107345,Clinic,QTS,harmonymedicalclinichue,0443107345,In SAP

@@ -3,9 +3,9 @@ Lives Group master data and regional dashboard prototype (SMU DSA Data Case Comp
 
     streamlit run app.py
 
-Two halves:
-  - Regional business view: a strategic overview with analytic drill-downs (the dashboard)
-  - Workflow mock-up: what the Power Apps form + Power Automate flows do, folded into the bottom of the sidebar
+The regional business view: a strategic overview with analytic drill-downs, forecasting and MDM ops.
+The request workflow itself runs in Microsoft 365 (Power Apps + Power Automate; see README). An earlier Streamlit
+mock-up of it is still in views/workflow_pages.py but hidden (SHOW_WORKFLOW_MOCKUP), so the demo shows one form.
 """
 from pathlib import Path
 
@@ -32,6 +32,8 @@ sections = {
         st.Page(ap.business_case, title="Business case", url_path="business-case", icon=":material/payments:"),
     ],
 }
+# The mock-up's duplicate check differs from the real form's, so it stays hidden; True brings it back
+SHOW_WORKFLOW_MOCKUP = False
 workflow_pages = [
     st.Page(wp.new_request, title="New request", url_path="new-request", icon=":material/edit_note:"),
     st.Page(wp.my_requests, title="Request status", url_path="status", icon=":material/pin_drop:"),
@@ -39,7 +41,7 @@ workflow_pages = [
     st.Page(wp.mdm_queue, title="MDM check", url_path="mdm", icon=":material/storage:"),
     st.Page(wp.audit_log, title="Audit log", url_path="audit-log", icon=":material/receipt_long:"),
     st.Page(wp.rules, title="Rules", url_path="rules", icon=":material/tune:"),
-]
+] if SHOW_WORKFLOW_MOCKUP else []
 common.PAGES.update({common.page_id(p): p for group in sections.values() for p in group})  # links and access
 
 ASSETS = Path(__file__).parent / "assets"

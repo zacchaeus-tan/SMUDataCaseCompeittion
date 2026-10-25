@@ -9,7 +9,7 @@ import plotly.io as pio
 import streamlit as st
 import streamlit.components.v1 as components
 
-from onerecord import advisor, classify, dedup, forecast, insights, process, workflow
+from onerecord import advisor, classify, dedup, forecast, insights, livecheck, process, workflow
 from onerecord.config import COUNTRIES, DATA, KEY, PRODUCTS
 
 from . import theme
@@ -144,6 +144,14 @@ def data_quality():
     return dict(pairs=pairs, clusters=clusters, item_map=item_map, score=dedup.evaluate(clusters, truth))
 
 
+@st.cache_data(show_spinner=False)
+def live_check():
+    """How the request form's own duplicate check does on the planted duplicates (onerecord/livecheck.py)."""
+    truth = pd.read_csv(KEY / "customer_record_truth.csv", dtype=str)
+    aliases = pd.read_csv(Path(__file__).resolve().parent.parent / "sharepoint" / "Aliases.csv", dtype=str)
+    return livecheck.evaluate(raw()["customers"], truth, dict(zip(aliases.Title, aliases.RecordID)))
+
+
 @st.cache_data(show_spinner="Building the regional view…")
 def regional():
     d, q = raw(), data_quality()
@@ -219,12 +227,13 @@ def sidebar(sections, workflow_pages, current):
             for p in mine:
                 _nav_link(p, current)
         st.html('<div style="height:20px"></div>')
-        in_workflow = current.url_path in {p.url_path for p in workflow_pages}
-        with st.expander("☰  Workflow mock-up", expanded=in_workflow):
-            for p in workflow_pages:
-                _nav_link(p, current)
-            st.divider()
-            _workflow_controls()
+        if workflow_pages:
+            in_workflow = current.url_path in {p.url_path for p in workflow_pages}
+            with st.expander("☰  Workflow mock-up", expanded=in_workflow):
+                for p in workflow_pages:
+                    _nav_link(p, current)
+                st.divider()
+                _workflow_controls()
         _user_switch()
 
 

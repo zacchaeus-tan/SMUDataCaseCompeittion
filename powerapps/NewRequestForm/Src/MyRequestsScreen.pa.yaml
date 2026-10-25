@@ -249,7 +249,7 @@ Screens:
                                     HoverBorderColor: =RGBA(16, 110, 190, 1)
                                     HoverColor: =RGBA(50, 49, 48, 1)
                                     HoverFill: =RGBA(245, 245, 245, 1)
-                                    Items: =["All", "Pending approval", "Changes requested", "Resubmitted", "Rejected", "Created in SAP"]
+                                    Items: =["All", "Pending approval", "Changes requested", "Resubmitted", "Rejected", "Ready for SAP import", "Created in SAP"]
                                     Items.Value: =Value
                                     LayoutMinHeight: =16
                                     LayoutMinWidth: =16
@@ -406,7 +406,7 @@ Screens:
                                     BorderColor: =RGBA(0, 0, 0, 0)
                                     BorderStyle: =BorderStyle.None
                                     BorderThickness: =2
-                                    Color: =Switch(ThisItem.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), RGBA(0, 90, 158, 1))
+                                    Color: =Switch(ThisItem.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), "Ready for SAP import", RGBA(92, 46, 145, 1), RGBA(0, 90, 158, 1))
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     FocusedBorderThickness: =4
@@ -540,7 +540,7 @@ Screens:
                               BorderColor: =RGBA(0, 0, 0, 0)
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =Switch(SelectedRequest.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), RGBA(0, 90, 158, 1))
+                              Color: =Switch(SelectedRequest.Status, "Rejected", RGBA(164, 38, 44, 1), "Created in SAP", RGBA(16, 124, 16, 1), "Changes requested", RGBA(157, 93, 0, 1), "Ready for SAP import", RGBA(92, 46, 145, 1), RGBA(0, 90, 158, 1))
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               FillPortions: =0
@@ -587,6 +587,128 @@ Screens:
                               Text: ="Edit and resubmit"
                               Visible: =!IsBlank(galRequests.Selected) && SelectedRequest.Status = "Changes requested" && Lower(SelectedRequest.'Created By'.Email) = Lower(User().Email)
                               Width: =200
+                        - SAPImportPanel:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              Fill: =RGBA(243, 238, 250, 1)
+                              FillPortions: =0
+                              Height: =132
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =8
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =8
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Visible: =!IsBlank(galRequests.Selected) && IsMDM && SelectedRequest.Status = "Ready for SAP import"
+                            Children:
+                              - lblSAPImportHelp:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =2
+                                    Color: =RGBA(96, 94, 92, 1)
+                                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                    DisabledColor: =RGBA(161, 159, 157, 1)
+                                    FillPortions: =0
+                                    FocusedBorderThickness: =4
+                                    Font: =Font.'Segoe UI'
+                                    Height: =40
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    PaddingLeft: =0
+                                    Size: =10
+                                    Text: ="Imported into SAP B1? Enter the code SAP gave it (normally the proposed code) and confirm. The requestor is told it is live, and the master list is updated."
+                                    Wrap: =true
+                              - rowSAPImport:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    FillPortions: =0
+                                    Height: =40
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =12
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    PaddingLeft: =0
+                                  Children:
+                                    - txtSAPCode:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          BorderColor: =RGBA(200, 198, 196, 1)
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Default: =SelectedRequest.SAPCode
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisabledColor: =RGBA(161, 159, 157, 1)
+                                          DisabledFill: =RGBA(242, 242, 241, 0)
+                                          Fill: =RGBA(255, 255, 255, 1)
+                                          FillPortions: =1
+                                          Font: =Font.'Segoe UI'
+                                          Height: =36
+                                          HintText: ="SAP code"
+                                          HoverBorderColor: =RGBA(16, 110, 190, 1)
+                                          HoverColor: =RGBA(50, 49, 48, 1)
+                                          HoverFill: =RGBA(255, 255, 255, 1)
+                                          LayoutMinHeight: =16
+                                          LayoutMinWidth: =16
+                                          PressedBorderColor: =RGBA(0, 120, 212, 1)
+                                          PressedColor: =RGBA(50, 49, 48, 1)
+                                          PressedFill: =RGBA(255, 255, 255, 1)
+                                          RadiusBottomLeft: =4
+                                          RadiusBottomRight: =4
+                                          RadiusTopLeft: =4
+                                          RadiusTopRight: =4
+                                          Size: =11
+                                    - btnMarkCreated:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderStyle: =BorderStyle.None
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisabledColor: =RGBA(161, 159, 157, 1)
+                                          DisabledFill: =RGBA(237, 235, 233, 1)
+                                          DisplayMode: =If(IsBlank(Trim(txtSAPCode.Text)), DisplayMode.Disabled, DisplayMode.Edit)
+                                          Fill: =RGBA(0, 120, 212, 1)
+                                          FillPortions: =0
+                                          Font: =Font.'Segoe UI'
+                                          Height: =36
+                                          HoverBorderColor: =RGBA(0, 0, 0, 0)
+                                          HoverColor: =RGBA(255, 255, 255, 1)
+                                          HoverFill: =RGBA(16, 110, 190, 1)
+                                          LayoutMinHeight: =16
+                                          LayoutMinWidth: =16
+                                          OnSelect: |-
+                                            =With(
+                                                {id: SelectedRequestID, code: Upper(Trim(txtSAPCode.Text))},
+                                                IfError(
+                                                    Patch(Requests, LookUp(Requests, Title = id), {Status: "Created in SAP", SAPCode: code});
+                                                    Notify(id & " marked as created in SAP as " & code & ". The requestor will be told.", NotificationType.Success);
+                                                    Refresh(Requests),
+                                                    Notify("Couldn't update: " & FirstError.Message, NotificationType.Error)
+                                                )
+                                            )
+                                          PressedBorderColor: =RGBA(0, 69, 120, 1)
+                                          PressedColor: =RGBA(255, 255, 255, 1)
+                                          PressedFill: =RGBA(16, 110, 190, 1)
+                                          RadiusBottomLeft: =4
+                                          RadiusBottomRight: =4
+                                          RadiusTopLeft: =4
+                                          RadiusTopRight: =4
+                                          Size: =11
+                                          Text: ="Mark as created in SAP"
+                                          Width: =220
                         - lblHeadWaiting:
                             Control: Label@2.5.1
                             Properties:

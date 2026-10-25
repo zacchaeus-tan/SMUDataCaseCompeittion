@@ -1,17 +1,17 @@
-Title,CostCentreName,Entity,Department,Owner
-SPD-SAL,SPD Sales,SPD,Sales,"Sales Head, SPD"
-SPD-MKT,SPD Marketing,SPD,Marketing,"Marketing Head, SPD"
-SPD-RA,SPD Regulatory Affairs,SPD,Regulatory Affairs,"Regulatory Affairs Head, SPD"
-SPD-FIN,SPD Finance,SPD,Finance,"Finance Head, SPD"
-SPD-WH,SPD Warehouse,SPD,Warehouse,"Warehouse Head, SPD"
-QTS-SAL,QTS Sales,QTS,Sales,"Sales Head, QTS"
-QTS-MKT,QTS Marketing,QTS,Marketing,"Marketing Head, QTS"
-QTS-RA,QTS Regulatory Affairs,QTS,Regulatory Affairs,"Regulatory Affairs Head, QTS"
-QTS-FIN,QTS Finance,QTS,Finance,"Finance Head, QTS"
-QTS-WH,QTS Warehouse,QTS,Warehouse,"Warehouse Head, QTS"
-QTG-SAL,QTG Sales,QTG,Sales,"Sales Head, QTG"
-QTG-MKT,QTG Marketing,QTG,Marketing,"Marketing Head, QTG"
-QTG-RA,QTG Regulatory Affairs,QTG,Regulatory Affairs,"Regulatory Affairs Head, QTG"
-QTG-SVC,QTG Service,QTG,Service,"Service Head, QTG"
-QTG-FIN,QTG Finance,QTG,Finance,"Finance Head, QTG"
-QTG-WH,QTG Warehouse,QTG,Warehouse,"Warehouse Head, QTG"
+Title,CostCentreName,Entity,Department,Owner,SAPStatus
+SPD-SAL,SPD Sales,SPD,Sales,"Sales Head, SPD",In SAP
+SPD-MKT,SPD Marketing,SPD,Marketing,"Marketing Head, SPD",In SAP
+SPD-RA,SPD Regulatory Affairs,SPD,Regulatory Affairs,"Regulatory Affairs Head, SPD",In SAP
+SPD-FIN,SPD Finance,SPD,Finance,"Finance Head, SPD",In SAP
+SPD-WH,SPD Warehouse,SPD,Warehouse,"Warehouse Head, SPD",In SAP
+QTS-SAL,QTS Sales,QTS,Sales,"Sales Head, QTS",In SAP
+QTS-MKT,QTS Marketing,QTS,Marketing,"Marketing Head, QTS",In SAP
+QTS-RA,QTS Regulatory Affairs,QTS,Regulatory Affairs,"Regulatory Affairs Head, QTS",In SAP
+QTS-FIN,QTS Finance,QTS,Finance,"Finance Head, QTS",In SAP
+QTS-WH,QTS Warehouse,QTS,Warehouse,"Warehouse Head, QTS",In SAP
+QTG-SAL,QTG Sales,QTG,Sales,"Sales Head, QTG",In SAP
+QTG-MKT,QTG Marketing,QTG,Marketing,"Marketing Head, QTG",In SAP
+QTG-RA,QTG Regulatory Affairs,QTG,Regulatory Affairs,"Regulatory Affairs Head, QTG",In SAP
+QTG-SVC,QTG Service,QTG,Service,"Service Head, QTG",In SAP
+QTG-FIN,QTG Finance,QTG,Finance,"Finance Head, QTG",In SAP
+QTG-WH,QTG Warehouse,QTG,Warehouse,"Warehouse Head, QTG",In SAP

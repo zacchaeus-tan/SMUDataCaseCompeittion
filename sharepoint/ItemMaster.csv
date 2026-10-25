@@ -1,15 +1,15 @@
-Title,Description,NormalizedName,ProductFamily,OwningEntity,UOM,Regulated,ManufacturerPartNo
-A-1001,Dengue NS1 Rapid Test Kit (25 tests),dengue ns1 rapid test kit 25 tests,A,SPD,Kit,Yes,BN-DEN-NS1-25
-A-1002,HbA1c Reagent Cartridge (10 tests),hba1c reagent cartridge 10 tests,A,SPD,Box,Yes,AX-HBA1C-C10
-A-1003,Troponin I Rapid Test (20 tests),troponin i rapid test 20 tests,A,SPD,Kit,Yes,CV-TNI-RT20
-A-1004,CRP Reagent Kit (100 tests),crp reagent kit 100 tests,A,SPD,Kit,Yes,HD-CRP-RK100
-A-1005,Malaria Ag Rapid Test (25 tests),malaria rapid test 25 tests,A,SPD,Kit,Yes,BN-MAL-AG25
-B-2001,Microcentrifuge Tubes 1.5 ml (500/pack),microcentrifuge tubes 1 5 ml 500 pack,B,QTS,Pack,No,LS-MCT15-500
-B-2002,Filter Pipette Tips 200 ul (960/box),filter pipette tips 200 ul 960 box,B,QTS,Box,No,LS-FPT200-960
-B-2003,Nitrile Examination Gloves M (100/box),nitrile examination gloves m 100 box,B,QTS,Box,Yes,GM-NIT-M100
-B-2004,EDTA Blood Collection Tubes (100/pack),edta blood collection tubes 100 pack,B,QTS,Pack,Yes,VC-EDTA-100
-B-2005,Specimen Containers 60 ml (100/pack),specimen containers 60 ml 100 pack,B,QTS,Pack,No,LS-SPC60-100
-C-3001,Benchtop Centrifuge 24-place,benchtop centrifuge 24 place,C,QTG,Unit,Yes,WB-BC24-230
-C-3002,Point-of-Care Chemistry Analyser,point of care chemistry analyser,C,QTG,Unit,Yes,AX-POC-CHEM1
-C-3003,Analyser Preventive Maintenance Kit,analyser preventive maintenance kit,C,QTG,Kit,No,AX-PMK-01
-C-3004,Biosafety Cabinet HEPA Filter Set,biosafety cabinet hepa filter set,C,QTG,Set,No,KS-BSC-HEPA4
+Title,Description,NormalizedName,ProductFamily,OwningEntity,UOM,Regulated,ManufacturerPartNo,MatchKey,IDKey,SAPStatus
+A-1001,Dengue NS1 Rapid Test Kit (25 tests),dengue ns1 rapid test kit 25 tests,A,SPD,Kit,Yes,BN-DEN-NS1-25,denguens1rapidtestkit25tests,BNDENNS125,In SAP
+A-1002,HbA1c Reagent Cartridge (10 tests),hba1c reagent cartridge 10 tests,A,SPD,Box,Yes,AX-HBA1C-C10,hba1creagentcartridge10tests,AXHBA1CC10,In SAP
+A-1003,Troponin I Rapid Test (20 tests),troponin i rapid test 20 tests,A,SPD,Kit,Yes,CV-TNI-RT20,troponinirapidtest20tests,CVTNIRT20,In SAP
+A-1004,CRP Reagent Kit (100 tests),crp reagent kit 100 tests,A,SPD,Kit,Yes,HD-CRP-RK100,crpreagentkit100tests,HDCRPRK100,In SAP
+A-1005,Malaria Ag Rapid Test (25 tests),malaria rapid test 25 tests,A,SPD,Kit,Yes,BN-MAL-AG25,malariarapidtest25tests,BNMALAG25,In SAP
+B-2001,Microcentrifuge Tubes 1.5 ml (500/pack),microcentrifuge tubes 1 5 ml 500 pack,B,QTS,Pack,No,LS-MCT15-500,microcentrifugetubes15ml500pack,LSMCT15500,In SAP
+B-2002,Filter Pipette Tips 200 ul (960/box),filter pipette tips 200 ul 960 box,B,QTS,Box,No,LS-FPT200-960,filterpipettetips200ul960box,LSFPT200960,In SAP
+B-2003,Nitrile Examination Gloves M (100/box),nitrile examination gloves m 100 box,B,QTS,Box,Yes,GM-NIT-M100,nitrileexaminationglovesm100box,GMNITM100,In SAP
+B-2004,EDTA Blood Collection Tubes (100/pack),edta blood collection tubes 100 pack,B,QTS,Pack,Yes,VC-EDTA-100,edtabloodcollectiontubes100pack,VCEDTA100,In SAP
+B-2005,Specimen Containers 60 ml (100/pack),specimen containers 60 ml 100 pack,B,QTS,Pack,No,LS-SPC60-100,specimencontainers60ml100pack,LSSPC60100,In SAP
+C-3001,Benchtop Centrifuge 24-place,benchtop centrifuge 24 place,C,QTG,Unit,Yes,WB-BC24-230,benchtopcentrifuge24place,WBBC24230,In SAP
+C-3002,Point-of-Care Chemistry Analyser,point of care chemistry analyser,C,QTG,Unit,Yes,AX-POC-CHEM1,pointofcarechemistryanalyser,AXPOCCHEM1,In SAP
+C-3003,Analyser Preventive Maintenance Kit,analyser preventive maintenance kit,C,QTG,Kit,No,AX-PMK-01,analyserpreventivemaintenancekit,AXPMK01,In SAP
+C-3004,Biosafety Cabinet HEPA Filter Set,biosafety cabinet hepa filter set,C,QTG,Set,No,KS-BSC-HEPA4,biosafetycabinethepafilterset,KSBSCHEPA4,In SAP

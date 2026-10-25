@@ -1,34 +1,34 @@
-Title,VendorName,Country,ProductSupplied,CreatedByEntity,CreatedDate,TaxID
-V2001,"Westbrook BioSystems Co., Ltd.",Japan,C,QTG,2015-10-01,TX60604147
-V2002,Halden Diagnostics Pte Ltd,Singapore,C,QTG,2016-11-01,TX33737085
-V2003,Corvid Diagnostics Inc.,USA,B,QTS,2024-11-01,TX40404038
-V2004,"Orion Labware Co., Ltd.",Japan,C,QTG,2023-02-01,TX62361634
-V2005,Westbrook Labware Pte Ltd,Singapore,C,QTG,2022-12-01,TX92410197
-V2006,"Kestrel Life Sciences Co., Ltd.",Korea,B,QTS,2024-05-01,TX83701737
-V2007,Corvid Labware AG,Switzerland,C,QTG,2014-01-01,TX69221566
-V2008,"Orion Medical Devices Co., Ltd.",Korea,A,SPD,2025-10-01,TX49865021
-V2009,Sentinel Diagnostics GmbH,Germany,B,QTS,2023-05-01,TX41725973
-V2010,Sentinel Labware Inc.,USA,C,QTG,2016-01-01,TX65186553
-V2011,"Helix Labware Co., Ltd.",China,B,QTS,2018-08-01,TX42290585
-V2012,"Meridian Medical Devices Co., Ltd.",Japan,A,SPD,2016-04-01,TX19783229
-V2013,Helix Diagnostics AG,Switzerland,B,QTS,2020-03-01,TX13318817
-V2014,Corvid Medical Devices Inc.,USA,A,SPD,2017-09-01,TX39912597
-V2015,"Helix Life Sciences Co., Ltd.",China,B,QTS,2016-09-01,TX99594683
-V2016,Brightwater Life Sciences GmbH,Germany,A,SPD,2025-02-01,TX99613717
-V2017,Corvid BioSystems Ltd,UK,A,SPD,2022-03-01,TX31955225
-V2018,Helix Medical Devices Ltd,UK,B,QTS,2017-11-01,TX37424102
-V2019,Norland Scientific GmbH,Germany,C,QTG,2021-05-01,TX96488837
-V2020,"Castell Scientific Co., Ltd.",China,C,QTG,2016-12-01,TX86624684
-V2021,Helix Scientific Inc.,USA,C,QTG,2020-05-01,TX15611578
-V2022,Kestrel Labware Ltd,UK,B,QTS,2016-05-01,TX19937732
-V2023,"Helix BioSystems Co., Ltd.",Japan,B,QTS,2015-03-01,TX16740456
-V2024,Castell Labware Inc.,USA,B,QTS,2022-04-01,TX53045801
-V2025,"Norland Life Sciences Co., Ltd.",Japan,C,QTG,2018-12-01,TX25838333
-V2026,"Vireo Scientific Co., Ltd.",Japan,C,QTG,2022-03-01,TX92261330
-V2027,Halden Labware Pte Ltd,Singapore,A,SPD,2021-11-01,TX31112106
-V2028,"Kestrel BioSystems Co., Ltd.",Japan,B,QTS,2025-01-01,TX42590952
-V2029,Aurora Medical Devices Pte Ltd,Singapore,B,QTS,2025-02-01,TX75889533
-V2030,"Aurora Life Sciences Co., Ltd.",Japan,B,QTS,2019-05-01,TX65170549
-V2101,Corvid Diagonstics Inc.,USA,B,QTG,2025-08-01,TX40404038
-V2102,Halden Labware Pte. Ltd.,Singapore,A,QTS,2025-11-01,TX31112106
-V2103,"HELIX BIOSYSTEMS CO., LTD.",Japan,B,QTG,2025-06-01,TX16740456
+Title,VendorName,Country,ProductSupplied,CreatedByEntity,CreatedDate,TaxID,MatchKey,IDKey,SAPStatus
+V2001,"Westbrook BioSystems Co., Ltd.",Japan,C,QTG,2015-10-01,TX60604147,westbrookbiosystems,TX60604147,In SAP
+V2002,Halden Diagnostics Pte Ltd,Singapore,C,QTG,2016-11-01,TX33737085,haldendiagnostics,TX33737085,In SAP
+V2003,Corvid Diagnostics Inc.,USA,B,QTS,2024-11-01,TX40404038,corviddiagnostics,TX40404038,In SAP
+V2004,"Orion Labware Co., Ltd.",Japan,C,QTG,2023-02-01,TX62361634,orionlabware,TX62361634,In SAP
+V2005,Westbrook Labware Pte Ltd,Singapore,C,QTG,2022-12-01,TX92410197,westbrooklabware,TX92410197,In SAP
+V2006,"Kestrel Life Sciences Co., Ltd.",Korea,B,QTS,2024-05-01,TX83701737,kestrellifesciences,TX83701737,In SAP
+V2007,Corvid Labware AG,Switzerland,C,QTG,2014-01-01,TX69221566,corvidlabware,TX69221566,In SAP
+V2008,"Orion Medical Devices Co., Ltd.",Korea,A,SPD,2025-10-01,TX49865021,orionmedicaldevices,TX49865021,In SAP
+V2009,Sentinel Diagnostics GmbH,Germany,B,QTS,2023-05-01,TX41725973,sentineldiagnostics,TX41725973,In SAP
+V2010,Sentinel Labware Inc.,USA,C,QTG,2016-01-01,TX65186553,sentinellabware,TX65186553,In SAP
+V2011,"Helix Labware Co., Ltd.",China,B,QTS,2018-08-01,TX42290585,helixlabware,TX42290585,In SAP
+V2012,"Meridian Medical Devices Co., Ltd.",Japan,A,SPD,2016-04-01,TX19783229,meridianmedicaldevices,TX19783229,In SAP
+V2013,Helix Diagnostics AG,Switzerland,B,QTS,2020-03-01,TX13318817,helixdiagnostics,TX13318817,In SAP
+V2014,Corvid Medical Devices Inc.,USA,A,SPD,2017-09-01,TX39912597,corvidmedicaldevices,TX39912597,In SAP
+V2015,"Helix Life Sciences Co., Ltd.",China,B,QTS,2016-09-01,TX99594683,helixlifesciences,TX99594683,In SAP
+V2016,Brightwater Life Sciences GmbH,Germany,A,SPD,2025-02-01,TX99613717,brightwaterlifesciences,TX99613717,In SAP
+V2017,Corvid BioSystems Ltd,UK,A,SPD,2022-03-01,TX31955225,corvidbiosystems,TX31955225,In SAP
+V2018,Helix Medical Devices Ltd,UK,B,QTS,2017-11-01,TX37424102,helixmedicaldevices,TX37424102,In SAP
+V2019,Norland Scientific GmbH,Germany,C,QTG,2021-05-01,TX96488837,norlandscientific,TX96488837,In SAP
+V2020,"Castell Scientific Co., Ltd.",China,C,QTG,2016-12-01,TX86624684,castellscientific,TX86624684,In SAP
+V2021,Helix Scientific Inc.,USA,C,QTG,2020-05-01,TX15611578,helixscientific,TX15611578,In SAP
+V2022,Kestrel Labware Ltd,UK,B,QTS,2016-05-01,TX19937732,kestrellabware,TX19937732,In SAP
+V2023,"Helix BioSystems Co., Ltd.",Japan,B,QTS,2015-03-01,TX16740456,helixbiosystems,TX16740456,In SAP
+V2024,Castell Labware Inc.,USA,B,QTS,2022-04-01,TX53045801,castelllabware,TX53045801,In SAP
+V2025,"Norland Life Sciences Co., Ltd.",Japan,C,QTG,2018-12-01,TX25838333,norlandlifesciences,TX25838333,In SAP
+V2026,"Vireo Scientific Co., Ltd.",Japan,C,QTG,2022-03-01,TX92261330,vireoscientific,TX92261330,In SAP
+V2027,Halden Labware Pte Ltd,Singapore,A,SPD,2021-11-01,TX31112106,haldenlabware,TX31112106,In SAP
+V2028,"Kestrel BioSystems Co., Ltd.",Japan,B,QTS,2025-01-01,TX42590952,kestrelbiosystems,TX42590952,In SAP
+V2029,Aurora Medical Devices Pte Ltd,Singapore,B,QTS,2025-02-01,TX75889533,auroramedicaldevices,TX75889533,In SAP
+V2030,"Aurora Life Sciences Co., Ltd.",Japan,B,QTS,2019-05-01,TX65170549,auroralifesciences,TX65170549,In SAP
+V2101,Corvid Diagonstics Inc.,USA,B,QTG,2025-08-01,TX40404038,corviddiagonstics,TX40404038,In SAP
+V2102,Halden Labware Pte. Ltd.,Singapore,A,QTS,2025-11-01,TX31112106,haldenlabware,TX31112106,In SAP
+V2103,"HELIX BIOSYSTEMS CO., LTD.",Japan,B,QTG,2025-06-01,TX16740456,helixbiosystems,TX16740456,In SAP

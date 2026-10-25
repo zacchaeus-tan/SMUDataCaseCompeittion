@@ -16,6 +16,10 @@ LISTS = {  # list GUIDs on the team site
     "Roles": "ddcffdf3-071e-4c53-a7a1-602cbe86ad9e",
     "ApprovalLog": "0420543c-3d28-47c5-9218-2e31486b0932",
     "RequiredFields": "6d7f2d26-8be0-409f-8a85-fbc141d462b1",
+    "CustomerMaster": "502051d3-be04-40e1-a04c-1570044a7266",
+    "ItemMaster": "e381c6db-53b7-4a0e-af7c-90cc847db58f",
+    "VendorMaster": "0b1a384f-5d84-49db-9c69-c33782112e5a",
+    "CostCentres": "25bf32a9-9546-4f8c-be2c-5a723eba7b59",
 }
 # The request form's web link (Power Apps > the app > ... > Details > Web link). The email auto-reply sends it.
 APP_URL = ("https://apps.powerapps.com/play/e/default-c98a79ca-5a9a-4791-a243-f06afd67464d/a/"
@@ -35,7 +39,8 @@ REQ = {"RequestType": "field_1", "Entity": "field_2", "Country": "field_3", "Req
        "CostCenterName": "field_25", "Department": "field_26", "Owner": "field_27", "BudgetYear": "field_28",
        "DuplicateCheck": "field_29", "PossibleMatchID": "field_30", "SAPCode": "field_31",
        # added by hand after the CSV import, so their internal names are their display names
-       "RegulatedAnswer": "RegulatedAnswer", "ChangeNote": "ChangeNote", "ManufacturerPartNo": "ManufacturerPartNo"}
+       "RegulatedAnswer": "RegulatedAnswer", "ChangeNote": "ChangeNote", "ManufacturerPartNo": "ManufacturerPartNo",
+       "MatchKey": "MatchKey", "IDKey": "IDKey", "DupReason": "DupReason"}
 RULE = {"RequestType": "field_1", "Entity": "field_2", "ConditionField": "field_3", "ConditionValue": "field_4",
         "ApproverRole": "field_5", "Stage": "field_6", "SLADays": "field_7", "EscalateAfterDays": "field_8",
         "Active": "field_9"}
@@ -44,6 +49,17 @@ ROLE = {"Role": "field_1", "Entity": "field_2", "PersonName": "field_3", "Person
 LOG = {"RequestID": "field_1", "Timestamp": "field_2", "Actor": "field_3", "ActorRole": "field_4",
        "Action": "field_5", "Detail": "field_6"}
 SENS = {"RequestID": "field_1", "PaymentTerms": "field_2", "CreditLimit": "field_3"}
+# Master lists (copies of SAP records for the duplicate check). MatchKey / IDKey / SAPStatus were added by hand.
+CUST = {"CustomerName": "field_1", "NormalizedName": "field_2", "Country": "field_3", "City": "field_4",
+        "Address": "field_5", "RegistrationNo": "field_6", "Segment": "field_7", "CreatedByEntity": "field_8",
+        "MatchKey": "MatchKey", "IDKey": "IDKey", "SAPStatus": "SAPStatus"}
+ITEM = {"Description": "field_1", "NormalizedName": "field_2", "ProductFamily": "field_3", "OwningEntity": "field_4",
+        "UOM": "field_5", "Regulated": "field_6", "ManufacturerPartNo": "ManufacturerPartNo",
+        "MatchKey": "MatchKey", "IDKey": "IDKey", "SAPStatus": "SAPStatus"}
+VEND = {"VendorName": "field_1", "Country": "field_2", "ProductSupplied": "field_3", "CreatedByEntity": "field_4",
+        "CreatedDate": "field_5", "TaxID": "field_6", "MatchKey": "MatchKey", "IDKey": "IDKey", "SAPStatus": "SAPStatus"}
+CC = {"CostCentreName": "field_1", "Entity": "field_2", "Department": "field_3", "Owner": "field_4",
+      "SAPStatus": "SAPStatus"}
 RF = {"RequestType": "field_1", "FieldName": "field_2", "Sensitive": "field_8", "VisibleToRoles": "field_9"}
 
 APIS = {

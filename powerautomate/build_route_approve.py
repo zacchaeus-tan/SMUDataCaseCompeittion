@@ -6,8 +6,8 @@ Each approval also writes an "Assigned" row to ApprovalLog, which build_reminder
 """
 from pathlib import Path
 
-from pkg import (LISTS, LOG, REQ, RF, ROLE, RULE, SENS, SITE, after, condition, definition, log_row, sp, teams_chat,
-                 write_package)
+from pkg import (CC, CUST, ITEM, LISTS, LOG, REQ, RF, ROLE, RULE, SENS, SITE, VEND, after, condition, definition,
+                 log_row, sp, teams_chat, write_package)
 
 OUT = Path(__file__).with_name("OneRecord-RouteAndApprove.zip")
 NAME = "OneRecord - Route and approve"
@@ -146,7 +146,10 @@ def stage_loop(stage):
                     f"**Requested by:** @{{{t('Requestor')}}}\n\n"
                     f"**Name:** @{{{name_now}}}\n\n"
                     f"**Country:** @{{{cur('Country')}}}\n\n"
-                    f"**Duplicate check:** @{{{cur('DuplicateCheck')}}} @{{{cur('PossibleMatchID')}}}\n\n"
+                    f"**Duplicate check:** @{{if(equals({cur('DuplicateCheck')}, 'Clear'), '', '\u26a0\ufe0f ')}}"
+                    f"@{{{cur('DuplicateCheck')}}} @{{{cur('PossibleMatchID')}}}\n\n"
+                    f"@{{if(empty({cur('DupReason')}), '', concat('**Requestor says it is not a duplicate:** ', "
+                    f"{cur('DupReason')}))}}\n\n"
                     f"**Your check:** @{{{role}}} (stage {stage})\n\n"
                     f"@{{if(equals({t('RequestType')}, 'Item'), concat('**Regulated (requestor answer):** ', "
                     f"coalesce({cur('RegulatedAnswer')}, if(equals({cur('IsRegulated')}, true), 'Yes', 'No'))), '')}}\n\n"
@@ -259,7 +262,10 @@ def rejected_gate(stage, prev):
 
 
 actions = {}
-actions["Get_routing_rules"] = sp("GetItems", "RoutingRules")
+# The master list row added for this request (set when the record is approved, updated once it is in SAP)
+actions["Init_master_row_id"] = {"type": "InitializeVariable", "runAfter": {}, "inputs": {
+    "variables": [{"name": "MasterRowID", "type": "integer", "value": 0}]}}
+actions["Get_routing_rules"] = after(sp("GetItems", "RoutingRules"), "Init_master_row_id")
 actions["Get_roles"] = after(sp("GetItems", "Roles"), "Get_routing_rules")
 
 s1 = stage_loop(1)
@@ -386,16 +392,106 @@ for k, (obj, _, cols) in DTW.items():
         body=dtw_body(cols))}}
 actions["Write_SAP_import_file"] = after({"type": "Switch", "expression": f"@{t('RequestType')}",
                                           "cases": cases, "default": {"actions": {}}}, "SAP_file_name")
-actions["Mark_created_in_SAP"] = update_request(
-    ["Write_SAP_import_file"], Status="Created in SAP", CompletedAt="@utcNow()", SAPCode="@{outputs('SAP_code')}",
-    CurrentStage="Approved. SAP code @{outputs('SAP_code')}; import file SAP_Imports/@{outputs('SAP_file_name')}")
+# Approved: add the record to its master list straight away (as "Pending SAP import"), so the next request's
+# duplicate check sees it, and hand over to MDM to import the file. The status only says "Created in SAP" once MDM
+# confirms the import in the app (My requests > Mark as created in SAP).
+PENDING_SAP = "Pending SAP import"
+today = "@{formatDateTime(utcNow(), 'yyyy-MM-dd')}"
+MASTER = {  # request type -> (list, column map, {master column: value})
+    "Customer": ("CustomerMaster", CUST, {
+        "CustomerName": f"@{{{t('CustomerName')}}}", "NormalizedName": f"@{{{t('MatchKey')}}}",
+        "Country": f"@{{{t('Country')}}}", "Address": f"@{{{t('BillingAddress')}}}",
+        "RegistrationNo": f"@{{{t('RegistrationNo')}}}", "Segment": f"@{{{t('Segment')}}}",
+        "CreatedByEntity": f"@{{{t('Entity')}}}", "MatchKey": f"@{{{t('MatchKey')}}}", "IDKey": f"@{{{t('IDKey')}}}"}),
+    "Item": ("ItemMaster", ITEM, {
+        "Description": f"@{{{t('ItemDescription')}}}", "NormalizedName": f"@{{{t('MatchKey')}}}",
+        "ProductFamily": f"@{{{t('ProductFamily')}}}", "OwningEntity": f"@{{{t('Entity')}}}",
+        "UOM": f"@{{{t('UnitOfMeasure')}}}", "Regulated": f"@equals({t('IsRegulated')}, true)",
+        "ManufacturerPartNo": f"@{{{t('ManufacturerPartNo')}}}", "MatchKey": f"@{{{t('MatchKey')}}}",
+        "IDKey": f"@{{{t('IDKey')}}}"}),
+    "Vendor": ("VendorMaster", VEND, {
+        "VendorName": f"@{{{t('VendorName')}}}", "Country": f"@{{{t('Country')}}}",
+        "CreatedByEntity": f"@{{{t('Entity')}}}", "CreatedDate": today, "TaxID": f"@{{{t('TaxID')}}}",
+        "MatchKey": f"@{{{t('MatchKey')}}}", "IDKey": f"@{{{t('IDKey')}}}"}),
+    "Cost Center": ("CostCentres", CC, {
+        "CostCentreName": f"@{{{t('CostCenterName')}}}", "Entity": f"@{{{t('Entity')}}}",
+        "Department": f"@{{{t('Department')}}}", "Owner": f"@{{{t('Owner')}}}"}),
+}
+
+
+def master_switch(name, build):
+    return {"type": "Switch", "runAfter": {}, "expression": f"@{t('RequestType')}", "default": {"actions": {}},
+            "cases": {k.replace(" ", "_"): {"case": k, "actions": build(k, *v)} for k, v in MASTER.items()}}
+
+
+def add_case(kind, lst, cols, values):
+    key = kind.replace(" ", "_")
+    fields = {f"item/{cols[c]}": v for c, v in values.items()}
+    fields.update({"item/Title": "@{outputs('SAP_code')}", f"item/{cols['SAPStatus']}": PENDING_SAP})
+    return {f"Add_{key}_record": sp("PostItem", lst, **fields),
+            f"Remember_{key}_row": after({"type": "SetVariable", "inputs": {
+                "name": "MasterRowID", "value": f"@outputs('Add_{key}_record')?['body/ID']"}}, f"Add_{key}_record")}
+
+
+poll = "Poll_SAP_status"
+sap_now = f"outputs('{poll}')?['body/{REQ['SAPCode']}']"
+
+
+def live_case(kind, lst, cols, values):
+    return {f"Mark_{kind.replace(' ', '_')}_in_SAP": sp("PatchItem", lst, **{
+        "id": "@variables('MasterRowID')", "item/Title": f"@{{{sap_now}}}", f"item/{cols['SAPStatus']}": "In SAP"})}
+
+
+mdm_email = f"first(body('Find_MDM_analyst'))?['{ROLE['PersonEmail']}']"
+actions["Add_to_master_list"] = after(master_switch("Add_to_master_list", add_case), "Write_SAP_import_file")
+actions["Mark_ready_for_SAP"] = update_request(
+    ["Add_to_master_list"], Status="Ready for SAP import", SAPCode="@{outputs('SAP_code')}",
+    CurrentStage="Approved. MDM to import SAP_Imports/@{outputs('SAP_file_name')} into SAP B1 "
+                 "(proposed code @{outputs('SAP_code')})")
 actions["Log_SAP_file"] = after(log_row(
     "@triggerBody()?['Title']", "OneRecord", "System", "SAP import file created",
-    "SAP_Imports/@{outputs('SAP_file_name')} (proposed code @{outputs('SAP_code')})"), "Mark_created_in_SAP")
+    "SAP_Imports/@{outputs('SAP_file_name')} (proposed code @{outputs('SAP_code')}); added to the master list as "
+    f"{PENDING_SAP}"), "Mark_ready_for_SAP")
 actions["Tell_requestor_approved"] = teams_to_requestor(
-    "Good news: your request @{triggerBody()?['Title']} was approved by every approver. Its proposed SAP code is "
-    "@{outputs('SAP_code')} and the SAP import file has been created.",
+    "Good news: your request @{triggerBody()?['Title']} was approved by every approver. The MDM team is now "
+    "importing it into SAP B1 (proposed code @{outputs('SAP_code')}). You'll get a message when it's live.",
     "Log_SAP_file")
+actions["Tell_MDM_to_import"] = after(teams_chat(
+    f"@{{{mdm_email}}}",
+    "@{triggerBody()?['Title']} is approved. Import SAP_Imports/@{outputs('SAP_file_name')} into SAP B1 with the "
+    "Data Transfer Workbench, then open OneRecord, go to My requests (All requests), select it and press "
+    "Mark as created in SAP."), "Tell_requestor_approved")
+# Wait (checking every 5 minutes, up to about 17 days) for MDM to confirm the import
+actions["Wait_for_SAP_import"] = after({
+    "type": "Until", "expression": f"@equals(outputs('{poll}')?['body/{REQ['Status']}'], 'Created in SAP')",
+    "limit": {"count": 5000, "timeout": "P30D"},
+    "actions": {
+        "Wait_5_minutes_SAP": {"type": "Wait", "runAfter": {}, "inputs": {"interval": {"count": 5, "unit": "Minute"}}},
+        poll: after(sp("GetItem", "Requests", id="@triggerBody()?['ID']"), "Wait_5_minutes_SAP"),
+    }}, "Tell_MDM_to_import")
+actions["After_SAP_import"] = {
+    **condition(f"equals(outputs('{poll}')?['body/{REQ['Status']}'], 'Created in SAP')", {
+        "Update_master_list": master_switch("Update_master_list", live_case),
+        "Mark_completed": update_request(
+            ["Update_master_list"], CompletedAt="@utcNow()",
+            CurrentStage=f"Created in SAP as @{{{sap_now}}}"),
+        "Log_created_in_SAP": after(log_row(
+            "@triggerBody()?['Title']", f"@{{outputs('{poll}')?['body/Editor/Email']}}", "MDM Analyst",
+            "Created in SAP", f"SAP code @{{{sap_now}}}; master list updated"), "Mark_completed"),
+        "Tell_requestor_live": teams_to_requestor(
+            f"Your request @{{triggerBody()?['Title']}} is live in SAP B1 as @{{{sap_now}}}. You can use it now.",
+            "Log_created_in_SAP"),
+    }, {
+        "Log_import_not_confirmed": log_row(
+            "@triggerBody()?['Title']", "OneRecord", "System", "SAP import not confirmed",
+            "Still Ready for SAP import after the waiting period"),
+        "Tell_MDM_not_confirmed": after(teams_chat(
+            f"@{{{mdm_email}}}",
+            "@{triggerBody()?['Title']} has been ready for SAP import for over two weeks and hasn't been marked as "
+            "created in SAP. Please import it or reject it."), "Log_import_not_confirmed"),
+    }),
+    "runAfter": {"Wait_for_SAP_import": ["Succeeded", "Failed", "TimedOut"]},
+}
 
 flow = definition({"When_a_request_is_submitted": {
     "type": "OpenApiConnection", "recurrence": {"interval": 1, "frequency": "Minute"},
