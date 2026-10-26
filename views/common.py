@@ -93,9 +93,7 @@ def header(section, headline):
     """Page header bar: the section name small, the finding as the headline, the data period on the right."""
     st.html(f'<div class="or-topbar"><div><div class="or-section">{escape(section)}</div>'
             f'<h1>{escape(headline)}</h1></div>'
-            f'<div class="or-who"><span class="or-period">Apr 2025 – Sep 2026 · synthetic data</span>'
-            f'<span class="or-avatar" title="{escape(user()["name"])}, {escape(user()["role"])}">'
-            f'{escape(user()["initials"])}</span></div></div>')
+            f'<div class="or-who"><span class="or-period">Apr 2025 – Sep 2026 · synthetic data</span></div></div>')
 
 
 def tone(change, up_is_good=True):
