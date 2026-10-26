@@ -162,6 +162,12 @@ h5 { font-weight: 600 !important; color: var(--or-navy); }
 .st-key-act-1 { padding-top: 6px !important; border-top: none; }
 [class*="st-key-act-"] [data-testid="stHorizontalBlock"] { gap: 8px; }
 [class*="st-key-act-"] [data-testid="stPageLink"] { display: flex; justify-content: flex-end; }
+/* the link column sizes to its label and the tag column takes the rest, so "See the evidence" never clips */
+[class*="st-key-act-"] [data-testid="stColumn"]:has([data-testid="stPageLink"]) {
+  flex: 0 0 auto !important; width: auto !important; min-width: 0;
+}
+[class*="st-key-act-"] [data-testid="stColumn"]:not(:has([data-testid="stPageLink"])) { flex: 1 1 0 !important; min-width: 0; }
+[class*="st-key-act-"] [data-testid="stPageLink"] a p { white-space: nowrap; overflow: visible; }
 [class*="st-key-act-"] [data-testid="stPageLink"] a {
   padding: 4px 12px; min-height: 0; border-radius: 8px; color: var(--or-primary);
 }
