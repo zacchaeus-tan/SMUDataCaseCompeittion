@@ -248,8 +248,11 @@ def stage_loop(stage):
                 "parameters": {
                     "approvalType": "CustomResponse",  # exact value from Peek code in the tenant
                     "WebhookApprovalCreationInput/responseOptions": RESPONSES,
+                    # The card header always names the flow's connection owner, so the title names the requestor
                     "WebhookApprovalCreationInput/title":
-                        f"@{{triggerBody()?['Title']}}: @{{{t('RequestType')}}} request for @{{{t('Entity')}}} "
+                        f"@{{triggerBody()?['Title']}} from @{{if(empty({t('Requestor')}), "
+                        f"triggerBody()?['Author']?['DisplayName'], {t('Requestor')})}}: "
+                        f"@{{{t('RequestType')}}} request for @{{{t('Entity')}}} "
                         f"(@{{{role}}} check)@{{if(greater({round_no}, 1), concat(' - round ', string({round_no})), '')}}"
                         + title_suffix,
                     "WebhookApprovalCreationInput/assignedTo": assigned_to,
