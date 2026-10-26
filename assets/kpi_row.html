@@ -16,13 +16,12 @@
   .card {
     position: relative; box-sizing: border-box; height: __CARD_HEIGHT__px; overflow: hidden;
     display: flex; flex-direction: column; justify-content: space-between;
-    padding: 14px 18px; background: #fff; border: none; border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(11, 37, 69, 0.07);
+    padding: 14px 18px; background: #fff; border: 1px solid var(--line); border-radius: 8px;
   }
   .good { --tone: var(--good); --tone-bg: var(--good-bg); }
   .bad { --tone: var(--bad); --tone-bg: var(--bad-bg); }
   .neutral { --tone: var(--neutral); --tone-bg: var(--neutral-bg); }
-  .label { display: flex; align-items: flex-start; gap: 6px; font-size: 14px; line-height: 1.3; color: var(--muted); }
+  .label { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; line-height: 1.3; color: #64748b; }
   .info {
     flex: none; display: inline-grid; place-items: center; width: 14px; height: 14px; margin-top: 1px;
     border: 1px solid #9aa3ad; border-radius: 50%; font-size: 10px; color: #6b7684; cursor: help;
@@ -32,8 +31,7 @@
     font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .delta {
-    align-self: flex-start; font-size: 13px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
-    background: var(--tone-bg); color: var(--tone);
+    align-self: flex-start; font-size: 12.5px; font-weight: 500; color: var(--tone);
     /* always one line: a long note ends in "…" (full text on hover) instead of growing over the number */
     max-width: 100%; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
