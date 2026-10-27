@@ -3,7 +3,12 @@
 *SMU DSA Data Case Competition 2026 · Modernising Master Data Management at Lives Group*
 
 **Try it online, nothing to install or run:** [onerecord-livesgroup.streamlit.app](https://onerecord-livesgroup.streamlit.app/)
-(the regional view) · [the request workflow](https://onerecord-livesgroup.streamlit.app/my-requests). No sign-in needed.
+
+Everything works without signing in. The workflow pages are a copy of our Power App (`NewRequestForm.msapp`) and
+its Power Automate flows, which run live on Microsoft 365 (shown in the demo video). Both read the same rule lists in
+`sharepoint/` and apply the same form checks, duplicate check, approval routing, reminders, escalation and SAP file.
+What differs: Teams and email messages are shown in the app instead of sent, a demo clock stands in for real days,
+and the Rules page edits the lists directly instead of through the Power App's guided forms.
 
 **The problem:** bad data gets into SAP B1 when a record is first requested. A new record takes **18.8 days**
 (median), and duplicate customers distort the regional sales view.
@@ -15,11 +20,7 @@
 | **Regional view** | Growth by country and product, 6-month forecasts, customers to call, duplicate clean-up | Streamlit (Python) on synthetic SAP data |
 | **Request workflow** | Smart request form, parallel approvals, reminders and escalation, SAP B1 import file | Streamlit, running the same rules and logic as our Power Apps + Power Automate build |
 
-Everything works without signing in. The workflow pages are a copy of our Power App (`NewRequestForm.msapp`) and
-its Power Automate flows, which run live on Microsoft 365 (shown in the demo video). Both read the same rule lists in
-`sharepoint/` and apply the same form checks, duplicate check, approval routing, reminders, escalation and SAP file.
-What differs: Teams and email messages are shown in the app instead of sent, a demo clock stands in for real days,
-and the Rules page edits the lists directly instead of through the Power App's guided forms.
+
 
 ## Results (synthetic data)
 
