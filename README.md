@@ -2,7 +2,7 @@
 
 *SMU DSA Data Case Competition 2026 · Modernising Master Data Management at Lives Group*
 
-> **Demo video:** _add YouTube link_ · **Summary slides:** _add link_
+> **Demo video:** [youtube.com/watch?v=1l3sva9yBHI](https://www.youtube.com/watch?v=1l3sva9yBHI) · **Summary slides:** _add link_
 
 ## The problem in one line
 
@@ -170,20 +170,41 @@ streamlit run app.py
 ```
 
 The Streamlit app is the regional business view (switch user at the bottom of the sidebar; Priya sees *MDM ops*).
-The request workflow is demoed in the Microsoft 365 build; the older Streamlit mock-up of it is hidden
-(`SHOW_WORKFLOW_MOCKUP` in `app.py`). The optional AI step for ambiguous emails and the AI action brief need an `OPENAI_API_KEY`
+The request workflow runs for real in the Microsoft 365 build, which needs our Teams tenant. So that it can be tried
+without one, the app also has a **Workflow mock-up** section (sidebar, bottom) with the same steps: New request, Request
+status, Approvals, MDM check, Audit log and Rules. Switch *Workflow persona* to act as Amy, an approver or Priya, and use
+the demo clock to fire reminders. Its duplicate check is simpler than the Power App's (names only). Everyone using a
+deployed copy shares one demo database; *Reset demo data* starts it over. Hide it with `SHOW_WORKFLOW_MOCKUP` in `app.py`. The optional AI step for ambiguous emails and the AI action brief need an `OPENAI_API_KEY`
 (model `gpt-5.4-nano` by default; set `OPENAI_MODEL` to change it). Without a key, those emails stay in human review.
+Put the key in `.streamlit/secrets.toml` (git-ignored) as `OPENAI_API_KEY = "..."`; on Streamlit Community Cloud, paste
+the same line into the app's **Settings → Secrets**.
 
 ### Demo script (Amy's story)
 
-1. As **Amy**, open *New request*, choose Item, set regulated to **Not sure** (Quality/Regulatory joins the approvers; try *N/A* as the HS code to see it blocked) and type
-   *Dengue NS1 rapid test 25T* to trigger the duplicate warning.
-2. As **Wei Jie**, **QA** and the **BU Head**, open *Approvals* and approve. The three checks run at the same time.
-3. In the sidebar, press **+3 days** on a stalled request to fire a reminder and an escalation.
-4. As **Priya**, open *MDM check*, approve, and download the SAP file.
-5. As **Priya**, open *Rules* and onboard Marcus's new BU. Then as **Marcus**, a *New request* for that BU routes to
-   its own BU Head, with no IT change.
-6. Finish on *Country deep-dive*, *Forecasting* and *Customers*.
+**Part 1: the request workflow (Microsoft 365, in our Teams tenant)**
+
+1. As **Amy**, open the **NewRequestForm** app pinned in the Teams channel and choose *Item*. Only the item fields show.
+   Type *N/A* as the HS code: it is flagged in red and *Submit* stays disabled. Set *Is this regulated?* to **Not sure**,
+   and *Who will approve* adds Quality/Regulatory. Type *Dengue NS1 rapid test 25T*: a *Possible match* warning names
+   item A-1001, and going ahead needs a reason.
+2. Submit. **Wei Jie** (Finance), **Quality/Regulatory** and the **BU Head** each get an approval card in Teams at the
+   same time. Approve them; one can choose *Request changes* to send it back to Amy instead.
+3. In *My requests*, Amy sees the status, who it is still waiting on, and a timeline from the **ApprovalLog**.
+   Running *OneRecord - Reminders (send now)* shows the reminder an approver gets once `SLADays` pass.
+4. As **Priya** (MDM), approve the final card. The flow writes the **SAP DTW import file** to `SAP_Imports` and tells
+   Priya in Teams. After importing it into SAP B1, she presses *Mark as created in SAP*, and Amy is told the item is live.
+5. As **Priya**, open *Rules* and add Marcus's new business unit and its BU Head. Marcus's next request routes to his
+   own BU Head with no IT change. With no BU Head set up, it goes to Priya instead of stalling.
+
+**Part 2: the regional business view (Streamlit, `streamlit run app.py`)**
+
+6. **Overview:** volume and growth by country and product (growth = year-on-year units, Apr–Sep 2026 vs Apr–Sep 2025,
+   customer orders only), forecast against actual, the top 3 actions, and the strip showing what was counted: purchase
+   orders only, with enquiries, follow-ups and MDM setup requests left out and duplicate records merged.
+7. **Country deep-dive**, **Forecasting** (6 months ahead, back-tested against today's 6-month average) and
+   **Customers** (the ranked call list, the early warning for customers gone quiet, cross-sell leads).
+8. Switch user to **Priya** (bottom of the sidebar) for **MDM ops**: confirm duplicate groups already in SAP and download
+   the DTW files that freeze them.
 
 ## Repository map
 

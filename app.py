@@ -35,8 +35,9 @@ sections = {
         st.Page(ap.business_case, title="Business case", url_path="business-case", icon=":material/payments:"),
     ],
 }
-# The mock-up's duplicate check differs from the real form's, so it stays hidden; True brings it back
-SHOW_WORKFLOW_MOCKUP = False
+# Shown so judges can click through the workflow without our Teams tenant; its duplicate check is simpler than the
+# real form's (see README)
+SHOW_WORKFLOW_MOCKUP = True
 workflow_pages = [
     st.Page(wp.new_request, title="New request", url_path="new-request", icon=":material/edit_note:"),
     st.Page(wp.my_requests, title="Request status", url_path="status", icon=":material/pin_drop:"),
