@@ -85,6 +85,22 @@ h5 { font-weight: 600 !important; color: var(--or-navy); }
   box-shadow: var(--or-shadow);
   border: none !important;
 }
+/* Form fields: the theme fills them with the same white as the cards, so give them their own grey box and border */
+[data-testid="stMain"] [data-testid="stTextInputRootElement"],
+[data-testid="stMain"] [data-testid="stTextAreaRootElement"],
+[data-testid="stMain"] [data-testid="stNumberInputContainer"],
+[data-testid="stMain"] .react-aria-ComboBox > div {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+}
+[data-testid="stMain"] [data-testid="stTextInputRootElement"]:focus-within,
+[data-testid="stMain"] [data-testid="stTextAreaRootElement"]:focus-within,
+[data-testid="stMain"] [data-testid="stNumberInputContainer"]:focus-within,
+[data-testid="stMain"] .react-aria-ComboBox > div:focus-within {
+  border-color: var(--or-primary) !important;
+  background-color: #ffffff !important;
+}
 /* no padding on charts: the space is built into the figure (views/common.py: chart) */
 [data-testid="stDataFrame"], [data-testid="stTable"] { padding: 6px; box-sizing: border-box; }
 [class*="st-key-card"] { padding: 14px 18px; }

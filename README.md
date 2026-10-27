@@ -2,6 +2,8 @@
 
 *SMU DSA Data Case Competition 2026 · Modernising Master Data Management at Lives Group*
 
+**Try it:** [onerecord-livesgroup.streamlit.app](https://onerecord-livesgroup.streamlit.app/) (no sign-in needed)
+
 **The problem:** bad data gets into SAP B1 when a record is first requested. A new record takes **18.8 days**
 (median), and duplicate customers distort the regional sales view.
 
