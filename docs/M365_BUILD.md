@@ -5,11 +5,9 @@
 The workflow half of OneRecord runs for real on Microsoft 365. We built it in a Teams team, using only
 **standard connectors** (SharePoint, Approvals, Teams), so it needs no premium licence and no custom code on a server.
 
-**On this page:** [What's built](#whats-built) · [Demo script](#demo-script-amys-story) ·
+**On this page:** [What's built](#whats-built) · [How the pieces fit](#how-the-pieces-fit) ·
+[Tested end to end](#tested-end-to-end) · [Demo script](#demo-script-amys-story) ·
 [Rebuild it in another tenant](#rebuild-it-in-another-microsoft-365-tenant) · [Limits we know about](#limits-we-know-about)
-
-For how the pieces connect and what we tested end to end, see the README's
-[Part 2](../README.md#part-2-request-workflow-microsoft-365).
 
 ## What's built
 
@@ -25,6 +23,36 @@ For how the pieces connect and what we tested end to end, see the README's
 | Changing rules, fields and approvers without IT | The app's **Rules** screen (MDM only) shows each request type's whole process in plain words: what the form asks for (*always*, or *only when Product family is A*) and who approves it (step 1 in parallel, then the MDM final check), with *Show for* to see one business's approvers by name. Every change is made in a short panel with dropdowns and tick-boxes that reads the rule back as a sentence before saving: **Add an approval step** (*Quality/Regulatory approves item requests for all businesses, only when Product family is D*), **Change** a field (always asked, or only for some values; label and help text), **Turn off** a step. **Businesses and people** lists each business and who approves for it, flags missing approvers, and has **Add a business unit** (code, name, product lines, BU Head) and **Add a person** (an existing or new role, for one business or all). **Product lines** lists each line with who sells it, its extra fields and approvals, and has **Add a product line** (code, name, seller, which optional fields it needs, an optional extra approver) in one form. **Advanced** keeps the raw list editor for anything else (format checks, known names, dropdown options). A *Needs attention* banner shows any business with nobody set up for a step and any step that can never apply. Under the hood these are rows in **RoutingRules**, **RequiredFields**, **Roles**, **BusinessUnits** and **ChoiceOptions**; the flow and the form read them on the next request. If a business has no approver for a step (Marcus's story), the request goes to the MDM Analyst instead of stalling, MDM is told in Teams, and the gap is logged and shown on the request. |
 | Getting the record into SAP B1 | After MDM approval, the flow writes a **SAP Data Transfer Workbench** file (tab-delimited `.txt` with DTW's two header rows) to `SAP_Imports`, which only Owners can open. The file is one per request and per object: BusinessPartners, Items or ProfitCenters. The flow proposes the SAP code (e.g. `C20007`) and **adds the record to its master list straight away** (`SAPStatus` = *Pending SAP import*), so the next request's duplicate check already sees it. The request becomes **Ready for SAP import** and MDM gets a Teams message. After importing the file, MDM presses **Mark as created in SAP** in *My requests* (correcting the code if SAP gave another); only then does the status say *Created in SAP*, the master list row switch to *In SAP*, and the requestor hear that it's live. |
 | Cleaning up duplicates already in SAP | Done in the dashboard, not in M365: the **MDM ops** page lists the duplicate groups the bulk matcher found (plus borderline pairs, unticked, for review). MDM confirms them and downloads DTW files that **freeze** the extra business partners and items, with a note naming the code to use, plus an old-to-new code list for reporting. Freezing keeps past orders in place; nothing is deleted. |
+
+## How the pieces fit
+
+```
+Power App (New request)  ──writes──▶  Requests + SensitiveDetails (SharePoint)
+        │                                       │ new item (checked every minute)
+        │ reads rules & master data             ▼
+        ├── RequiredFields, BusinessUnits   Flow: Route and approve
+        ├── CustomerMaster, Aliases            ├─ reads RoutingRules, Roles, RequiredFields
+        ├── ItemMaster, VendorMaster           ├─ stage 1: parallel approvals (Teams/Outlook) ─┐
+        ├── CostCentres                        ├─ stage 2: MDM Analyst                         ├─▶ ApprovalLog
+        ├── (My requests) Roles, ApprovalLog   └─ SAP DTW file → SAP_Imports, status, Teams    ┘
+        └── (Rules, MDM) edits RoutingRules, Roles, RequiredFields, BusinessUnits, Aliases
+                                            Flow: Reminders and escalation (hourly, 9 AM local) ─▶ ApprovalLog
+```
+
+The Streamlit app's *Requests* pages embed this Power App (`POWER_APP_URL` in `onerecord/config.py`); its
+`StartScreen` reads `?screen=new|mine|rules` to open the right screen.
+
+## Tested end to end
+
+Synthetic data, on our tenant.
+
+| Request | What it showed |
+|---|---|
+| REQ-0004 (Customer) | Three stage-1 approvals in parallel, then MDM. Status *Created in SAP*, SAP file created, requestor notified in Teams. |
+| REQ-0005 (regulated Item) | Quality/Regulatory added only because the item is regulated. With Assigned dates back-dated: a reminder at 3 days, an escalation to `EscalateTo` at 5 days. (Tested on the earlier, message-only escalation; the re-send-to-manager version is not yet tested on the tenant.) |
+| REQ-0006 (Item for the new BU "LGD") | No BU Head in Roles, so the step went to the MDM Analyst. Teams nudge, *Routing gap* log row, request stage *"BU Head missing for LGD in Roles; sent to MDM"*. |
+| REQ-0007 (Customer) | Finance card linked to the restricted SensitiveDetails row. After approval: `REQ-0007_BusinessPartners_DTW.txt` with code `C20007`, payment terms and credit limit taken from the restricted list. |
+| Duplicate checks | Blocked: registration no. `200288778W`, part no. `BN-DEN-NS1-25`, tax ID `TX40404038`, SPD + Sales cost centre. Warned: *"Dengue NS1 rapid test 25T"* (matches item A-1001). |
 
 ## Demo script (Amy's story)
 

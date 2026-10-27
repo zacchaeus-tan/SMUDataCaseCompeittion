@@ -3,7 +3,7 @@
 The solution has two halves joined by clean master data: **clean records in at the front door** (form, parallel
 approvals, SAP import file) and **better decisions out the back** (one regional view, forecasts and sales actions
 built on those records). The technical wiring (lists, flows, columns) is in the
-[README](../README.md#how-the-pieces-fit); this page follows the people.
+[build guide](M365_BUILD.md#how-the-pieces-fit); this page follows the people.
 
 ```mermaid
 flowchart TD
