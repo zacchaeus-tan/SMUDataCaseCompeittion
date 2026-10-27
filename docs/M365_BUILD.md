@@ -81,7 +81,7 @@ Set these column types and leave the rest as single line of text:
    `1-App-Formulas.txt` into **App → Formulas**, `2-ScreenContainer1.yaml` onto **NewRequestScreen → Paste code**,
    `3-MyRequestsScreen-ScreenContainer2.yaml` onto **MyRequestsScreen → Paste code**, and
    `4-AdminScreen-ScreenContainer3.yaml` onto **AdminScreen → Paste code**.
-4. Set **App → StartScreen** to `If(IsBlank(Param("requestId")), NewRequestScreen, MyRequestsScreen)`, so the links in Teams messages open *My requests*.
+4. Set **App → StartScreen** to `If(!IsBlank(Param("requestId")), MyRequestsScreen, Param("screen") = "mine", MyRequestsScreen, Param("screen") = "rules", AdminScreen, NewRequestScreen)`, so the links in Teams messages open *My requests*, and the Streamlit app's *Requests* pages open the screen they embed.
 5. Save and publish.
 6. **Pin it in Teams:** in the team's channel, press **+** (Add a tab) → **Power Apps** → choose the app → **Save**. Requestors then open it from the channel instead of hunting for a link.
 

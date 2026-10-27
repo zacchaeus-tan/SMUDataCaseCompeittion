@@ -1070,8 +1070,11 @@ screen_yaml = HEADER + "\n".join([
     "    Children:",
 ] + screen(6)) + "\n"
 
+# A Teams link (?requestId=) opens My requests; the Streamlit pages that embed the app pick a screen with ?screen=
+START_SCREEN = ('If(!IsBlank(Param("requestId")), MyRequestsScreen, Param("screen") = "mine", MyRequestsScreen, '
+                'Param("screen") = "rules", AdminScreen, NewRequestScreen)')
 app_yaml = HEADER + "App:\n  Properties:\n    Formulas: |-\n" + indent("=" + FORMULAS, 6) + \
-    "\n    StartScreen: =If(IsBlank(Param(\"requestId\")), NewRequestScreen, MyRequestsScreen)" + \
+    "\n    StartScreen: =" + START_SCREEN + \
     "\n    Theme: =PowerAppsTheme\n"
 
 # ---------------------------------------------------------------------------- My requests screen

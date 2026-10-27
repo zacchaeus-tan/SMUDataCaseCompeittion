@@ -583,5 +583,5 @@ App:
                  {Value: Index(bus, Value - 1).Value, Code: Index(bus, Value - 1).Code}))
       );
       ApproverRoles = Sort(Distinct(Filter(RolesRows, Role <> "Requestor" && Role <> "MDM Analyst"), Role), Value);
-    StartScreen: =If(IsBlank(Param("requestId")), NewRequestScreen, MyRequestsScreen)
+    StartScreen: =If(!IsBlank(Param("requestId")), MyRequestsScreen, Param("screen") = "mine", MyRequestsScreen, Param("screen") = "rules", AdminScreen, NewRequestScreen)
     Theme: =PowerAppsTheme

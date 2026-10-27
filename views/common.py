@@ -9,7 +9,7 @@ import plotly.io as pio
 import streamlit as st
 import streamlit.components.v1 as components
 
-from onerecord import advisor, classify, dedup, forecast, insights, livecheck, process, workflow
+from onerecord import advisor, classify, dedup, forecast, insights, livecheck, process
 from onerecord.config import COUNTRIES, DATA, KEY, PRODUCTS
 
 from . import theme
@@ -30,14 +30,17 @@ CHART_TEMPLATE = pio.templates.merge_templates(pio.templates["plotly_white"], go
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 PAGES = {}  # url_path -> page, filled in by app.py so pages can link to each other
 
-# Who uses the dashboard, and which pages each person sees (by url_path). The first page is where they land.
+# Who uses the app, and which pages each person sees (by url_path). The first page is where they land.
+# Anyone can raise a request; only MDM sees Rules (the Power App checks the Roles list as well).
+REQUESTS = ["new-request", "my-requests"]
 USERS = {
     "daniel": dict(name="Daniel", role="Regional Commercial Lead", tier="Primary user", initials="D",
-                   pages=["overview", "growth", "forecast", "actions", "business-case"]),
+                   pages=["overview", "growth", "forecast", "actions", "business-case", *REQUESTS]),
     "analyst": dict(name="Commercial analyst", role="Sales operations", tier="Secondary user", initials="CA",
-                    pages=["overview", "growth", "forecast", "actions", "inbound", "business-case"]),
+                    pages=["overview", "growth", "forecast", "actions", "inbound", "business-case", *REQUESTS]),
+    "amy": dict(name="Amy", role="Product Manager", tier="Requestor", initials="A", pages=REQUESTS),
     "priya": dict(name="Priya", role="MDM Analyst", tier="Ops panel", initials="P",
-                  pages=["data-quality", "inbound"]),
+                  pages=["data-quality", "inbound", *REQUESTS, "rules"]),
 }
 
 
@@ -89,11 +92,11 @@ def table_height(rows):
     return 35 * (rows + 1) + 3
 
 
-def header(section, headline):
-    """Page header bar: the section name small, the finding as the headline, the data period on the right."""
+def header(section, headline, source="Apr 2025 – Sep 2026 · synthetic data"):
+    """Page header bar: the section name small, the finding as the headline, where the data comes from on the right."""
     st.html(f'<div class="or-topbar"><div><div class="or-section">{escape(section)}</div>'
             f'<h1>{escape(headline)}</h1></div>'
-            f'<div class="or-who"><span class="or-period">Apr 2025 – Sep 2026 · synthetic data</span></div></div>')
+            f'<div class="or-who"><span class="or-period">{escape(source)}</span></div></div>')
 
 
 def tone(change, up_is_good=True):
@@ -219,29 +222,8 @@ def process_baseline():
     return process.breakdown(d["steps"])
 
 
-# --------------------------------------------------------------------------- workflow state
-@st.cache_resource
-def con():
-    return workflow.ensure()
-
-
-def reset_workflow():
-    con().close()
-    con.clear()
-    workflow.reset().close()
-
-
-def persona() -> str:
-    return st.session_state.get("persona", list(workflow.PERSONAS)[0])
-
-
-def role() -> str:
-    return workflow.PERSONAS[persona()]
-
-
-def sidebar(sections, workflow_pages, current):
-    """Dashboard pages as lists with the current one highlighted; the workflow mock-up (with its persona picker
-    and demo clock) folded into one section at the bottom."""
+def sidebar(sections, current):
+    """Pages as lists by section, with the current one highlighted, and the user switch at the bottom."""
     with st.sidebar:
         for label, section_pages in sections.items():
             mine = [p for p in section_pages if allowed(p)]
@@ -252,13 +234,6 @@ def sidebar(sections, workflow_pages, current):
             for p in mine:
                 _nav_link(p, current)
         st.html('<div style="height:20px"></div>')
-        if workflow_pages:
-            in_workflow = current.url_path in {p.url_path for p in workflow_pages}
-            with st.expander("☰  Workflow mock-up", expanded=in_workflow):
-                for p in workflow_pages:
-                    _nav_link(p, current)
-                st.divider()
-                _workflow_controls()
         _user_switch()
 
 
@@ -279,50 +254,13 @@ def _user_switch():
 
 
 def allowed(page) -> bool:
-    """Workflow pages are open to everyone (they demo the process); dashboard pages depend on the user."""
-    return page_id(page) not in PAGES or page_id(page) in user()["pages"]
+    return page_id(page) in user()["pages"]
 
 
 def _nav_link(page, current):
     on = "navon" if page.url_path == current.url_path else "navoff"
     with st.container(key=f"{on}-{page.url_path}"):
         st.page_link(page)
-
-
-def _workflow_controls():
-    """Persona picker and demo clock: they only matter for the workflow mock-up."""
-    st.markdown("**Workflow persona**")
-    select(st, "Persona", list(workflow.PERSONAS), key="persona", label_visibility="collapsed",
-                 help="Switch persona to see the request from each person's side. Sensitive fields are only "
-                      "visible to Finance and MDM.")
-    st.caption(f"Role: **{role()}**")
-    st.divider()
-    st.markdown("**Demo clock**")
-    c = con()
-    st.caption(f"Simulated time: {workflow.now(c):%a %d %b %Y, %H:%M}")
-    col1, col2 = st.columns(2)
-    if col1.button("+1 day", width="stretch"):
-        _advance(1)
-    if col2.button("+3 days", width="stretch"):
-        _advance(3)
-    if st.button("Reset demo data", width="stretch", type="secondary"):
-        reset_workflow()
-        st.toast("Workflow demo reset")
-        st.rerun()
-    st.caption("The clock lets you fast-forward to show reminders and escalation firing.")
-
-
-def _advance(days):
-    events = workflow.advance_clock(con(), days)
-    st.session_state["clock_events"] = events or ["No reminders due."]
-    st.rerun()
-
-
-def clock_events():
-    ev = st.session_state.pop("clock_events", None)
-    if ev:
-        for e in ev:
-            st.toast(e)
 
 
 def period(window) -> str:

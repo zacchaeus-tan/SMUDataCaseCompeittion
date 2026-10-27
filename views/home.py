@@ -50,6 +50,10 @@ def render():
 
     t = ov.trust(clean, window, c.triage()["main"], q["clusters"], q["item_map"], country)
     _trust_strip(t, window)
+    request = c.PAGES.get("new-request")
+    if request is not None and c.allowed(request):
+        st.page_link(request, label="Setup requests are kept out of these numbers: they go through the request form",
+                     icon=":material/arrow_forward:")
 
 
 def _kpis(clean, g, f, window, country):

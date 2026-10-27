@@ -634,6 +634,10 @@ def inbound():
              + (f"; on {len(hold)} messy emails, no AI run counted a non-order as an order or missed one"
                 if no_order_errors else ""))
     st.caption("The regional view counts orders only. This page shows how incoming emails are sorted.")
+    request = c.PAGES.get("new-request")
+    if request is not None and c.allowed(request):
+        st.page_link(request, label="Setup requests that arrive by email are answered with a link to the request form",
+                     icon=":material/arrow_forward:")
     with st.expander("How emails are sorted"):
         st.markdown("First by channel (a dedicated order inbox, and the form for setup requests), then by rules the "
                     "MDM team can read, then by an AI prompt for whatever is left. Anything uncertain goes to a "

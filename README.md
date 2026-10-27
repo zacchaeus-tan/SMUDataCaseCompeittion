@@ -2,15 +2,16 @@
 
 *SMU DSA Data Case Competition 2026 · Modernising Master Data Management at Lives Group*
 
-> **Demo video:** [youtube.com/watch?v=1l3sva9yBHI](https://www.youtube.com/watch?v=1l3sva9yBHI) · **Summary slides:** _add link_
 
-OneRecord has **two parts**, joined by clean master data:
+OneRecord has **two parts**, joined by clean master data, in **one app**: the Streamlit app holds the regional
+dashboard, and its *Requests* pages embed the live Power App, so a request raised there runs the real Microsoft 365
+flows.
 
 | | Part 1: Regional dashboard | Part 2: Request workflow |
 |---|---|---|
 | **What it does** | Turns clean records into decisions: growth by country, forecasts, sales call lists, duplicate clean-up | Gets clean records in: smart request form, parallel approvals, SAP B1 import file |
 | **Who uses it** | Daniel (Regional Commercial Lead), commercial analysts, Priya (MDM) | Amy and other requestors, approvers, Priya (MDM) |
-| **Built with** | Streamlit (Python), running locally | Power Apps, Power Automate, SharePoint, Teams |
+| **Built with** | Streamlit (Python) | Power Apps, Power Automate, SharePoint, Teams, embedded in the Streamlit app's *Requests* pages |
 | **In production** | Power BI | As built: Microsoft 365, which Lives Group already licenses |
 | **Start here** | [Run the dashboard](#run-the-dashboard) | [Microsoft 365 build guide](docs/M365_BUILD.md) |
 
@@ -87,8 +88,9 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-It opens at http://localhost:8501 on the **Overview** page as Daniel. Everything runs on the synthetic data in
-`data/`; no Microsoft 365 account or API key is needed.
+It opens at http://localhost:8501 on the **Overview** page as Daniel. The dashboard pages run on the synthetic data
+in `data/`; no API key is needed. The *Requests* pages show the live Power App, which needs a Microsoft 365 account in
+the demo tenant.
 
 ### Who sees what
 
@@ -96,9 +98,13 @@ Switch user at the bottom of the sidebar. Each user sees only the pages for thei
 
 | User | Role | Pages |
 |---|---|---|
-| **Daniel** (default) | Regional Commercial Lead | Overview, Country deep-dive, Forecasting, Customers, Business case |
+| **Daniel** (default) | Regional Commercial Lead | Overview, Country deep-dive, Forecasting, Customers, Business case, New request, My requests |
 | **Commercial analyst** | Sales operations | Daniel's pages plus Orders vs enquiries |
-| **Priya** | MDM Analyst | MDM ops, Orders vs enquiries |
+| **Amy** | Product Manager (requestor) | New request, My requests |
+| **Priya** | MDM Analyst | MDM ops, New request, My requests, Rules, Orders vs enquiries |
+
+The Power App signs each person in with their own Microsoft 365 account, and what they can do in it (such as the
+Rules screen) follows its Roles list, not the user picked in the sidebar.
 
 ### Pages
 
@@ -111,6 +117,9 @@ Switch user at the bottom of the sidebar. Each user sees only the pages for thei
 | **MDM ops** | Today's request cycle time, the duplicates the bulk matcher found, and the SAP DTW files that freeze them. |
 | **Orders vs enquiries** | How incoming emails are sorted into orders, enquiries, follow-ups and setup requests (rules first, then AI, then a person). |
 | **Business case** | Time and money saved, with every assumption adjustable. |
+| **New request** | The live Power App's request form: Customer, Item, Vendor or Cost Center setup, with format and duplicate checks while you type. Submitting starts the real approval flow in Teams. |
+| **My requests** | The live Power App's status screen: who holds each request, and its timeline from the ApprovalLog. |
+| **Rules** | The live Power App's rules screen, where MDM changes approval steps, fields, business units, people and product lines. |
 
 ### Demo walkthrough
 
@@ -120,25 +129,23 @@ Switch user at the bottom of the sidebar. Each user sees only the pages for thei
 4. Open *Customers*: the call list. Switch on *Data check: show raw SAP records* to see the false alerts duplicates cause.
 5. Open *Business case* and change an assumption.
 6. Switch to **Priya**: *MDM ops* shows the duplicates found and the clean-up files to download.
+7. Open *New request* and follow [Amy's story](docs/M365_BUILD.md#demo-script-amys-story) in the embedded app: the
+   approval cards arrive in Teams, and *My requests* shows the timeline.
 
 ### Optional: AI features
 
 Two features call OpenAI and need an `OPENAI_API_KEY`, set in your shell or in `.streamlit/secrets.toml`
-(git ignores it). The model is `gpt-5.4-nano` by default; set `OPENAI_MODEL` to change it. On Streamlit Community
-Cloud, paste `OPENAI_API_KEY = "..."` into the app's **Settings → Secrets**.
+(git ignores it). The model is `gpt-5.4-nano` by default; set `OPENAI_MODEL` to change it.
 
 - **AI action brief** (bottom of *Forecasting*): a preview of a planned Phase 2 feature. Without a key the page
   shows the standard plan instead.
 - **AI step for messy emails** (*Orders vs enquiries*): the page shows recorded runs, so it works without a key.
   To record a fresh run, use `python3 scripts/run_ai_step.py`.
 
-### Try the workflow without Microsoft 365
-
-The real request workflow (Part 2) needs our Teams tenant. So that it can be tried in the browser, the app also has a
-**Workflow mock-up** section (sidebar, bottom) with the same steps: New request, Request status, Approvals, MDM check,
-Audit log and Rules. Switch *Workflow persona* to act as Amy, an approver or Priya, and use the demo clock to fire
-reminders. Its duplicate check is simpler than the Power App's (names only). Everyone using a deployed copy shares one
-demo database; *Reset demo data* starts it over. Hide it with `SHOW_WORKFLOW_MOCKUP` in `app.py`.
+> The *Requests* pages are not a copy of the workflow: they embed the published Power App
+> (`POWER_APP_URL` in `onerecord/config.py`), and the app's `StartScreen` reads `?screen=new|mine|rules` to open
+> the right screen. If the frame stays blank or stuck on sign-in (for example, when the browser blocks third-party
+> cookies), each page has a link to open the app in its own tab.
 
 ---
 
@@ -199,7 +206,7 @@ To demo it, follow [Amy's story](docs/M365_BUILD.md#demo-script-amys-story). To 
 
 | Path | What |
 |---|---|
-| `app.py`, `views/` | The Streamlit dashboard (plus the workflow mock-up in `views/workflow_pages.py`) |
+| `app.py`, `views/` | The Streamlit app; `views/m365_pages.py` embeds the live Power App as the *Requests* pages |
 | `onerecord/dedup.py` | Duplicate matching across SPD/QTS/QTG (deterministic rules, nothing to retrain) |
 | `onerecord/forecast.py` | 6-month average baseline vs business-calendar model, tested on held-back months |
 | `onerecord/insights.py` | Growth table, drop-off and cross-sell alerts on clean data |
@@ -216,7 +223,6 @@ To demo it, follow [Amy's story](docs/M365_BUILD.md#demo-script-amys-story). To 
 | `powerautomate/` | The flows: the `build_*.py` scripts generate the importable packages (`*.zip`); `pkg.py` holds the shared settings |
 | `NewRequestForm*.msapp` | Packed copies of the app (pasting into Studio is how it was actually loaded) |
 | `onerecord/livecheck.py` | The form's duplicate check, mirrored in Python to measure it |
-| `onerecord/workflow.py` | Workflow engine mirroring the Power Automate flows (SQLite), used by the workflow mock-up |
 
 **Shared**
 
