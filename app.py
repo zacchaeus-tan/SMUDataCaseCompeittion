@@ -4,8 +4,8 @@ OneRecord prototype for the Lives Group MDM case (SMU DSA Data Case Competition 
     streamlit run app.py
 
 One app for both parts: the regional business view (a strategic overview with analytic drill-downs, forecasting
-and MDM ops) and the request workflow. The workflow is the live Power App running in Microsoft 365, embedded in the
-"Requests" pages (views/m365_pages.py), so a request raised here runs the real Power Automate flows.
+and MDM ops) and the request workflow (views/workflow_pages.py), which runs the Power App's and the Power Automate
+flows' logic on shared demo data (onerecord/workflow.py), so it works without a Microsoft 365 sign-in.
 """
 from pathlib import Path
 
@@ -16,7 +16,7 @@ st.set_page_config(page_title="OneRecord", page_icon=str(Path(__file__).parent /
 from views import analytics_pages as ap  # noqa: E402
 from views import common  # noqa: E402
 from views import home  # noqa: E402
-from views import m365_pages as mp  # noqa: E402
+from views import workflow_pages as wp  # noqa: E402
 
 sections = {
     "": [st.Page(home.render, title="Overview", url_path="overview", icon=":material/space_dashboard:",
@@ -30,11 +30,13 @@ sections = {
         st.Page(ap.actions, title="Customers", url_path="actions", icon=":material/groups:"),
         st.Page(ap.quality, title="MDM ops", url_path="data-quality", icon=":material/fact_check:"),
     ],
-    # the live Power App: getting clean records in
+    # the request workflow: getting clean records in
     "Requests": [
-        st.Page(mp.new_request, title="New request", url_path="new-request", icon=":material/edit_note:"),
-        st.Page(mp.my_requests, title="My requests", url_path="my-requests", icon=":material/pin_drop:"),
-        st.Page(mp.rules, title="Rules", url_path="rules", icon=":material/tune:"),
+        st.Page(wp.new_request, title="New request", url_path="new-request", icon=":material/edit_note:"),
+        st.Page(wp.my_requests, title="My requests", url_path="my-requests", icon=":material/pin_drop:"),
+        st.Page(wp.approvals, title="Approvals", url_path="approvals", icon=":material/task_alt:"),
+        st.Page(wp.audit_log, title="Audit log", url_path="audit-log", icon=":material/receipt_long:"),
+        st.Page(wp.rules, title="Rules", url_path="rules", icon=":material/tune:"),
     ],
     "Context": [
         st.Page(ap.inbound, title="Orders vs enquiries", url_path="inbound", icon=":material/inbox:"),
@@ -49,5 +51,5 @@ nav = st.navigation([p for group in sections.values() for p in group], position=
 if not common.allowed(nav):  # e.g. just switched to Priya while on Forecasting: go to her start page
     st.switch_page(common.PAGES[common.user()["pages"][0]])
 common.page_style()
-common.sidebar(sections, nav)
+common.sidebar(sections, nav, {p.url_path for p in sections["Requests"]}, wp.demo_controls)
 nav.run()

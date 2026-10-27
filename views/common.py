@@ -9,7 +9,7 @@ import plotly.io as pio
 import streamlit as st
 import streamlit.components.v1 as components
 
-from onerecord import advisor, classify, dedup, forecast, insights, livecheck, process
+from onerecord import advisor, classify, dedup, forecast, insights, livecheck, process, workflow
 from onerecord.config import COUNTRIES, DATA, KEY, PRODUCTS
 
 from . import theme
@@ -31,16 +31,28 @@ ASSETS = Path(__file__).resolve().parent.parent / "assets"
 PAGES = {}  # url_path -> page, filled in by app.py so pages can link to each other
 
 # Who uses the app, and which pages each person sees (by url_path). The first page is where they land.
-# Anyone can raise a request; only MDM sees Rules (the Power App checks the Roles list as well).
-REQUESTS = ["new-request", "my-requests"]
+# wf_role is their role in the request workflow (sharepoint/Roles.csv): it decides which approval cards they get and
+# whether they see bank and credit details. Anyone can raise a request and view the rules; only MDM changes them.
+REQUESTS = ["new-request", "my-requests", "rules"]
+APPROVER = ["approvals", "my-requests", "new-request", "rules"]
+DASHBOARD = ["overview", "growth", "forecast", "actions", "business-case"]
 USERS = {
     "daniel": dict(name="Daniel", role="Regional Commercial Lead", tier="Primary user", initials="D",
-                   pages=["overview", "growth", "forecast", "actions", "business-case", *REQUESTS]),
+                   wf_role="Requestor", pages=DASHBOARD + REQUESTS),
     "analyst": dict(name="Commercial analyst", role="Sales operations", tier="Secondary user", initials="CA",
-                    pages=["overview", "growth", "forecast", "actions", "inbound", "business-case", *REQUESTS]),
-    "amy": dict(name="Amy", role="Product Manager", tier="Requestor", initials="A", pages=REQUESTS),
-    "priya": dict(name="Priya", role="MDM Analyst", tier="Ops panel", initials="P",
-                  pages=["data-quality", "inbound", *REQUESTS, "rules"]),
+                    wf_role="Requestor", pages=DASHBOARD[:4] + ["inbound", "business-case"] + REQUESTS),
+    "amy": dict(name="Amy", role="Product Manager", tier="Requestor", initials="A", wf_role="Requestor",
+                pages=REQUESTS),
+    "buhead": dict(name="BU Head", role="Head of SPD, QTS or QTG", tier="Approver", initials="BU", wf_role="BU Head",
+                   pages=APPROVER),
+    "weijie": dict(name="Wei Jie", role="Finance Manager", tier="Approver", initials="WJ", wf_role="Finance",
+                   pages=APPROVER),
+    "qa": dict(name="QA/RA Lead", role="Quality and Regulatory", tier="Approver", initials="QA",
+               wf_role="Quality/Regulatory", pages=APPROVER),
+    "support": dict(name="Business Support", role="Business Support", tier="Approver", initials="BS",
+                    wf_role="Business Support", pages=APPROVER),
+    "priya": dict(name="Priya", role="MDM Analyst", tier="Ops panel", initials="P", wf_role="MDM Analyst",
+                  pages=["data-quality", "approvals", "my-requests", "new-request", "audit-log", "rules", "inbound"]),
 }
 
 
@@ -216,14 +228,20 @@ def ai_step_runs():
     return runs
 
 
+def wf_con():
+    """The shared workflow database (one SQLite file for every visitor)."""
+    return workflow.ensure()
+
+
 @st.cache_data(show_spinner=False)
 def process_baseline():
     d = raw()
     return process.breakdown(d["steps"])
 
 
-def sidebar(sections, current):
-    """Pages as lists by section, with the current one highlighted, and the user switch at the bottom."""
+def sidebar(sections, current, request_pages=(), controls=None):
+    """Pages as lists by section, with the current one highlighted, the demo clock on request pages, and the user
+    switch at the bottom."""
     with st.sidebar:
         for label, section_pages in sections.items():
             mine = [p for p in section_pages if allowed(p)]
@@ -234,6 +252,8 @@ def sidebar(sections, current):
             for p in mine:
                 _nav_link(p, current)
         st.html('<div style="height:20px"></div>')
+        if controls and current.url_path in request_pages:
+            controls()
         _user_switch()
 
 

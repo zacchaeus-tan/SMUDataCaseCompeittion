@@ -182,7 +182,8 @@
             LayoutMinHeight: =16
             LayoutMinWidth: =16
             Size: =12
-            Text: ="Only the MDM team can change the rules."
+            Text: |-
+              =If(CanSeeRules, "View only: the MDM team changes the rules.", "Only the MDM team can change the rules.")
             Visible: =!IsMDM
       - AdminBody:
           Control: GroupContainer@1.5.0
@@ -197,7 +198,7 @@
             LayoutMinHeight: =16
             LayoutMinWidth: =16
             LayoutOverflowY: =LayoutOverflow.Scroll
-            Visible: =IsMDM
+            Visible: =CanSeeRules
           Children:
             - RulesTabs:
                 Control: GroupContainer@1.5.0
@@ -678,6 +679,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               Font: =Font.'Segoe UI'
                               Height: =30
@@ -934,6 +936,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               Font: =Font.'Segoe UI'
                               Height: =30
@@ -972,6 +975,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               Font: =Font.'Segoe UI'
                               Height: =30
@@ -1063,6 +1067,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -1155,6 +1160,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -1254,6 +1260,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               Font: =Font.'Segoe UI'
                               Height: =30
@@ -1348,6 +1355,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -1467,6 +1475,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               Font: =Font.'Segoe UI'
                               Height: =30
@@ -1591,6 +1600,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -1686,6 +1696,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               Font: =Font.'Segoe UI'
                               Height: =30
@@ -1924,6 +1935,7 @@
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     DisabledFill: =RGBA(237, 235, 233, 1)
+                                    DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                                     Fill: =RGBA(255, 255, 255, 1)
                                     FillPortions: =0
                                     Font: =Font.'Segoe UI'
@@ -2288,7 +2300,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
-                              DisplayMode: =If(IsBlank(galBU.Selected), DisplayMode.Disabled, DisplayMode.Edit)
+                              DisplayMode: =If(IsBlank(galBU.Selected) || !IsMDM, DisplayMode.Disabled, DisplayMode.Edit)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -2377,6 +2389,7 @@
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     DisabledFill: =RGBA(237, 235, 233, 1)
+                                    DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                                     Fill: =RGBA(255, 255, 255, 1)
                                     FillPortions: =0
                                     Font: =Font.'Segoe UI'
@@ -3157,7 +3170,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
-                              DisplayMode: =If(IsBlank(galRR.Selected), DisplayMode.Disabled, DisplayMode.Edit)
+                              DisplayMode: =If(IsBlank(galRR.Selected) || !IsMDM, DisplayMode.Disabled, DisplayMode.Edit)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -3252,6 +3265,7 @@
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     DisabledFill: =RGBA(237, 235, 233, 1)
+                                    DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                                     Fill: =RGBA(255, 255, 255, 1)
                                     FillPortions: =0
                                     Font: =Font.'Segoe UI'
@@ -4054,7 +4068,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
-                              DisplayMode: =If(IsBlank(galRF.Selected), DisplayMode.Disabled, DisplayMode.Edit)
+                              DisplayMode: =If(IsBlank(galRF.Selected) || !IsMDM, DisplayMode.Disabled, DisplayMode.Edit)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -4150,6 +4164,7 @@
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     DisabledFill: =RGBA(237, 235, 233, 1)
+                                    DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                                     Fill: =RGBA(255, 255, 255, 1)
                                     FillPortions: =0
                                     Font: =Font.'Segoe UI'
@@ -4657,7 +4672,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
-                              DisplayMode: =If(IsBlank(galRO.Selected), DisplayMode.Disabled, DisplayMode.Edit)
+                              DisplayMode: =If(IsBlank(galRO.Selected) || !IsMDM, DisplayMode.Disabled, DisplayMode.Edit)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -4749,6 +4764,7 @@
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     DisabledFill: =RGBA(237, 235, 233, 1)
+                                    DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                                     Fill: =RGBA(255, 255, 255, 1)
                                     FillPortions: =0
                                     Font: =Font.'Segoe UI'
@@ -5056,7 +5072,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
-                              DisplayMode: =If(IsBlank(galAL.Selected), DisplayMode.Disabled, DisplayMode.Edit)
+                              DisplayMode: =If(IsBlank(galAL.Selected) || !IsMDM, DisplayMode.Disabled, DisplayMode.Edit)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -5145,6 +5161,7 @@
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     DisabledColor: =RGBA(161, 159, 157, 1)
                                     DisabledFill: =RGBA(237, 235, 233, 1)
+                                    DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                                     Fill: =RGBA(255, 255, 255, 1)
                                     FillPortions: =0
                                     Font: =Font.'Segoe UI'
@@ -5520,7 +5537,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
-                              DisplayMode: =If(IsBlank(galCO.Selected), DisplayMode.Disabled, DisplayMode.Edit)
+                              DisplayMode: =If(IsBlank(galCO.Selected) || !IsMDM, DisplayMode.Disabled, DisplayMode.Edit)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -6114,6 +6131,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -6144,6 +6162,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -6648,6 +6667,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -6678,6 +6698,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -7275,6 +7296,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -7305,6 +7327,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -7896,6 +7919,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -7926,6 +7950,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -8444,6 +8469,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(255, 255, 255, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'
@@ -8474,6 +8500,7 @@
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
                               DisabledColor: =RGBA(161, 159, 157, 1)
                               DisabledFill: =RGBA(237, 235, 233, 1)
+                              DisplayMode: =If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)
                               Fill: =RGBA(0, 120, 212, 1)
                               FillPortions: =0
                               Font: =Font.'Segoe UI'

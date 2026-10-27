@@ -330,6 +330,9 @@ StatusText = If(
 RolesRows = ForAll(Roles, {ID: ID, Role: Role, Entity: Entity, Name: PersonName, Email: Lower(PersonEmail),
                              EscalateTo: EscalateTo, TimeZone: TimeZone});
 IsMDM = !IsBlank(LookUp(RolesRows, Role = "MDM Analyst" && Email = Lower(User().Email)));
+// For judging: anyone can open the Rules screen to look; only MDM can change anything. false after judging.
+RulesViewForAll = true;
+CanSeeRules = IsMDM || RulesViewForAll;
 ShowAllRequests = IsMDM && tglShowAll.Value;
 StatusFilter = ddStatusFilter.Selected.Value;
 MyRequestList = Sort(

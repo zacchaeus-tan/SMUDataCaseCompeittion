@@ -6,10 +6,6 @@ KEY = DATA / "answer_key"          # ground truth: only used to SCORE methods, n
 SHAREPOINT = ROOT / "sharepoint"   # same rule tables that get imported into SharePoint
 
 COUNTRIES = {"SG": "Singapore", "MY": "Malaysia", "TH": "Thailand", "ID": "Indonesia", "VN": "Vietnam"}
-# The live OneRecord Power App (the request workflow), embedded in the Streamlit "Requests" pages
-POWER_APP_URL = ("https://apps.powerapps.com/play/e/default-c98a79ca-5a9a-4791-a243-f06afd67464d/a/"
-                 "967cb70c-0e04-409d-8b53-60f87ab250ea?tenantId=c98a79ca-5a9a-4791-a243-f06afd67464d")
-
 PRODUCTS = {"A": "IVD reagents & rapid tests", "B": "Lab consumables", "C": "Medical & lab equipment"}
 
 # Growth measure: % change in purchase-order units, last 6 months vs a comparison window. Change this one constant:

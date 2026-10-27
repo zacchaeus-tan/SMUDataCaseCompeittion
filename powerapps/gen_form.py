@@ -499,6 +499,9 @@ ChangesText = If(
 RolesRows = ForAll(Roles, {{ID: ID, Role: Role, Entity: Entity, Name: PersonName, Email: Lower(PersonEmail),
                              EscalateTo: EscalateTo, TimeZone: TimeZone}});
 IsMDM = !IsBlank(LookUp(RolesRows, Role = "MDM Analyst" && Email = Lower(User().Email)));
+// For judging: anyone can open the Rules screen to look; only MDM can change anything. false after judging.
+RulesViewForAll = true;
+CanSeeRules = IsMDM || RulesViewForAll;
 ShowAllRequests = IsMDM && tglShowAll.Value;
 StatusFilter = ddStatusFilter.Selected.Value;
 MyRequestList = Sort(
@@ -1388,7 +1391,8 @@ def grid(key, menu, lst, items, help_text, summary, cols, extra, new_row):
             label(f"lblHelp{key}", f'"{help_text}"', FillPortions="1", Size="10", Wrap="true", Color=GREY,
                   PaddingLeft="0"),
             ctl(f"btnNewRow{key}", "Classic/Button@2.2.0", outline(dict(
-                BUTTON, Text='"Add a row"', FillPortions="0", Width="120", Height="34", Size="11", OnSelect=add))),
+                BUTTON, Text='"Add a row"', FillPortions="0", Width="120", Height="34", Size="11", OnSelect=add,
+                DisplayMode="If(IsMDM, DisplayMode.Edit, DisplayMode.Disabled)"))),
         ], 44, align="LayoutAlignItems.Center"),
         gallery,
         label(f"lblEdit{key}", f'If(IsBlank({gal}.Selected), "Select a row to change it.", '
@@ -1399,7 +1403,7 @@ def grid(key, menu, lst, items, help_text, summary, cols, extra, new_row):
         ctl(f"btnSave{key}", "Classic/Button@2.2.0", dict(
             BUTTON, Text='"Save changes"', FillPortions="0", Width="160", Height="40", Size="12",
             AlignInContainer="AlignInContainer.Start", OnSelect=save,
-            DisplayMode=f"If(IsBlank({gal}.Selected), DisplayMode.Disabled, DisplayMode.Edit)")),
+            DisplayMode=f"If(IsBlank({gal}.Selected) || !IsMDM, DisplayMode.Disabled, DisplayMode.Edit)")),
     ], variant="AutoLayout")
 
 
@@ -1418,7 +1422,14 @@ BLUE, WHITE, AMBER = "RGBA(0, 120, 212, 1)", "RGBA(255, 255, 255, 1)", "RGBA(157
 NEXT_RULE = '"R" & Text(Coalesce(First(Sort(RoutingRules, ID, SortOrder.Descending)).ID, 0) + 1, "00")'
 
 
+def mdm_only(extra):
+    """Rules-screen buttons change rules, so they're disabled for anyone else viewing the screen."""
+    extra["DisplayMode"] = f'If(IsMDM, {extra.get("DisplayMode", "DisplayMode.Edit")}, DisplayMode.Disabled)'
+    return extra
+
+
 def btn(name, text, onselect, primary=False, width=150, height=36, **extra):
+    mdm_only(extra)
     style = dict(BUTTON, Text=text, FillPortions="0", Width=str(width), Height=str(height), Size="11",
                  OnSelect=onselect, **extra)
     return ctl(name, "Classic/Button@2.2.0", style if primary else outline(style))
@@ -1515,6 +1526,7 @@ def cell(name, text, x, width, y="0", height="Parent.TemplateHeight - 1", **extr
 
 
 def row_btn(name, text, onselect, right, width=76, **extra):
+    mdm_only(extra)
     return ctl(name, "Classic/Button@2.2.0", outline(dict(
         BUTTON, Text=text, X=f"Parent.TemplateWidth - {right}", Y="(Parent.TemplateHeight - 30) / 2",
         Width=str(width), Height="30", Size="10", OnSelect=onselect, **extra)))
@@ -1979,7 +1991,7 @@ advanced_card = vbox("AdvancedCard", [
 ] + [grid(*g) for g in GRIDS], visible=f'{TAB} = "Advanced" && IsBlank(locPanel)')
 
 admin_body = ctl("AdminBody", "GroupContainer@1.5.0", {
-    "Fill": "RGBA(245, 245, 245, 1)", "FillPortions": "1", "Visible": "IsMDM", "LayoutMinHeight": "16",
+    "Fill": "RGBA(245, 245, 245, 1)", "FillPortions": "1", "Visible": "CanSeeRules", "LayoutMinHeight": "16",
     "LayoutMinWidth": "16", "LayoutDirection": "LayoutDirection.Vertical",
     "LayoutAlignItems": "LayoutAlignItems.Stretch", "LayoutOverflowY": "LayoutOverflow.Scroll", "LayoutGap": "12",
     "DropShadow": "DropShadow.None"},
@@ -1992,7 +2004,8 @@ admin_screen = ctl("ScreenContainer3", "GroupContainer@1.5.0", {
     "LayoutGap": "16", "PaddingBottom": "16", "PaddingLeft": "16", "PaddingRight": "16", "PaddingTop": "16",
 }, [
     header(3, "OneRecord | Rules", "Rules"),
-    label("lblNotMDM", '"Only the MDM team can change the rules."', Visible="!IsMDM", FillPortions="0", Height="40",
+    label("lblNotMDM", 'If(CanSeeRules, "View only: the MDM team changes the rules.", '
+                       '"Only the MDM team can change the rules.")', Visible="!IsMDM", FillPortions="0", Height="40",
           Size="12", Color=GREY),
     admin_body,
 ], variant="AutoLayout")

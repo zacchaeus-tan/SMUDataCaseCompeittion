@@ -39,8 +39,8 @@ Power App (New request)  ──writes──▶  Requests + SensitiveDetails (Sha
                                             Flow: Reminders and escalation (hourly, 9 AM local) ─▶ ApprovalLog
 ```
 
-The Streamlit app's *Requests* pages embed this Power App (`POWER_APP_URL` in `onerecord/config.py`); its
-`StartScreen` reads `?screen=new|mine|rules` to open the right screen.
+The Streamlit app's *Requests* pages run the same logic without Microsoft 365 (`onerecord/workflow.py`, reading the
+same `sharepoint/*.csv` lists), so it can be tried without a sign-in. Change both together.
 
 ## Tested end to end
 
@@ -109,7 +109,7 @@ Set these column types and leave the rest as single line of text:
    `1-App-Formulas.txt` into **App → Formulas**, `2-ScreenContainer1.yaml` onto **NewRequestScreen → Paste code**,
    `3-MyRequestsScreen-ScreenContainer2.yaml` onto **MyRequestsScreen → Paste code**, and
    `4-AdminScreen-ScreenContainer3.yaml` onto **AdminScreen → Paste code**.
-4. Set **App → StartScreen** to `If(!IsBlank(Param("requestId")), MyRequestsScreen, Param("screen") = "mine", MyRequestsScreen, Param("screen") = "rules", AdminScreen, NewRequestScreen)`, so the links in Teams messages open *My requests*, and the Streamlit app's *Requests* pages open the screen they embed.
+4. Set **App → StartScreen** to `If(!IsBlank(Param("requestId")), MyRequestsScreen, Param("screen") = "mine", MyRequestsScreen, Param("screen") = "rules", AdminScreen, NewRequestScreen)`, so the links in Teams messages open *My requests* (`?screen=mine` or `?screen=rules` opens those screens).
 5. Save and publish.
 6. **Pin it in Teams:** in the team's channel, press **+** (Add a tab) → **Power Apps** → choose the app → **Save**. Requestors then open it from the channel instead of hunting for a link.
 
