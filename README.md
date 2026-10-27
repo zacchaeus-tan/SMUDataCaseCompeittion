@@ -2,7 +2,8 @@
 
 *SMU DSA Data Case Competition 2026 · Modernising Master Data Management at Lives Group*
 
-**Try it:** [onerecord-livesgroup.streamlit.app](https://onerecord-livesgroup.streamlit.app/) (no sign-in needed)
+**Try it online, nothing to install or run:** [onerecord-livesgroup.streamlit.app](https://onerecord-livesgroup.streamlit.app/)
+(the regional view) · [the request workflow](https://onerecord-livesgroup.streamlit.app/my-requests). No sign-in needed.
 
 **The problem:** bad data gets into SAP B1 when a record is first requested. A new record takes **18.8 days**
 (median), and duplicate customers distort the regional sales view.
@@ -28,7 +29,9 @@ and the Rules page edits the lists directly instead of through the Power App's g
 - **Forecasting:** **11.1%** error vs 13.7% for today's 6-month average (WAPE, Products A and B, 1–3 months ahead).
 - **Sales:** a call list of **27 customers dropping off**, worth about **S$431k a quarter**, and 98 cross-sell leads.
 
-## Run it
+## Run it yourself (optional)
+
+The [online app](https://onerecord-livesgroup.streamlit.app/my-requests) is the same code. To run it on your own computer:
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
