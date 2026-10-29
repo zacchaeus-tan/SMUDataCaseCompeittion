@@ -5,14 +5,16 @@
 | Section | Speaker | Slides | Target |
 |---|---|---|---|
 | 1 · The problem | Megan | 1–7 | 3:40 |
-| 2 · OneRecord | Zacchaeus | 8–14 | 4:10 |
+| 2 · OneRecord | Zacchaeus | 8–14 | 3:40 |
 | 3 · Regional view | Darryl | 15–19 | 3:30 |
 | 4 · Making it real | Chloe | 20–25 | 3:40 |
-| | | **Total** | **15:00** |
+| | | **Total** | **14:30** |
+
+No live demo: both demos are videos (slides 10 and 13). That leaves about 30 s spare.
 
 **How to read this**
 - `[CLICK]` means the clicker presses once: either the next animation or the next slide. The speaker says a quiet "next" or nods.
-- **Clicker:** someone else clicks for Megan (slides 1–7, **TBC**). From slide 8 onwards, Megan clicks *and* drives the browser in the live demo.
+- **Clicker:** someone else clicks for Megan (slides 1–7, **TBC**). From slide 8 onwards, Megan clicks.
 - Slide numbers are the shared deck's current ones. When Chloe adds the risk slide before the roadmap, the roadmap and close move to slides 24 and 25.
 - **If you're running long:** say slide 7 in one line, then say slide 19 in one line. Never cut the business case or the Ask.
 
@@ -75,7 +77,7 @@ open orders and invoices, so a person confirms. Happy to go through the rest in 
 
 ---
 
-## 2 · OneRecord: Zacchaeus (4:10)
+## 2 · OneRecord: Zacchaeus (3:40)
 
 *From here on, Megan clicks.*
 
@@ -91,26 +93,19 @@ SAP import file, so Priya stops retyping.
 `[CLICK]` The rules behind all of it are lists the MDM team edits themselves.
 `[CLICK]`
 
-### Slide 10 · Live demo (1:20)
-**Megan switches to the browser:** the online app, user = Amy, page = New request.
+### Slide 10 · Amy raises her item request (0:50)
+*Video, about 38 s, no sound. Click 1 starts it. Click 2 and 3 as each step happens on screen.*
 
 This is our working prototype. Watch Amy raise the same item request.
-1. *(Megan picks **Item**, then business entity **SPD**.)* She picks Item, and only the item fields appear. Submit
-   stays off until the request is complete, so nothing half-filled reaches an approver.
-2. *(Megan sets "Is this regulated?" to **Not sure**.)* Amy wasn't sure about regulatory sign-off. Now she just says
-   "Not sure", and Quality/Regulatory is added to the approvers for her. No guessing.
-3. *(Megan types **Dengue NS1 rapid test 25T**.)* And as she types the name, OneRecord warns her: this looks like
-   item A-1001, which is already in SAP. The duplicate is stopped before it reaches anyone.
+1. `[CLICK]` *(video starts)* She picks Item, and only the item fields appear. Submit stays off until the request is
+   complete, so nothing half-filled reaches an approver.
+2. `[CLICK]` *(as "Is this regulated?" is set to Not sure)* Amy wasn't sure about regulatory sign-off. Now she just
+   says "Not sure", and Quality/Regulatory is added to the approvers for her. No guessing.
+3. `[CLICK]` *(as she types the name)* And as she types, OneRecord warns her: this looks like item A-1001, which is
+   already in SAP. The duplicate is stopped before it reaches anyone.
 
 This is our web copy. The same form runs in Teams, as you'll see in a moment.
-
-**Megan switches back to the slides.**
-
-> **If the live demo fails:** stay on slide 10 and click three times; each click shows the next screenshot. Talk
-> over them using the same three lines. Or type **11** + Enter to play the backup video.
-
-> **If the live demo worked:** slide 10 still has its 3 backup-screenshot clicks waiting, so don't click through
-> them. Type **12** + Enter to jump straight to the approvers slide.
+`[CLICK]` *(slide 11 is hidden, so this goes straight to slide 12)*
 
 ### Slide 12 · Approvers sign off at the same time (0:35)
 `[CLICK]` Amy submits.

@@ -17,18 +17,15 @@ Screenshots: online app, browser at 1920×1080, zoom 100%, *Reset demo data* fir
 `deck/SHOT_LIST.md`.
 
 - [ ] **SHOT-01**, slide 8 (circle): New request form as Amy, type = Item
-- [ ] **SHOT-02**, slide 10: Item fields showing. **Use Animation Painter** to copy the box's animation onto the picture before deleting the box
-- [ ] **SHOT-03**, slide 10: "Is this regulated?" = Not sure, QA/RA under "Who will approve" (Animation Painter again)
-- [ ] **SHOT-04**, slide 10: "Dengue NS1 rapid test 25T" with the A-1001 possible-match warning (Animation Painter again)
+- ~~SHOT-02 to 04~~ not needed: there's no live demo now, and slide 10 plays VIDEO-01 instead
 - [ ] Circle shots: crop 1:1 → Crop to Shape → Oval → Send Backward so the rings stay on top
-- [ ] Slide 10 notes: change "ZACCHAEUS: switch to the browser" to "MEGAN drives the browser"
 - [ ] Slide 6 (Why M365): add a 4th row, **"Off-the-shelf MDM software"**: High cost · Months · Needs an integrator · Yes
 - [ ] Slide 7 (Not in V1): keep vs move to the appendix, decided after the timed run
 - [ ] **Consistency pass on the whole deck**, using `GLOSSARY.md`:
   - say "setup request" for MDM, and "order" or "enquiry" for customers; never a bare "request"
   - the same numbers everywhere: 18.8 days · 4–6 days · 41/41 · 11.1% vs 13.7% · S$431k · 27 · 98 · 3,285 / 300 / 60 · S$58k · S$205k · 3.4 months
   - typos, titles left-aligned, speaker names on the 4 dividers
-- [ ] Learn the live demo (Megan drives the browser while Zacchaeus talks) and the recovery: on slide 10, click for each backup screenshot, or type **11** + Enter for the backup video
+- [ ] Learn the clicks on slide 10: click 1 starts the video with callout 1, then click 2 and 3 as each step shows on screen
 
 ## Chloe: slides 13–29 (video, Rules shot, making it real, appendix)
 
@@ -56,7 +53,7 @@ Once Megan and Chloe are done, go through the deck in slideshow mode, start to f
 - [ ] Animations run in the order the script's `[CLICK]` cues expect, and both videos play
 - [ ] Numbers on slides 2, 4, 16–19, 21–23 match the app and `QA_PREP.md`
 - [ ] The risk slide and roadmap owners read well, and the deck is still 15:00 or under (cut slide 7, then slide 19, if not)
-- [ ] Hidden slide 11 is still hidden, and typing **11** + Enter in the slideshow jumps to it
+- [ ] Slide 10's video plays on click 1, and hidden slide 11 (the old backup) is skipped
 - [ ] Send the team the final OK, or a short list of fixes
 
 ---
@@ -64,7 +61,7 @@ Once Megan and Chloe are done, go through the deck in slideshow mode, start to f
 ## Everyone, tomorrow before the finals
 
 - [ ] Read `deck/PITCH_SCRIPT.md` (your part) and `deck/QA_PREP.md` (all of it)
-- [ ] **Timed run-through** with the single clicker and the live demo. Target ≤ 15:00
+- [ ] **Timed run-through** with the single clicker and both videos. Target ≤ 15:00
 - [ ] Practise the hand-off lines
 - [ ] On the **presenting laptop**: Poppins font shows correctly, both videos play, animations run
-- [ ] 5 minutes before: open the online app (wakes it up), press **Reset demo data**, set the user to Amy, keep it open in a tab for Q&A
+- [ ] Optional, for Q&A only: open the online app 5 minutes before (wakes it up) and keep it in a tab
