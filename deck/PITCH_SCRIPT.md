@@ -6,17 +6,17 @@
 |---|---|---|---|
 | 1 · The problem | Megan | 1–7 | 3:40 |
 | 2 · OneRecord: what the form does | Zacchaeus | 8–15 | 4:00 |
-| 3 · The dashboard: what it does | Darryl | 16–21 | 3:35 |
+| 3 · The dashboard: what it does | Darryl | 16–21 | 4:10 |
 | 4 · Making it real | Chloe | 22–27 | 3:40 |
-| | | **Total** | **14:55** |
+| | | **Total** | **15:30** |
 
-No live demo: both demos are videos (slides 10 and 13). Only about 5 s spare, so keep to the timings.
+No live demo: both demos are videos (slides 10 and 13). **The total is now about 30 s over 15:00**, so the cuts below are no longer optional: rehearse with them.
 
 **How to read this**
 - `[CLICK]` means the clicker presses once: either the next animation or the next slide. The speaker says a quiet "next" or nods.
 - **Clicker:** someone else clicks for Megan (slides 1–7, **TBC**). From slide 8 onwards, Megan clicks.
 - Slide numbers are the shared deck's current ones, assuming one of the two "Roadmap, and our ask" slides (26 and 27) is deleted.
-- **If you're running long:** say slide 7 in one line, then skip slide 15 (Zacchaeus says its three numbers in one breath). Never cut the business case or the Ask.
+- **To fit 15:00** (about 35 s to find): say slide 7 in one line (saves about 15 s); Zacchaeus says slide 15's three numbers in one breath (about 10 s); Chloe covers only the top three risks on slide 25 (about 10 s). Never cut the business case or the Ask.
 
 ---
 
@@ -146,64 +146,84 @@ while people typed. And it stays quiet when it should: only 3% of genuinely new 
 
 ---
 
-## 3 · The dashboard: Darryl (3:35)
+## 3 · The dashboard: Darryl (4:10)
 
-*Every slide is stacked cards: each click brings in one callout and its screenshot, and only one is in focus.
-Talk about what the dashboard does, not the data. Say a number only as proof of a feature.*
+*Slides 18 to 21 open on the full app page; your first click zooms in. After that, each click brings in one callout
+and its screenshot. Talk about what the dashboard does; use a number only as evidence that a feature works.*
 
 ### Slide 16 · Divider 03 (0:05)
-So the form keeps the data clean. Now let me show you what clean data gets you.
+With clean data now entering the system, I will show what that data makes possible.
 `[CLICK]`
 
-### Slide 17 · Duplicates double the money at risk (0:35)
-`[CLICK]` First, why this matters for sales. This is our dashboard on today's raw SAP data. It flags 56 customers who
-look like they're dropping off. But 29 of them? False alarms.
-`[CLICK]` Now the same data, after OneRecord merges the duplicates. 27 real alerts.
-`[CLICK]` On raw data, sales would chase 852 thousand dollars a quarter. The real number is 431 thousand. Half of it
-was just the same hospital, filed twice.
+### Slide 17 · Duplicates double the money at risk (0:40)
+Before I walk through the dashboard, it is worth showing why clean master data matters commercially.
+`[CLICK]` This is our customer analysis, run on Lives Group's SAP records as they stand today. It raises 56 drop-off
+alerts: customers who appear to be ordering much less. However, 29 of those are false alarms, because the same
+customer exists under more than one record.
+`[CLICK]` Once OneRecord merges those duplicates, the same analysis returns 27 genuine alerts.
+`[CLICK]` In value terms, the raw data suggests S$852,000 a quarter at risk. The true figure is S$431,000. In other
+words, half of what the sales team would be chasing is not real.
 `[CLICK]`
 
-### Slide 18 · Dashboard view (0:40)
-*Opens on the full Overview page. Click 1 zooms in.*
+### Slide 18 · Dashboard view (0:45)
+*Opens on the full Overview page.*
 
-So what does the dashboard give you? This is the Overview page Daniel opens every morning: the regional view the
-brief asks for, all on one page.
-`[CLICK]` *(zooms in)* First, where we're growing. Green is growing, red is shrinking. Every country and product, at a glance.
-`[CLICK]` Second, the top three things to do this quarter. Each one has its evidence, one click away.
-`[CLICK]` Third, actual orders against our AI forecast, with a likely range around it.
+This is the Overview page: the regional view the brief asks for, and the first page a regional lead such as Daniel
+would open. Every figure on it can be filtered by country and by period.
+`[CLICK]` *(zooms in)* On the left is growth by country and product. Each cell compares units ordered this year with
+the same period last year: the darker the green, the stronger the growth; the darker the red, the sharper the decline.
+`[CLICK]` On the right are the three highest-priority actions for the quarter. Each one links directly to the evidence
+behind it, so a manager can check the reasoning before acting on it.
+`[CLICK]` Below that, actual orders are plotted against our forecast model, with a likely range for the next six
+months.
 `[CLICK]`
 
-### Slide 19 · Country deep-dive (0:45)
-Want more detail? That's the Country deep-dive page.
-`[CLICK]` Up top, the headline numbers for all five countries: units, order value, customers, and who's growing
-fastest.
-`[CLICK]` Growth is simple. This year's orders against the same six months last year. Real customer orders only, never
-enquiries.
-`[CLICK]` Pick any country from this dropdown, and you get its monthly units by product, its top ten customers, and
-what each one buys.
-`[CLICK]` And to compare countries, monthly units for each product, with the takeaways written out for you.
+### Slide 19 · Country deep-dive (0:50)
+*Opens on the full Country deep-dive page.*
+
+For more detail, the Country deep-dive page breaks the regional view down further.
+`[CLICK]` *(zooms in)* The headline figures cover all five countries: units, order value, active customers, and the
+fastest-growing market, each compared with last year.
+`[CLICK]` Growth is defined the same way across the dashboard: units ordered from April to September 2026, against the
+same months in 2025, so seasonal effects cancel out. Only customer purchase orders are counted; enquiries and setup
+requests are excluded.
+`[CLICK]` A manager can then select any country from this dropdown, to see its monthly sales by product and its ten
+largest customers.
+`[CLICK]` Finally, monthly units by country for each product line, with written takeaways that update automatically as
+the data changes.
 `[CLICK]`
 
-### Slide 20 · Who to call, and what counts (0:40)
-`[CLICK]` Then: who should sales call? A ranked list. Biggest value at risk on top, why they were flagged, and what to
-do next.
-`[CLICK]` An early warning, for big customers who've suddenly gone quiet.
-`[CLICK]` Cross-sell leads. Customers buying A but not B, when similar customers buy both.
-`[CLICK]` And the email sorter makes sure only real orders count. Its AI instructions are plain English, so the MDM
-team can tweak them themselves. No retraining.
+### Slide 20 · Who to call, and what counts (0:50)
+*Opens on the full Customers page.*
+
+The Customers page turns these insights into a work list for the sales team.
+`[CLICK]` *(zooms in)* First, a call list ranked by value at risk. For each customer, it shows why the account was
+flagged and the recommended next step.
+`[CLICK]` Second, an early warning for larger customers who have gone unusually quiet, so that sales can step in
+before they become a drop-off.
+`[CLICK]` Third, cross-sell leads: customers who buy Product A but not Product B, where similar customers buy both.
+`[CLICK]` Underneath all of this, an email sorter ensures that only genuine purchase orders count towards growth. Its
+AI instructions are written in plain English, so the MDM team can adjust them without retraining a model.
 `[CLICK]`
 
-### Slide 21 · Forecasts that know the calendar (0:50)
-Last, forecasting. Today, Lives Group uses a six-month average. It has no idea what month it is.
-`[CLICK]` Our model knows the calendar. Dengue season. The year-end budget rush. The January slowdown. Lunar New Year.
-`[CLICK]` And we tested it fairly. We forecast from every month, April to September, then checked against what really
-happened. The error drops from 13.7 to 11.1 percent.
-`[CLICK]` It gives you a range, not a single guess. Eight months in ten landed inside it.
-`[CLICK]` That becomes a stock plan for next quarter. And when the model isn't sure, it says so, instead of guessing.
-`[CLICK]` Coming in Phase 2: an AI brief, posted to Teams every month. It only ever sees summary numbers, never
-customer records.
+### Slide 21 · Forecasts that know the calendar (1:00)
+*Opens on the full Forecasting page.*
 
-> **Hand-off:** "Chloe will now show how Lives Group can actually roll this out."
+The final page is forecasting. Lives Group currently uses a six-month moving average, which cannot anticipate
+seasonal patterns.
+`[CLICK]` *(zooms in)* Our model combines each country and product's own trend with calendar events the business
+already knows: dengue season, the year-end hospital budget spend, the January slowdown, and public holidays such as
+Lunar New Year.
+`[CLICK]` We tested it on past data. From each month between April and September, we forecast one to three months
+ahead and compared the result with actual orders. Forecast error fell from 13.7 per cent to 11.1 per cent.
+`[CLICK]` Rather than a single number, the model provides a likely range. In testing, eight months out of ten fell
+within it.
+`[CLICK]` This feeds a stock plan for the next quarter. Where the model has been less accurate in the past, the series
+is flagged for review rather than acted upon.
+`[CLICK]` In Phase 2, an AI-generated action brief will be posted to Teams each month. It works only from summary
+figures, never from customer records.
+
+> **Hand-off:** "Chloe will now explain how Lives Group can put this into practice."
 
 `[CLICK]`
 
