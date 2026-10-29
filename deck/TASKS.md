@@ -16,7 +16,7 @@ Slide numbers below are the shared deck's current numbers.
 Screenshots: online app, browser at 1920×1080, zoom 100%, *Reset demo data* first. How to paste them is in
 `deck/SHOT_LIST.md`.
 
-- [ ] **SHOT-01**, slide 8 (circle): New request form as Amy, type = Item
+- ~~SHOT-01~~ not needed: the dividers now show a big section number instead of a screenshot
 - ~~SHOT-02 to 04~~ not needed: there's no live demo now, and slide 10 plays VIDEO-01 instead
 - [ ] Circle shots: crop 1:1 → Crop to Shape → Oval → Send Backward so the rings stay on top
 - [ ] Slide 6 (Why M365): add a 4th row, **"Off-the-shelf MDM software"**: High cost · Months · Needs an integrator · Yes
@@ -30,7 +30,7 @@ Screenshots: online app, browser at 1920×1080, zoom 100%, *Reset demo data* fir
 ## Chloe: slides 13–29 (video, Rules shot, making it real, appendix)
 
 - [ ] **SHOT-05**, slide 14 (circle): Rules page as Priya
-- [ ] **SHOT-06**, slide 20 (circle): the **real Teams approval card**. Needs the M365 build: ask Darryl for access or for the screenshot
+- ~~SHOT-06~~ not needed: the dividers now show a big section number instead of a screenshot
 - [ ] Slide 13 video: trim to about 80 s (Playback → Trim Video); optionally put a real Teams card clip at the start
 - [ ] Slide 13 callout 1 says "Teams card", but the video shows the web copy: change it to "Approval card", or add the Teams clip
 - [ ] **Slide 21: change "~10 weeks of one Power Platform contractor" to "~8 weeks"** (the business case costs 8 weeks)

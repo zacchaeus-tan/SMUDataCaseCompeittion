@@ -8,12 +8,12 @@ Tips: browser at 1920×1080, zoom 100%, hide the bookmarks bar, *Reset demo data
 
 | ID | Slide | Where | Who (sidebar user) | What must be on screen |
 |---|---|---|---|---|
-| SHOT-01 | 7 · Divider "OneRecord" (circle) | New request | Amy | The form, top part, with type = Item. Fills a circle, so keep the key part in the centre |
+| ~~SHOT-01~~ | **Not needed: dividers show a big number now** · 7 · Divider "OneRecord" (circle) | New request | Amy | The form, top part, with type = Item. Fills a circle, so keep the key part in the centre |
 | ~~SHOT-02~~ | 9 · Live demo backup, click 1 | New request | Amy | Type = **Item**, only the item fields showing, Submit greyed out **Not needed: no live demo** |
 | ~~SHOT-03~~ | 9 · Live demo backup, click 2 | New request | Amy | "Is this regulated?" = **Not sure**, and Quality/Regulatory listed under "Who will approve" **Not needed: no live demo** |
 | ~~SHOT-04~~ | 9 · Live demo backup, click 3 | New request | Amy | Name typed as **Dengue NS1 rapid test 25T**, warning that it matches **A-1001** **Not needed: no live demo** |
 | SHOT-05 | 13 · Marcus (circle) | Rules | Priya | Business units / routing rules list, with an Edit control visible |
-| SHOT-06 | 19 · Divider "Making it real" (circle) | **Microsoft Teams** (real M365 build) | Any approver | The real Teams approval card: Approve / Request changes / Reject |
+| ~~SHOT-06~~ | **Not needed: dividers show a big number now** · 19 · Divider "Making it real" (circle) | **Microsoft Teams** (real M365 build) | Any approver | The real Teams approval card: Approve / Request changes / Reject |
 | VIDEO-01 | 10 · Amy raises her item request (replaces the live demo, plays on click 1) | New request | Amy | 60 s clip of SHOT-02 → 03 → 04, silent. Insert > Video, set to *start on click* |
 | VIDEO-02 | 12 · "Watch: approvals…" | Approvals → sidebar Demo clock → My requests → Approvals | Approver, then Amy, then Priya | 60–90 s, silent: Teams card → Demo clock +4 days → escalation → My requests "waiting on" → Priya downloads the SAP file. Cut it from the existing demo video |
 
