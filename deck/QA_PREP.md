@@ -71,3 +71,10 @@ working copy of the same rules; in production the regional view moves to Power B
 **14. How would you add a new data domain, like price lists?**
 Rules, fields and approvers are rows in lists, so a new domain is new rows plus a form screen, not a new system. It's
 on the Phase 3 list.
+
+**15. How does the email sorter's AI work, and who maintains it?**
+Rules sort the standard emails first; only the unclear ones go to an AI prompt, and anything it's unsure of goes to a
+person. There's no model to train: the instructions are plain English (shown on the Orders vs enquiries page), and in
+production they sit in the AI Builder prompt in Power Automate, so the MDM team edits the wording themselves. On 24
+deliberately messy emails, its mistakes only mixed up enquiries and follow-ups; it never counted a non-order as an
+order, so growth figures stay right.

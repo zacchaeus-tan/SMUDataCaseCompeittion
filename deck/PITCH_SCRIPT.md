@@ -5,18 +5,18 @@
 | Section | Speaker | Slides | Target |
 |---|---|---|---|
 | 1 · The problem | Megan | 1–7 | 3:40 |
-| 2 · OneRecord | Zacchaeus | 8–14 | 3:40 |
-| 3 · Regional view | Darryl | 15–19 | 3:30 |
-| 4 · Making it real | Chloe | 20–25 | 3:40 |
-| | | **Total** | **14:30** |
+| 2 · OneRecord: what the form does | Zacchaeus | 8–15 | 4:00 |
+| 3 · The dashboard: what it does | Darryl | 16–21 | 3:35 |
+| 4 · Making it real | Chloe | 22–27 | 3:40 |
+| | | **Total** | **14:55** |
 
-No live demo: both demos are videos (slides 10 and 13). That leaves about 30 s spare.
+No live demo: both demos are videos (slides 10 and 13). Only about 5 s spare, so keep to the timings.
 
 **How to read this**
 - `[CLICK]` means the clicker presses once: either the next animation or the next slide. The speaker says a quiet "next" or nods.
 - **Clicker:** someone else clicks for Megan (slides 1–7, **TBC**). From slide 8 onwards, Megan clicks.
-- Slide numbers are the shared deck's current ones. When Chloe adds the risk slide before the roadmap, the roadmap and close move to slides 24 and 25.
-- **If you're running long:** say slide 7 in one line, then say slide 19 in one line. Never cut the business case or the Ask.
+- Slide numbers are the shared deck's current ones, assuming one of the two "Roadmap, and our ask" slides (26 and 27) is deleted.
+- **If you're running long:** say slide 7 in one line, then skip slide 15 (Zacchaeus says its three numbers in one breath). Never cut the business case or the Ask.
 
 ---
 
@@ -102,7 +102,9 @@ This is our working prototype. Watch Amy raise the same item request.
 2. `[CLICK]` *(as "Is this regulated?" is set to Not sure)* Amy wasn't sure about regulatory sign-off. Now she just
    says "Not sure", and Quality/Regulatory is added to the approvers for her. No guessing.
 3. `[CLICK]` *(as she types the name)* And as she types, OneRecord warns her: this looks like item A-1001, which is
-   already in SAP. The duplicate is stopped before it reaches anyone.
+   already in SAP. The duplicate is stopped before it reaches anyone. The check compares names the way a person
+   would, so "NUH" and "National University Hospital" match. A similar name only warns; the same registration
+   number blocks.
 
 This is our web copy. The same form runs in Teams, as you'll see in a moment.
 `[CLICK]` *(slide 11 is hidden, so this goes straight to slide 12)*
@@ -132,6 +134,11 @@ One more persona from the brief. Marcus's team was just added to Lives Group.
 `[CLICK]` Fields and approvers are rows too, so a new regulatory step doesn't need IT.
 `[CLICK]` And if nobody is set up yet, his request goes to MDM instead of stalling.
 `[CLICK]` Before, his first requests sat untouched for two weeks.
+`[CLICK]`
+
+### Slide 15 · What the form delivers (0:20)
+In short: setup requests reach SAP in 4 to 6 days instead of 18.8. The form caught all 41 duplicates in our data
+while people typed. And it stays quiet when it should: only 3% of genuinely new customers get a warning.
 
 > **Hand-off:** "Now that the data coming in is clean, Darryl will show what it unlocks."
 
@@ -139,44 +146,61 @@ One more persona from the brief. Marcus's team was just added to Lives Group.
 
 ---
 
-## 3 · Regional view: Darryl (3:30)
+## 3 · The dashboard: Darryl (3:35)
 
-### Slide 15 · Divider 03 (0:05)
-Clean data means one hospital is one customer across SPD, QTS and QTG. So now the regional view can be trusted.
+*Every slide is stacked cards: each click brings in one callout and its screenshot, and only one is in focus.
+Talk about what the dashboard does, not the data. Say a number only as proof of a feature.*
+
+### Slide 16 · Divider 03 (0:05)
+So the form keeps the data clean. Now let me show you what clean data gets you.
 `[CLICK]`
 
-### Slide 16 · One regional view (0:55)
-This is Daniel's overview: the regional view the brief asks for, across five countries and Products A, B and C.
-`[CLICK]` Growth is the year-on-year change in units ordered, April to September 2026 against 2025, counting customer
-orders only. Malaysia and Indonesia are growing fast, while Singapore equipment is down 16%.
-`[CLICK]` Every quarter it gives the top three actions, each with its evidence one click away.
-`[CLICK]` And it compares our forecast with today's 6-month average, with a likely range.
+### Slide 17 · Duplicates double the money at risk (0:35)
+`[CLICK]` First, why this matters for sales. This is our dashboard on today's raw SAP data. It flags 56 customers who
+look like they're dropping off. But 29 of them? False alarms.
+`[CLICK]` Now the same data, after OneRecord merges the duplicates. 27 real alerts.
+`[CLICK]` On raw data, sales would chase 852 thousand dollars a quarter. The real number is 431 thousand. Half of it
+was just the same hospital, filed twice.
 `[CLICK]`
 
-### Slide 17 · From clean data to sales actions (0:55)
-`[CLICK]` For sales: 27 established customers are ordering much less, which is about S$431k a quarter at risk. They're
-ranked, so account managers call the biggest first. And there are 98 cross-sell leads, such as Vietnam customers who
-buy Product A but not B.
-`[CLICK]` The brief also asks us to separate real orders from enquiries and setup requests. Our email sorter does
-that, so only the 3,285 real orders count as growth.
+### Slide 18 · One regional view (0:40)
+*Opens on the full Overview page. Click 1 zooms in.*
+
+So what does the dashboard give you? This is the Overview page Daniel opens every morning. Everything on one page.
+`[CLICK]` *(zooms in)* First, where we're growing. Green is growing, red is shrinking. Every country and product, at a glance.
+`[CLICK]` Second, the top three things to do this quarter. Each one has its evidence, one click away.
+`[CLICK]` Third, actual orders against our AI forecast, with a likely range around it.
 `[CLICK]`
 
-### Slide 18 · How it works, in plain words (1:05)
-Three pieces of data science, in plain words.
-`[CLICK]` The duplicate check compares names the way a person would, so "NUH" and "National University Hospital"
-match. It found all 41 duplicates in our data, with no false matches.
-`[CLICK]` The forecast knows the business calendar: dengue season, the December budget push, Lunar New Year. That cuts
-the error from 13.7% to 11.1%.
-`[CLICK]` And the email sorter labels each email, so only real orders count. No black box: the team can explain every
-result.
+### Slide 19 · Drill into any country (0:45)
+Want more on one country? Just click into it.
+`[CLICK]` Up top, the headline numbers: units, order value, customers, and who's growing fastest.
+`[CLICK]` Growth is simple. This year's orders against the same six months last year. Real customer orders only, never
+enquiries.
+`[CLICK]` You see the top ten customers for any country, and what each one buys.
+`[CLICK]` And monthly units by country, with the takeaways written out for you.
 `[CLICK]`
 
-### Slide 19 · The results (0:30)
-`[CLICK]` In short: 4 to 6 days to SAP instead of 18.8. All 41 duplicates caught while typing. Forecast error down to
-11.1%. S$431k a quarter at risk on one call list, and 98 cross-sell leads.
-`[CLICK]` And it stays quiet when it should: only 3% of genuinely new customers get a warning.
+### Slide 20 · Who to call, and what counts (0:40)
+`[CLICK]` Then: who should sales call? A ranked list. Biggest value at risk on top, why they were flagged, and what to
+do next.
+`[CLICK]` An early warning, for big customers who've suddenly gone quiet.
+`[CLICK]` Cross-sell leads. Customers buying A but not B, when similar customers buy both.
+`[CLICK]` And the email sorter makes sure only real orders count. Its AI instructions are plain English, so the MDM
+team can tweak them themselves. No retraining.
+`[CLICK]`
 
-> **Hand-off:** "Chloe will show how Lives Group can actually roll this out."
+### Slide 21 · Forecasts that know the calendar (0:50)
+Last, forecasting. Today, Lives Group uses a six-month average. It has no idea what month it is.
+`[CLICK]` Our model knows the calendar. Dengue season. The year-end budget rush. The January slowdown. Lunar New Year.
+`[CLICK]` And we tested it fairly. We forecast from every month, April to September, then checked against what really
+happened. The error drops from 13.7 to 11.1 percent.
+`[CLICK]` It gives you a range, not a single guess. Eight months in ten landed inside it.
+`[CLICK]` That becomes a stock plan for next quarter. And when the model isn't sure, it says so, instead of guessing.
+`[CLICK]` Coming in Phase 2: an AI brief, posted to Teams every month. It only ever sees summary numbers, never
+customer records.
+
+> **Hand-off:** "Chloe will now show how Lives Group can actually roll this out."
 
 `[CLICK]`
 
@@ -184,11 +208,11 @@ result.
 
 ## 4 · Making it real: Chloe (3:40)
 
-### Slide 20 · Divider 04 (0:05)
+### Slide 22 · Divider 04 (0:05)
 This isn't a mock-up. It already runs on Microsoft 365, and this is the real approval card in Teams.
 `[CLICK]`
 
-### Slide 21 · Built with what Lives Group already has (1:05)
+### Slide 23 · Built with what Lives Group already has (1:05)
 Is this feasible?
 `[CLICK]` To build it: standard Microsoft 365 connectors only, so no premium licence. About eight weeks of one
 contractor. IT for about two days, once. After that, the MDM team edits the rules themselves.
@@ -198,7 +222,7 @@ asking. And after go-live, MDM only acts on setup requests that come through the
 `[CLICK]` Remember the 20 to 30 emails a day? That's the problem we take away.
 `[CLICK]`
 
-### Slide 22 · Pays back in 3.4 months (0:45)
+### Slide 24 · Pays back in 3.4 months (0:45)
 `[CLICK]` Year one costs about S$58k. The benefit is about S$205k a year, so it pays back in about 3.4 months, and
 setup requests reach SAP in 4 to 6 days instead of 18.8.
 `[CLICK]` To be upfront: staff time alone doesn't pay for the build. Most of the value comes from sales acting on clean
@@ -206,14 +230,14 @@ data: keeping customers who are drifting away, and cross-selling. Every assumpti
 case page.
 `[CLICK]`
 
-### Slide 23 · Risks and mitigation (0:35) *(new slide, being added by Chloe)*
+### Slide 25 · Risks and mitigation (0:35)
 We've also thought about what could go wrong. Real SAP data may differ from ours, so the pilot re-checks the
 thresholds first. If staff keep emailing, the auto-reply and cut-over rule catch it. False duplicate warnings only
 warn, they never block. Approvers who ignore cards get escalated. And because we use only standard connectors, the
 build can't balloon.
 `[CLICK]`
 
-### Slide 24 · Roadmap and our ask (0:55)
+### Slide 26 · Roadmap and our ask (0:55)
 `[CLICK]` Three phases. First, fix the front door in about ten weeks, owned by a contractor with the MDM team. Second,
 put the clean data to work: the regional view in Power BI inside Teams, owned by a data analyst and sales ops.
 Third, a direct SAP link, with an SAP partner, but only if the first two phases hit their targets.
@@ -221,7 +245,7 @@ Third, a direct SAP link, with an SAP partner, but only if the first two phases 
 days or less, and 90% go through the form, we roll it out to QTS and QTG.
 `[CLICK]`
 
-### Slide 25 · Close (0:15)
+### Slide 27 · Close (0:15)
 Clean records in, better decisions out. Thank you. We'd love your questions, and we're happy to show any page live.
 
 ---
