@@ -163,22 +163,25 @@ look like they're dropping off. But 29 of them? False alarms.
 was just the same hospital, filed twice.
 `[CLICK]`
 
-### Slide 18 · One regional view (0:40)
+### Slide 18 · Dashboard view (0:40)
 *Opens on the full Overview page. Click 1 zooms in.*
 
-So what does the dashboard give you? This is the Overview page Daniel opens every morning. Everything on one page.
+So what does the dashboard give you? This is the Overview page Daniel opens every morning: the regional view the
+brief asks for, all on one page.
 `[CLICK]` *(zooms in)* First, where we're growing. Green is growing, red is shrinking. Every country and product, at a glance.
 `[CLICK]` Second, the top three things to do this quarter. Each one has its evidence, one click away.
 `[CLICK]` Third, actual orders against our AI forecast, with a likely range around it.
 `[CLICK]`
 
-### Slide 19 · Drill into any country (0:45)
-Want more on one country? Just click into it.
-`[CLICK]` Up top, the headline numbers: units, order value, customers, and who's growing fastest.
+### Slide 19 · Country deep-dive (0:45)
+Want more detail? That's the Country deep-dive page.
+`[CLICK]` Up top, the headline numbers for all five countries: units, order value, customers, and who's growing
+fastest.
 `[CLICK]` Growth is simple. This year's orders against the same six months last year. Real customer orders only, never
 enquiries.
-`[CLICK]` You see the top ten customers for any country, and what each one buys.
-`[CLICK]` And monthly units by country, with the takeaways written out for you.
+`[CLICK]` Pick any country from this dropdown, and you get its monthly units by product, its top ten customers, and
+what each one buys.
+`[CLICK]` And to compare countries, monthly units for each product, with the takeaways written out for you.
 `[CLICK]`
 
 ### Slide 20 · Who to call, and what counts (0:40)
